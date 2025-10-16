@@ -1,16 +1,14 @@
 import SwiftUI
 
 struct AddWorkoutView: View {
-    @StateObject var viewModel: AddWorkoutViewModel
+    @StateObject var viewModel = AddWorkoutViewModel()
     @Binding var isPresented: Bool
 
-    init(isPresented: Binding<Bool>, exerciseService: ExerciseService) {
+    init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
-        _viewModel = StateObject(wrappedValue: AddWorkoutViewModel(exerciseService: exerciseService))
     }
 
     var body: some View {
-
         NavigationStack() {
             ExercisePickerView(
                 viewModel: viewModel,

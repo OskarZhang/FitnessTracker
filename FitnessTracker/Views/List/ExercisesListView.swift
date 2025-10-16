@@ -19,11 +19,7 @@ struct ExercisesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Exercise.date, order: .reverse) private var exercises: [Exercise]
 
-    let exerciseService: ExerciseService
-
-    init(exerciseService: ExerciseService) {
-        self.exerciseService = exerciseService
-    }
+    @Injected var exerciseService: ExerciseService
 
     var groupedWorkouts: [(date: Date, exercises: [Exercise])] {
         let groupedDict = Dictionary(grouping: exercises.filter({ exercise in
@@ -90,7 +86,7 @@ struct ExercisesListView: View {
         }
         .searchable(text: $searchContext.searchText)
         .sheet(isPresented: $isAddingWorkout) {
-            AddWorkoutView(isPresented: $isAddingWorkout, exerciseService: exerciseService)
+            AddWorkoutView(isPresented: $isAddingWorkout)
         }
     }
 

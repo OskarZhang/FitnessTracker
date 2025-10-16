@@ -25,6 +25,7 @@
 		4BD095A72D7E588300F4769F /* ExerciseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD095A62D7E588100F4769F /* ExerciseService.swift */; };
 		4BDFCCC32EA15A25000861F4 /* WorkoutRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */; };
 		4BDFCCCA2EA15BDB000861F4 /* WorkoutChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */; };
+		4BDFCCCE2EA160DC000861F4 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCCD2EA160D5000861F4 /* Container.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,7 @@
 		4BD095A62D7E588100F4769F /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
 		4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRowView.swift; sourceTree = "<group>"; };
 		4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutChartView.swift; sourceTree = "<group>"; };
+		4BDFCCCD2EA160D5000861F4 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 		4BA93FBF2C86B7B300973198 /* FitnessTracker */ = {
 			isa = PBXGroup;
 			children = (
+				4BDFCCCC2EA160C8000861F4 /* DependencyInjection */,
 				4BDFCCC82EA15B6A000861F4 /* Services */,
 				4BDFCCC52EA15B12000861F4 /* Views */,
 				4B10B8A22EA0B6F000890AC6 /* Components */,
@@ -168,6 +171,14 @@
 				4BB21AAD2C8813E300C1DEDE /* WorkoutDetailView.swift */,
 			);
 			path = DetailView;
+			sourceTree = "<group>";
+		};
+		4BDFCCCC2EA160C8000861F4 /* DependencyInjection */ = {
+			isa = PBXGroup;
+			children = (
+				4BDFCCCD2EA160D5000861F4 /* Container.swift */,
+			);
+			path = DependencyInjection;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -245,6 +256,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BDFCCCE2EA160DC000861F4 /* Container.swift in Sources */,
 				4BDFCCC32EA15A25000861F4 /* WorkoutRowView.swift in Sources */,
 				4BA93FC32C86B7B300973198 /* ExercisesListView.swift in Sources */,
 				4BB21AAE2C8813E300C1DEDE /* WorkoutDetailView.swift in Sources */,

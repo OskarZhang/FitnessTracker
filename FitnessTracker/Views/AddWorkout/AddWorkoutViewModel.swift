@@ -27,11 +27,7 @@ class AddWorkoutViewModel: ObservableObject {
     }
     @Published var sets: [StrengthSetData] = []
 
-    private let exerciseService: ExerciseService
-
-    init(exerciseService: ExerciseService) {
-        self.exerciseService = exerciseService
-    }
+    @Injected private var exerciseService: ExerciseService
 
     func saveWorkout() {
         guard let selectedExercise else {
