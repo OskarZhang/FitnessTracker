@@ -10,10 +10,14 @@ import SwiftData
 
 @main
 struct FitnessTrackerApp: App {
+    init() {
+        Container.shared.registerSingleton(ExerciseService.self) { ExerciseService() }
+    }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ExercisesListView()
         }
-        .modelContainer(for: Exercise.self)
+//        .modelContainer(for: Exercise.self)
+        
     }
 }

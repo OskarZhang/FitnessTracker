@@ -9,7 +9,7 @@ class ExerciseService {
 
     private var transitions: [String: [String: Int]] = [:]
     private var transitionProbabilities: [String: [String: Double]] = [:]
-    private var exercises: [Exercise] = []
+    var exercises: [Exercise] = []
     
     lazy var exerciseNamesFromCSV: [String] = {
         guard let url = Bundle.main.url(forResource: "strength_workout_names", withExtension: "csv") else {
@@ -30,12 +30,44 @@ class ExerciseService {
         }
     }()
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
+    init() {
+        let container = try! ModelContainer(for: Exercise.self, configurations: .init())
+        self.modelContext = ModelContext(container)
         self.exercises = fetchWorkouts()
         Task {
             await buildTransitionProbabilityMatrix(data: self.exercises)
         }
+    }
+
+    func groupedWorkouts(query: String = "") -> [(date: Date, exercises: [Exercise])] {
+        let groupedDict = Dictionary(grouping: exercises.filter({ exercise in
+            query.isEmpty || exercise.name.lowercased().contains(query)
+        })) { exercise in
+            // Normalize the date to remove time components
+            Calendar.current.startOfDay(for: exercise.date)
+        }
+        // Sort the dates in descending order
+        let sortedDates = groupedDict.keys.sorted(by: >)
+        // Map the sorted dates to an array of tuples
+        let res = sortedDates.map { date in
+            (date: date, exercises: groupedDict[date]!)
+        }
+        return res
+    }
+    
+    func removeExerciseBulk(indexSet: IndexSet) {
+        // keep in-mem and database in sync
+        exercises = exercises.enumerated()
+            .map { (index, value) -> Exercise? in
+                if indexSet.contains(index) {
+                    modelContext.delete(value)
+                    return nil
+                } else {
+                    return value
+                }
+        }
+            .compactMap { $0 }
+        try? modelContext.save()
     }
 
     /// build a Markov Chain prediction matrix with exercise data
@@ -76,7 +108,6 @@ class ExerciseService {
     }
 
     func getExerciseSuggestions(exerciseName: String) -> [String] {
-        
         if exerciseName.isEmpty {
             return predictNextWorkout()
         } else {
@@ -135,12 +166,6 @@ class ExerciseService {
         }
 
         return existingWorkoutMatch + stockWorkoutMatch
-    }
-
-    private func getMostRecentWorkout(exerciseName: String) -> Exercise? {
-        var descriptor = FetchDescriptor<Exercise>(predicate: #Predicate { $0.name == exerciseName }, sortBy: [SortDescriptor(\.date, order: .reverse)])
-        descriptor.fetchLimit = 1
-        return (try? modelContext.fetch(descriptor))?.first
     }
 
     private func fetchWorkouts() -> [Exercise] {

@@ -16,37 +16,16 @@ class SearchContext: ObservableObject {
 }
 
 struct ExercisesListView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Exercise.date, order: .reverse) private var exercises: [Exercise]
+
+    private var exercises: [Exercise] {
+        exerciseService.exercises
+    }
 
     @Injected var exerciseService: ExerciseService
 
-    var groupedWorkouts: [(date: Date, exercises: [Exercise])] {
-        let groupedDict = Dictionary(grouping: exercises.filter({ exercise in
-            searchContext.debouncedSearchText.isEmpty || exercise.name.lowercased().contains(searchContext.debouncedSearchText.lowercased())
-        })) { exercise in
-            // Normalize the date to remove time components
-            Calendar.current.startOfDay(for: exercise.date)
-        }
-        // Sort the dates in descending order
-        let sortedDates = groupedDict.keys.sorted(by: >)
-        // Map the sorted dates to an array of tuples
-        let res = sortedDates.map { date in
-            (date: date, exercises: groupedDict[date]!)
-        }
-        return res
-    }
     @Environment(\.colorScheme) var colorScheme
 
     @State private var isAddingWorkout = false
-    @State private var isPresentingExperimentalAdd = false
-    @State private var showingSettings = false
-    @State private var showingImportFileSelector = false
-
-    @State private var isShareSheetPresented: Bool = false
-    @State private var exportedCSVFileURL: URL?
-    @State private var showErrorAlert: Bool = false
-    @State private var errorMessage: String = ""
 
     @StateObject var searchContext = SearchContext()
 
@@ -58,7 +37,7 @@ struct ExercisesListView: View {
                         Text("No exercises found in the last 7 days")
                     } else {
                         List {
-                            ForEach(groupedWorkouts, id: \.date) { group in
+                            ForEach(exerciseService.groupedWorkouts(query: searchContext.debouncedSearchText.lowercased()), id: \.date) { group in
                                 Section(header: Text(group.date.customFormatted)) {
                                     ForEach(group.exercises) { exercise in
                                         WorkoutRowView(exercise: exercise).background(NavigationLink("", destination: WorkoutDetailView(exercise: exercise))
@@ -68,7 +47,6 @@ struct ExercisesListView: View {
                                     }
                                     .onDelete(perform: deleteWorkouts)
                                 }
-
                             }
                         }
                         .listStyle(.plain)
@@ -92,10 +70,7 @@ struct ExercisesListView: View {
 
     private func deleteWorkouts(offsets: IndexSet) {
         withAnimation {
-            for index in offsets {
-                print("deleting index \(index)")
-                modelContext.delete(exercises[index])
-            }
+            exerciseService.removeExerciseBulk(indexSet: offsets)
         }
     }
 }
@@ -109,7 +84,7 @@ private extension Date {
             return "Yesterday"
         } else {
             let formatter = DateFormatter()
-            formatter.dateStyle = .medium // You can choose .short, .medium, .long, or .full
+            formatter.dateStyle = .medium
             return formatter.string(from: self)
         }
 

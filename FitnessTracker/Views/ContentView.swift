@@ -13,8 +13,5 @@ struct ContentView: View {
 
     var body: some View {
         ExercisesListView()
-            .onAppear {
-                Container.shared.registerSingleton(ExerciseService.self) { ExerciseService(modelContext: modelContext) }
-            }
     }
 }
