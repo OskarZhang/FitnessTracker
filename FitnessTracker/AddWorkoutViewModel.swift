@@ -1,18 +1,32 @@
 import Foundation
+import SwiftUI
 import Combine
 
+struct StrengthSetData {
+    var weightInLbs: Double
+    var reps: Int
+    var restSeconds: Int?
+    var rpe: Int?
+
+}
+
 class AddWorkoutViewModel: ObservableObject {
+
+    enum State: String, Hashable {
+        case picker
+        case logger
+    }
+    var showingSetLogger = false
+
     @Published var selectedExercise: String? {
         didSet {
-            if selectedExercise != nil && !hasPrefilledExercise {
-                isShowingSetLogging = true
+            if selectedExercise != nil {
+                showingSetLogger = true
             }
         }
     }
-    @Published var sets: [StrengthSet] = []
+    @Published var sets: [StrengthSetData] = []
 
-    @Published var isShowingSetLogging = false
-    
     let hasPrefilledExercise: Bool
 
     private let exerciseService: ExerciseService
@@ -30,7 +44,9 @@ class AddWorkoutViewModel: ObservableObject {
         let exercise = Exercise(
             name: selectedExercise,
             type: .strength,
-            sets: sets
+            sets: sets.map {
+                StrengthSet(weightInLbs: $0.weightInLbs, reps: $0.reps, restSeconds: $0.restSeconds, rpe: $0.rpe)
+            }
         )
         exerciseService.addExercise(exercise)
     }

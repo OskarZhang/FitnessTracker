@@ -71,7 +71,7 @@ struct SetLoggingView: View {
     }
 
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack() {
                 ZStack {
                     addSetView()
@@ -98,7 +98,7 @@ struct SetLoggingView: View {
                 }
 
             }
-        }
+//        }
         .navigationBarItems(
             trailing: Button("Done") {
                 confirmationImpact.impactOccurred()

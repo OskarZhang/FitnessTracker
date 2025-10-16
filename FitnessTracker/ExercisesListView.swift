@@ -55,7 +55,6 @@ struct ExercisesListView: View {
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
 
-    let addWorkoutImpact = UIImpactFeedbackGenerator(style: .medium)
     // health data
     @State var authenticated = false
     @State var trigger = false
@@ -86,62 +85,12 @@ struct ExercisesListView: View {
                         .listStyle(.plain)
                     }
                 }
-                .navigationTitle("Exercises")
-                .toolbar {
-                    Button("", systemImage: "gear") {
-                        showingSettings = true
-                        // todo: re-enable export
-//                        exportAndPrepareShare()
-                    }
-
-                }
-                .confirmationDialog("", isPresented: $showingSettings) {
-                    Button("Import") {
-                        showingImportFileSelector.toggle()
-                        print("tapped")
-                    }
-
-                    if let csvURL = exportedCSVFileURL {
-                        ShareLink(item: csvURL) {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                                .font(.title2)
-                                .padding()
-                                .foregroundColor(.white)
-                                .background(Color.blue)
-                                .cornerRadius(10)
-                        }
-                    } else {
-                        EmptyView()
-                    }
-                }
-                .fileImporter(isPresented: $showingImportFileSelector, allowedContentTypes: [.item], allowsMultipleSelection: false) { result in
-                    switch result {
-                    case .success(let urls):
-                        if let url = urls.first {
-                            importFrom(fileURL: url)
-                        }
-                    case .failure(let error):
-                        print(error)
-                    }
-                }
-
+                .navigationTitle("GTFG")
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: {
-                            isAddingWorkout = true
-                            addWorkoutImpact.impactOccurred()
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.title)
-                                .frame(width: 60, height: 60)
-                                .background(colorScheme == .dark ? Color.white : Color.black)
-                                .foregroundColor(colorScheme == .dark ? Color.black : Color.white)
-                                .clipShape(Circle())
-                                .shadow(radius: 4)
-                        }
-                        .padding()
+                        AddExerciseButton(isAddingWorkout: $isAddingWorkout)
                     }
                 }
             }
@@ -166,7 +115,7 @@ struct ExercisesListView: View {
         _ = fileURL.startAccessingSecurityScopedResource()
 
         do {
-            let csvInput = try String(contentsOf: fileURL)
+            let csvInput = try String(contentsOf: fileURL, encoding: .utf8)
 
             // Parse the CSV
             let exercises = try importer.importCSV(csvString: csvInput)
