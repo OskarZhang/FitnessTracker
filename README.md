@@ -1,9 +1,9 @@
-# Simple AF workout tracker. 
+# Another goddamn fitness app nobody asked for.
 Co-written by Claude, GPT and me.
 1. Two tap logging: Type some letters, tap on a suggestion, done
 2. Own your data: Export your data into a JSON file. 
 3. Basic charting
    
-| List | Add workout | Detail view | 
+| List | Select | Per set logging | 
 | -- | -- | -- | 
-| ![IMG_7853](https://github.com/user-attachments/assets/1e2a6c00-56f5-4045-80c9-58fd7d127a7d) | ![IMG_7856](https://github.com/user-attachments/assets/6270f99f-5d0c-478a-ac8e-012518d80c5b) | ![IMG_7855](https://github.com/user-attachments/assets/b688f5ac-1310-4c6d-9e98-6c16c3f6b2d8) | 
+| <img width="603" height="1311" alt="IMG_9204" src="https://github.com/user-attachments/assets/89c6ef73-7eee-4112-ad40-241aaedca990" /> | <img width="603" height="1311" alt="IMG_9205" src="https://github.com/user-attachments/assets/3be2e2ac-f541-4044-99d5-4e4d1c1ad2a1" /> | <img width="603" height="1311" alt="IMG_9206" src="https://github.com/user-attachments/assets/823481d2-3f0e-432c-a7e0-be7104d002c0" /> | 
