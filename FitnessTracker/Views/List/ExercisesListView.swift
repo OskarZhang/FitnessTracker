@@ -28,9 +28,10 @@ struct ExercisesListView: View {
     @State private var isAddingWorkout = false
 
     @StateObject var searchContext = SearchContext()
+    @Namespace var animation
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 VStack {
                     if exercises.isEmpty {
@@ -40,9 +41,14 @@ struct ExercisesListView: View {
                             ForEach(exerciseService.groupedWorkouts(query: searchContext.debouncedSearchText.lowercased()), id: \.date) { group in
                                 Section(header: Text(group.date.customFormatted)) {
                                     ForEach(group.exercises) { exercise in
-                                        WorkoutRowView(exercise: exercise).background(NavigationLink("", destination: WorkoutDetailView(exercise: exercise))
-                                            .opacity(0)
-                                        )
+                                        NavigationLink {
+                                            WorkoutDetailView(exercise: exercise)
+                                                .navigationTransition(.zoom(sourceID: exercise.id, in: animation))
+                                        } label: {
+                                            WorkoutRowView(exercise: exercise)
+                                                .matchedTransitionSource(id: exercise.id, in: animation)
+                                        }
+                                        .navigationLinkIndicatorVisibility(.hidden)
                                         .listRowSeparator(.hidden)
                                     }
                                     .onDelete(perform: deleteWorkouts)

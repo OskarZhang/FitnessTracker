@@ -15,13 +15,14 @@ struct WorkoutChartView: View {
 
     @State private var dateRange: ClosedRange<Date>
 
-    @Query private var exercises: [Exercise]
+    private var exercises: [Exercise]
 
     init(_ exerciseName: String) {
         let endDate = Date()
         let startDate = Calendar.current.date(byAdding: .day, value: -30, to: endDate)!
         _dateRange = State(initialValue: startDate...endDate)
-        _exercises = Query(filter: WorkoutChartView.exercisesFilteredByName(exerciseName), sort: \Exercise.date, order: .reverse)
+        @Injected var service: ExerciseService
+        exercises = service.exercises.filter { $0.name != exerciseName }
     }
 
     var body: some View {
