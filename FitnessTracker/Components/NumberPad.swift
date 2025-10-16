@@ -1,0 +1,187 @@
+//
+//  NumberPad.swift
+//  FitnessTracker
+//
+//  Created by Oskar Zhang on 10/16/25.
+//
+
+import SwiftUI
+
+enum RecordType {
+    case weight, rep
+    func labelForValue(_ value: Int) -> String {
+        switch self {
+        case .weight:
+            return "lb"
+        case .rep:
+            return value > 1 ? "reps" : "rep"
+        }
+    }
+}
+
+struct OnReturnModifier: ViewModifier {
+    let action: () -> Void
+    
+    func body(content: Content) -> some View {
+        content.onSubmit {
+            action()
+        }
+    }
+}
+
+struct NumberPad: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    let type: RecordType
+    var nextAction: (() -> Void)?
+
+    @Binding var value: Int
+    
+    @Binding private var shouldOverwrite: Bool
+
+    init(type: RecordType, value: Binding<Int>, shouldOverwrite: Binding<Bool>) {
+        self.type = type
+        self._value = value
+        self._shouldOverwrite = shouldOverwrite
+    }
+    
+    private let lightImpact = UIImpactFeedbackGenerator(style: .light)
+
+    var body: some View {
+        VStack {
+            Divider()
+            HStack {
+                if type == .weight {
+                    quickAddWeightButton(5)
+                    quickAddWeightButton(10)
+                    quickAddWeightButton(15)
+                    quickAddWeightButton(20)
+                } else {
+                    quickSetReps(5)
+                    quickSetReps(8)
+                    quickSetReps(12)
+                    quickSetReps(15)
+                }
+            }
+            HStack {
+                numberButton(1)
+                numberButton(2)
+                numberButton(3)
+            }
+
+            HStack {
+                numberButton(4)
+                numberButton(5)
+                numberButton(6)
+            }
+
+            HStack {
+                numberButton(7)
+                numberButton(8)
+                numberButton(9)
+            }
+            HStack {
+                backspaceButton
+                numberButton(0)
+                nextButton
+            }
+        }
+        .padding(.leading, 8)
+        .padding(.trailing, 8)
+        .background(colorScheme == .dark ? Color.black : Color(.systemGray5))
+    }
+    
+    @ViewBuilder
+    private func quickAddWeightButton(_ weight: Int) -> some View {
+        Button {
+            lightImpact.impactOccurred()
+            
+            value += weight
+            
+        } label: {
+            Text("+\(weight) lb")
+                .font(.system(size: 24, weight: .medium))
+                .styledNumberPadText(height: 40, colorScheme: colorScheme)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    
+    @ViewBuilder
+    private func quickSetReps(_ reps: Int) -> some View {
+        Button {
+            lightImpact.impactOccurred()
+            value = reps
+        } label: {
+            Text("\(reps) reps")
+                .font(.system(size: 24, weight: .medium))
+                .styledNumberPadText(height: 40, colorScheme: colorScheme)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    @ViewBuilder
+    private func numberButton(_ number: Int) -> some View {
+        Button {
+            lightImpact.impactOccurred()
+            updateCurrentFocusedField(numberTapped: number)
+        } label: {
+            Text("\(number)")
+                .font(.system(size: 36, weight: .regular))
+                .styledNumberPadText(height: 60, colorScheme: colorScheme)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private func updateCurrentFocusedField(numberTapped: Int) {
+        if shouldOverwrite {
+            value = numberTapped
+        } else {
+            value = value * 10 + numberTapped
+        }
+
+        if shouldOverwrite {
+            shouldOverwrite = false
+        }
+    }
+
+    
+    @ViewBuilder
+    private var backspaceButton: some View {
+        Button {
+            lightImpact.impactOccurred()
+            backspaceTapped()
+        } label: {
+            Image(systemName: "delete.backward")
+                .font(.system(size: 30, weight: .regular))
+                .styledNumberPadText(height: 60, colorScheme: colorScheme)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+
+    private func backspaceTapped() {
+        value = value / 10
+    }
+
+    @ViewBuilder
+    private var nextButton: some View {
+        Button {
+            lightImpact.impactOccurred()
+            self.nextAction?()
+        } label: {
+            Text("Next")
+                .font(.system(size: 30, weight: .medium))
+                .styledNumberPadText(height: 60, colorScheme: colorScheme)
+
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    func onNext(perform action: @escaping () -> Void) -> some View {
+        var view = self
+        view.nextAction = action
+        return view
+    }
+
+}

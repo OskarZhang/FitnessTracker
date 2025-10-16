@@ -3,17 +3,6 @@ import SwiftUI
 struct SetLoggingView: View {
 
     private struct FocusIndex: Equatable, Hashable {
-        enum RecordType {
-            case weight, rep
-            func labelForValue(_ value: Int) -> String {
-                switch self {
-                case .weight:
-                    return "lb"
-                case .rep:
-                    return value > 1 ? "reps" : "rep"
-                }
-            }
-        }
         var setNum: Int
         var type: RecordType
 
@@ -36,17 +25,15 @@ struct SetLoggingView: View {
     let confirmationImpact = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.colorScheme) var colorScheme
 
-
     @Binding var isPresented: Bool
 
+    /// When a number field is initially focused, we will default to overwriting it instead of appending. Since there is always only one keyboard at a time, we will just use one flag for the entire view
     @State private var shouldOverwrite = true
     @State private var currentFocusIndexState: FocusIndex? = .initial {
         didSet {
             shouldOverwrite = true
         }
     }
-    @State private var hasEdited: [FocusIndex : Bool] = [:]
-
 
     @State var weight: Int = 0
     @State var reps: Int = 0
@@ -71,34 +58,47 @@ struct SetLoggingView: View {
     }
 
     var body: some View {
-//        NavigationView {
-            VStack() {
-                ZStack {
-                    addSetView()
-                    VStack {
-                        Spacer()
-                        if shouldShowTimerButton {
-                            timerButton
-                                .padding(.trailing, 8)
-                                .padding(.bottom, 8)
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .bottom),
-                                    removal: .opacity
-                                ))
-                        }
+        VStack() {
+            ZStack {
+                addSetView()
+                VStack {
+                    Spacer()
+                    if shouldShowTimerButton {
+                        timerButton
+                            .padding(.trailing, 8)
+                            .padding(.bottom, 8)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom),
+                                removal: .opacity
+                            ))
                     }
                 }
-
-                if showingNumberPad {
-//                    VStack(spacing: 16) {
-
-                        numberPad(currentFocusIndexState?.type ?? .weight)
-//                    }
-                    .transition(.move(edge: .bottom))
-                }
-
             }
-//        }
+
+            if let currentFocusIndexState,
+                showingNumberPad {
+                NumberPad(
+                    type: currentFocusIndexState.type,
+                    value: Binding(
+                        get: {
+                            let set = sets[currentFocusIndexState.setNum]
+                            return currentFocusIndexState.type == .weight ? Int(set.weightInLbs) : set.reps
+                        },
+                        set: { value in
+                            if currentFocusIndexState.type == .weight {
+                                sets[currentFocusIndexState.setNum].weightInLbs = Double(value)
+                            } else {
+                                sets[currentFocusIndexState.setNum].reps = value
+                            }
+                        }),
+                    shouldOverwrite: $shouldOverwrite
+                )
+                .onNext {
+                    nextButtonTapped()
+                }
+            }
+
+        }
         .navigationBarItems(
             trailing: Button("Done") {
                 confirmationImpact.impactOccurred()
@@ -218,6 +218,7 @@ struct SetLoggingView: View {
 
                 Button(action: addSet) {
                     Label("Add Set", systemImage: "plus.circle.fill")
+                        .foregroundStyle(Color.bratGreen)
                 }
                 .listRowSeparator(.hidden)
             }
@@ -229,7 +230,7 @@ struct SetLoggingView: View {
 
 
     @ViewBuilder
-    private func numberPadField(_ index: Int, _ type: FocusIndex.RecordType) -> some View {
+    private func numberPadField(_ index: Int, _ type: RecordType) -> some View {
         HStack {
             Spacer()
             HStack {
@@ -280,110 +281,6 @@ struct SetLoggingView: View {
         .frame(width: 100)
     }
 
-
-    @ViewBuilder
-    private func numberPad(_ type: FocusIndex.RecordType) -> some View {
-        VStack {
-            Divider()
-            HStack {
-                if type == .weight {
-                    quickAddWeightButton(5)
-                    quickAddWeightButton(10)
-                    quickAddWeightButton(15)
-                    quickAddWeightButton(20)
-                } else {
-                    quickSetReps(5)
-                    quickSetReps(8)
-                    quickSetReps(12)
-                    quickSetReps(15)
-                }
-            }
-            HStack {
-                numberButton(1)
-                numberButton(2)
-                numberButton(3)
-            }
-
-            HStack {
-                numberButton(4)
-                numberButton(5)
-                numberButton(6)
-            }
-
-            HStack {
-                numberButton(7)
-                numberButton(8)
-                numberButton(9)
-            }
-            HStack {
-                backspaceButton
-                numberButton(0)
-                nextButton
-            }
-        }
-        .padding(.leading, 8)
-        .padding(.trailing, 8)
-        .background(colorScheme == .dark ? Color.black : Color(.systemGray5))
-
-
-    }
-
-    private func updateCurrentFocusedField(numberTapped: Int) {
-        guard let currentFocusIndexState = currentFocusIndexState else {
-            return
-        }
-
-        switch (shouldOverwrite, currentFocusIndexState.type) {
-        case (false, .rep):
-            sets[currentFocusIndexState.setNum].reps = sets[currentFocusIndexState.setNum].reps * 10 + numberTapped
-        case (false, .weight):
-            sets[currentFocusIndexState.setNum].weightInLbs = sets[currentFocusIndexState.setNum].weightInLbs * 10 + Double(numberTapped)
-        case (true, .rep):
-            sets[currentFocusIndexState.setNum].reps = numberTapped
-        case (true, .weight):
-            sets[currentFocusIndexState.setNum].weightInLbs = Double(numberTapped)
-        }
-
-        if shouldOverwrite {
-            shouldOverwrite = false
-        }
-    }
-
-    private func quickAddWeight(weightAddition: Int) {
-        guard let currentFocusIndexState = currentFocusIndexState else {
-            return
-        }
-        guard currentFocusIndexState.type == .weight else {
-            assert(false, "Something seriously is wrong")
-            return
-        }
-        sets[currentFocusIndexState.setNum].weightInLbs = sets[currentFocusIndexState.setNum].weightInLbs + Double(weightAddition)
-
-    }
-
-    private func quickSetReps(reps: Int) {
-        guard let currentFocusIndexState = currentFocusIndexState else {
-            return
-        }
-        guard currentFocusIndexState.type == .rep else {
-            assert(false, "Something seriously is wrong")
-            return
-        }
-        sets[currentFocusIndexState.setNum].reps = reps
-
-    }
-
-    private func backspaceTapped() {
-        guard let currentFocusIndexState = currentFocusIndexState else {
-            return
-        }
-        if currentFocusIndexState.type == .rep {
-            sets[currentFocusIndexState.setNum].reps = sets[currentFocusIndexState.setNum].reps / 10
-        } else {
-            sets[currentFocusIndexState.setNum].weightInLbs = floor(sets[currentFocusIndexState.setNum].weightInLbs / 10)
-        }
-    }
-
     private func nextButtonTapped() {
         let nextFocus = currentFocusIndexState?.next()
         withAnimation {
@@ -396,73 +293,6 @@ struct SetLoggingView: View {
             addSet()
         }
     }
-
-    @ViewBuilder
-    private func quickAddWeightButton(_ weight: Int) -> some View {
-        Button {
-            lightImpact.impactOccurred()
-            quickAddWeight(weightAddition: weight)
-        } label: {
-            Text("+\(weight) lb")
-                .font(.system(size: 24, weight: .medium))
-                .styledNumberPadText(height: 40, colorScheme: colorScheme)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    @ViewBuilder
-    private func quickSetReps(_ reps: Int) -> some View {
-        Button {
-            lightImpact.impactOccurred()
-            quickSetReps(reps: reps)
-        } label: {
-            Text("\(reps) reps")
-                .font(.system(size: 24, weight: .medium))
-                .styledNumberPadText(height: 40, colorScheme: colorScheme)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    @ViewBuilder
-    private func numberButton(_ number: Int) -> some View {
-        Button {
-            lightImpact.impactOccurred()
-            updateCurrentFocusedField(numberTapped: number)
-        } label: {
-            Text("\(number)")
-                .font(.system(size: 36, weight: .regular))
-                .styledNumberPadText(height: 60, colorScheme: colorScheme)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    @ViewBuilder
-    private var nextButton: some View {
-        Button {
-            lightImpact.impactOccurred()
-            nextButtonTapped()
-        } label: {
-            Text("Next")
-                .font(.system(size: 30, weight: .medium))
-                .styledNumberPadText(height: 60, colorScheme: colorScheme)
-
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    @ViewBuilder
-    private var backspaceButton: some View {
-        Button {
-            lightImpact.impactOccurred()
-            backspaceTapped()
-        } label: {
-            Image(systemName: "delete.backward")
-                .font(.system(size: 30, weight: .regular))
-                .styledNumberPadText(height: 60, colorScheme: colorScheme)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
 
     private func addSet() {
         let lastSet = sets.last

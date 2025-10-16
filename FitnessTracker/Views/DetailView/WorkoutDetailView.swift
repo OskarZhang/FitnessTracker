@@ -40,11 +40,6 @@ struct WorkoutDetailView: View {
 
                 WorkoutChartView(exercise.name)
                     .frame(height: 300)
-                .padding()
-
-                Text("Pinch to zoom on the chart")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             .padding()
         }

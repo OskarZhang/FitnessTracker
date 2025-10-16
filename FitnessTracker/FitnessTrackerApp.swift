@@ -12,12 +12,14 @@ import SwiftData
 struct FitnessTrackerApp: App {
     init() {
         Container.shared.registerSingleton(ExerciseService.self) { ExerciseService() }
+        
+        // Large Navigation Title global override
+        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.bratGreen]
     }
     var body: some Scene {
         WindowGroup {
             ExercisesListView()
+
         }
-//        .modelContainer(for: Exercise.self)
-        
     }
 }

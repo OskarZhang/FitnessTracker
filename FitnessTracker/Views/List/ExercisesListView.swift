@@ -59,6 +59,7 @@ struct ExercisesListView: View {
                     }
                 }
                 .navigationTitle("GTFG")
+                .tint(.bratGreen)
                 VStack {
                     Spacer()
                     HStack {
@@ -68,7 +69,7 @@ struct ExercisesListView: View {
                 }
             }
         }
-        .searchable(text: $searchContext.searchText)
+        .searchable(text: $searchContext.searchText, placement: .navigationBarDrawer)
         .sheet(isPresented: $isAddingWorkout) {
             AddWorkoutView(isPresented: $isAddingWorkout)
         }

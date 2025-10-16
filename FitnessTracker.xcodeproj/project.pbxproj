@@ -25,6 +25,8 @@
 		4BDFCCC32EA15A25000861F4 /* WorkoutRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */; };
 		4BDFCCCA2EA15BDB000861F4 /* WorkoutChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */; };
 		4BDFCCCE2EA160DC000861F4 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCCD2EA160D5000861F4 /* Container.swift */; };
+		4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD02EA17AB1000861F4 /* Extensions.swift */; };
+		4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD22EA18360000861F4 /* NumberPad.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +61,8 @@
 		4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRowView.swift; sourceTree = "<group>"; };
 		4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutChartView.swift; sourceTree = "<group>"; };
 		4BDFCCCD2EA160D5000861F4 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
+		4BDFCCD02EA17AB1000861F4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		4BDFCCD22EA18360000861F4 /* NumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberPad.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +81,7 @@
 		4B10B8A22EA0B6F000890AC6 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4BDFCCD22EA18360000861F4 /* NumberPad.swift */,
 				4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */,
 				4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */,
 				4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */,
@@ -104,6 +109,7 @@
 		4BA93FBF2C86B7B300973198 /* FitnessTracker */ = {
 			isa = PBXGroup;
 			children = (
+				4BDFCCCF2EA17AAC000861F4 /* Utils */,
 				4BDFCCCC2EA160C8000861F4 /* DependencyInjection */,
 				4BDFCCC82EA15B6A000861F4 /* Services */,
 				4BDFCCC52EA15B12000861F4 /* Views */,
@@ -176,6 +182,14 @@
 				4BDFCCCD2EA160D5000861F4 /* Container.swift */,
 			);
 			path = DependencyInjection;
+			sourceTree = "<group>";
+		};
+		4BDFCCCF2EA17AAC000861F4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				4BDFCCD02EA17AB1000861F4 /* Extensions.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,7 +279,9 @@
 				4BB21AA82C86D4BC00C1DEDE /* Models.swift in Sources */,
 				4BD095A72D7E588300F4769F /* ExerciseService.swift in Sources */,
 				4B9E49102E2F449E00C8D273 /* SetLoggingView.swift in Sources */,
+				4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */,
 				4B10B8A42EA0B6FB00890AC6 /* AddExerciseButton.swift in Sources */,
+				4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

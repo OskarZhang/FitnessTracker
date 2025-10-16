@@ -24,9 +24,9 @@ struct AddExerciseButton: View {
             Image(systemName: "plus")
                 .font(.title)
                 .frame(width: 60, height: 60)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                .foregroundColor(.bratGreen)
         }
-        .glassEffect()
+        .glassEffect(.regular.tint(.bratGreen.opacity(0.3)).interactive(true))
         .padding()
     }
 }

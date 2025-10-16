@@ -26,44 +26,67 @@ struct WorkoutChartView: View {
     }
 
     var body: some View {
-        Chart {
-            ForEach(exercises, id: \.date) { exercise in
-              if case .strength = exercise.type {
-                    LineMark(
-                        x: .value("Date", exercise.date),
-                        y: .value("Weight", exercise.maxWeight)
-                    )
-                    PointMark(
-                        x: .value("Date", exercise.date),
-                        y: .value("Weight", exercise.maxWeight)
-                    )
+        if exercises.count <= 1 {
+            // show empty state
+            Color.bratGreen
+                .opacity(0.1)
+                .cornerRadius(16)
+                .overlay {
+                    Text("This chart will show up when you log another exercise")
+                        .padding()
                 }
-            }
+        } else {
+            chartView
         }
-
-        .chartXAxis {
-            AxisMarks(preset: .automatic, values: .stride(by: .day, count: strideDayCount)) { value in
-                if let date = value.as(Date.self), shouldShowLabel(for: date) {
-                    AxisGridLine()
-                    AxisTick()
-                    AxisValueLabel(formatDate(date))
-                }
-            }
-        }
-        .chartXScale(domain: dateRange)
-        .gesture(
-            MagnificationGesture()
-                .onChanged { value in
-                    let scale = value / zoomScale
-                    updateDateRange(scale: scale)
-                    zoomScale = value
-                }
-                .onEnded { _ in
-                    zoomScale = 1.0
-                }
-        )
     }
 
+    @ViewBuilder
+    var chartView: some View {
+        VStack {
+            Chart {
+                ForEach(exercises, id: \.date) { exercise in
+                  if case .strength = exercise.type {
+                        LineMark(
+                            x: .value("Date", exercise.date),
+                            y: .value("Weight", exercise.maxWeight)
+                        )
+                        .foregroundStyle(Color.bratGreen)
+                        PointMark(
+                            x: .value("Date", exercise.date),
+                            y: .value("Weight", exercise.maxWeight)
+                        )
+                        .foregroundStyle(Color.bratGreen)
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks(preset: .automatic, values: .stride(by: .day, count: strideDayCount)) { value in
+                    if let date = value.as(Date.self), shouldShowLabel(for: date) {
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel(formatDate(date))
+                    }
+                }
+            }
+            .chartXScale(domain: dateRange)
+            .gesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        let scale = value / zoomScale
+                        updateDateRange(scale: scale)
+                        zoomScale = value
+                    }
+                    .onEnded { _ in
+                        zoomScale = 1.0
+                    }
+            )
+
+            Text("Pinch to zoom on the chart")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+    
     private func updateDateRange(scale: CGFloat) {
         let currentEndDate = dateRange.upperBound
         let currentStartDate = dateRange.lowerBound
