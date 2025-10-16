@@ -10,15 +10,14 @@ class ExerciseService {
     private var transitions: [String: [String: Int]] = [:]
     private var transitionProbabilities: [String: [String: Double]] = [:]
     private var exercises: [Exercise] = []
-
-
+    
     lazy var exerciseNamesFromCSV: [String] = {
         guard let url = Bundle.main.url(forResource: "strength_workout_names", withExtension: "csv") else {
             print("CSV file not found")
             return []
         }
         do {
-            let content = try String(contentsOf: url)
+            let content = try String(contentsOf: url, encoding: .utf8)
             // Split by newlines, trim whitespace, and filter out empty lines
             var lines = content.components(separatedBy: .newlines)
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -76,16 +75,12 @@ class ExerciseService {
         }
     }
 
-    func getWorkoutSuggestion(exerciseName: String) -> [Exercise] {
-        if exerciseName.isEmpty && exercises.isEmpty {
-            // completely new user we just return the stock exercise names
-            return exerciseNamesFromCSV.map {
-                Exercise(name: $0, type: .strength)
-            }
-        } else if exerciseName.isEmpty {
+    func getExerciseSuggestions(exerciseName: String) -> [String] {
+        
+        if exerciseName.isEmpty {
             return predictNextWorkout()
         } else {
-            return matchWorkout(exerciseName: exerciseName)
+            return matchWorkout(exerciseName: exerciseName).map { $0.name }
         }
     }
 
@@ -93,19 +88,21 @@ class ExerciseService {
         return exercises.filter { $0.name.lowercased() == name.lowercased()}.first
     }
 
-    private func predictNextWorkout() -> [Exercise] {
+    private func predictNextWorkout() -> [String] {
         var lastWorkoutName: String = ExerciseService.StartOfDayWorkoutToken
         if let mostRecentWorkout = exercises.first,
            Calendar.current.isDateInToday(mostRecentWorkout.date) {
             lastWorkoutName = mostRecentWorkout.name
         }
-        guard let nextExercises = transitionProbabilities[lastWorkoutName] else {
-            return Array(exercises.prefix(10))
+        
+        let res = (transitionProbabilities[lastWorkoutName] ?? [:])
+            .sorted { $0.value > $1.value } // sort exercises by probability
+            .map { $0.key } // map to exercise name
+
+        if res.count < 10 {
+            let predictionSet = Set(res.map { $0.lowercased() })
+            return res + exerciseNamesFromCSV.filter { !predictionSet.contains($0.lowercased()) }
         }
-
-        // Sort exercises by probability
-        let res = nextExercises.sorted { $0.value > $1.value }.map { $0.key }.compactMap { getMostRecentWorkout(exerciseName: $0)}
-
         return res
     }
 

@@ -27,14 +27,10 @@ class AddWorkoutViewModel: ObservableObject {
     }
     @Published var sets: [StrengthSetData] = []
 
-    let hasPrefilledExercise: Bool
-
     private let exerciseService: ExerciseService
 
-    init(exerciseService: ExerciseService, prefilledExerciseName: String? = nil) {
+    init(exerciseService: ExerciseService) {
         self.exerciseService = exerciseService
-        self.hasPrefilledExercise = prefilledExerciseName != nil
-        self.selectedExercise = prefilledExerciseName
     }
 
     func saveWorkout() {
@@ -60,7 +56,7 @@ class AddWorkoutViewModel: ObservableObject {
         return nil
     }
 
-    func matchExercise(name: String) -> [Exercise] {
-        return exerciseService.getWorkoutSuggestion(exerciseName: name)
+    func getExerciseSuggestions(name: String) -> [String] {
+        return exerciseService.getExerciseSuggestions(exerciseName: name)
     }
 }

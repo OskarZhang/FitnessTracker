@@ -51,12 +51,12 @@ struct ExercisePickerView: View {
                     }
                     .padding(.top, 8)
                 
-                List(viewModel.matchExercise(name: searchContext.searchText), id: \.self) { exercise in
+                List(viewModel.getExerciseSuggestions(name: searchContext.searchText), id: \.self) { exerciseName in
                     Button(action: {
-                        selectedExercise = exercise.name
+                        selectedExercise = exerciseName
                         confirmationImpact.impactOccurred()
                     }) {
-                        Text(exercise.name)
+                        Text(exerciseName)
                             .font(.system(size: 18))
                     }
                     .listRowSeparator(.hidden)
