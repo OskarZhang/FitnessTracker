@@ -13,19 +13,6 @@ enum ExerciseType: String, Codable {
     case cardio
 }
 
-enum ExerciseTag: String, Codable, CaseIterable {
-    case back = "Back"
-    case abs = "Abs"
-    case chest = "Chest"
-    case legs = "Legs"
-    case shoulders = "Shoulders"
-    case arms = "Arms"
-    case glutes = "Glutes"
-    case fullBody = "Full Body"
-    case cardio = "Cardio"
-    case other = "Other"
-}
-
 @Model
 class Exercise {
     @Attribute(.unique) var id: UUID = UUID()
@@ -33,7 +20,6 @@ class Exercise {
     var name: String
     var date: Date
     var notes: String?
-    var tag: ExerciseTag?
 
     // Strength-specific
     @Relationship(deleteRule: .cascade) var sets: [StrengthSet]?
@@ -48,7 +34,6 @@ class Exercise {
         notes: String? = nil,
         name: String,
         type: ExerciseType,
-        tag: ExerciseTag? = nil,
         sets: [StrengthSet]? = nil,
         distanceInMiles: Double? = nil,
         durationInSeconds: Int? = nil,
@@ -58,7 +43,6 @@ class Exercise {
         self.notes = notes
         self.name = name
         self.type = type
-        self.tag = tag
         self.sets = sets
         self.distanceInMiles = distanceInMiles
         self.durationInSeconds = durationInSeconds
@@ -87,23 +71,6 @@ extension Exercise {
     }
     var maxRep: Int {
         sets?.map { $0.reps }.max() ?? 0
-    }
-}
-
-extension ExerciseTag {
-    var color: Color {
-        switch self {
-        case .back: return .blue
-        case .abs: return .orange
-        case .chest: return .red
-        case .legs: return .green
-        case .shoulders: return .yellow
-        case .arms: return .purple
-        case .glutes: return .pink
-        case .fullBody: return .teal
-        case .cardio: return .indigo
-        case .other: return .gray
-        }
     }
 }
 

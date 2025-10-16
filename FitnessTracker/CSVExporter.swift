@@ -9,7 +9,7 @@ import Foundation
 
 struct CSVExporter {
     // Define the CSV header
-    private let header = "id,name,type,tag,weight,repCount,setCount,durationMinutes,date\n"
+    private let header = "id,name,type,weight,repCount,setCount,durationMinutes,date\n"
 
     // Date formatter for consistent date representation
     private let dateFormatter: DateFormatter

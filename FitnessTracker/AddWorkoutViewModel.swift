@@ -10,7 +10,6 @@ class AddWorkoutViewModel: ObservableObject {
         }
     }
     @Published var sets: [StrengthSet] = []
-    @Published var selectedTag: ExerciseTag? = nil
 
     @Published var isShowingSetLogging = false
     
@@ -31,7 +30,6 @@ class AddWorkoutViewModel: ObservableObject {
         let exercise = Exercise(
             name: selectedExercise,
             type: .strength,
-            tag: selectedTag,
             sets: sets
         )
         exerciseService.addExercise(exercise)
@@ -48,12 +46,5 @@ class AddWorkoutViewModel: ObservableObject {
 
     func matchExercise(name: String) -> [Exercise] {
         return exerciseService.getWorkoutSuggestion(exerciseName: name)
-    }
-
-    func allStockExercises() -> [Exercise] {
-        return exerciseService.exerciseNamesFromCSV.map { name in
-            let tag = exerciseService.exerciseNameToTagFromCSV[name] ?? ExerciseService.tagForExerciseName(name)
-            return Exercise(name: name, type: .strength, tag: tag)
-        }
     }
 }

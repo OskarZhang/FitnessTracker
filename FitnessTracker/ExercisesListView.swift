@@ -235,25 +235,9 @@ struct WorkoutRow: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(spacing: 8) {
-                Text(exercise.name)
-                    .font(.system(size: 20, weight: .medium))
-                if let tag = exercise.tag {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(tag.color)
-                            .frame(width: 8, height: 8)
-                        Text(tag.rawValue)
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 6)
-                            .background(tag.color.opacity(0.15))
-                            .foregroundColor(tag.color)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
+
+            Text(exercise.name)
+                .font(.system(size: 20, weight: .medium))
 
             switch exercise.type {
             case .strength:

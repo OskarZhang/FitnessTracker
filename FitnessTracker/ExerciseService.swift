@@ -19,51 +19,15 @@ class ExerciseService {
         }
         do {
             let content = try String(contentsOf: url)
+            // Split by newlines, trim whitespace, and filter out empty lines
             var lines = content.components(separatedBy: .newlines)
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 .filter { !$0.isEmpty }
-            guard !lines.isEmpty else { return [] }
-            let header = lines.removeFirst().lowercased()
-            if header.contains(",") {
-                // Name,Tag format
-                return lines.compactMap { row in
-                    let parts = row.split(separator: ",", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
-                    return parts.first
-                }
-            } else {
-                // Single column of names
-                return lines
-            }
+            lines.removeFirst() // remove column name
+            return lines
         } catch {
             print("Error reading CSV: \(error)")
             return []
-        }
-    }()
-
-    lazy var exerciseNameToTagFromCSV: [String: ExerciseTag] = {
-        guard let url = Bundle.main.url(forResource: "strength_workout_names", withExtension: "csv") else {
-            return [:]
-        }
-        do {
-            let content = try String(contentsOf: url)
-            var lines = content.components(separatedBy: .newlines)
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { !$0.isEmpty }
-            guard !lines.isEmpty else { return [:] }
-            let header = lines.removeFirst().lowercased()
-            var mapping: [String: ExerciseTag] = [:]
-            if header.contains(",") {
-                for row in lines {
-                    let parts = row.split(separator: ",", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
-                    guard parts.count == 2 else { continue }
-                    let name = parts[0]
-                    let tag = ExerciseTag(rawValue: parts[1]) ?? ExerciseService.tagForExerciseName(name)
-                    mapping[name] = tag
-                }
-            }
-            return mapping
-        } catch {
-            return [:]
         }
     }()
 
@@ -72,64 +36,6 @@ class ExerciseService {
         self.exercises = fetchWorkouts()
         Task {
             await buildTransitionProbabilityMatrix(data: self.exercises)
-        }
-        Task { await backfillTagsIfNeeded() }
-    }
-
-    static func tagForExerciseName(_ name: String) -> ExerciseTag {
-        let n = name.lowercased()
-        func contains(_ terms: [String]) -> Bool { terms.first { n.contains($0) } != nil }
-
-        if contains(["crunch", "plank", "russian twist", "leg raise", "knee raise", "dragon flag", "cable crunch", "woodchopper", "ab wheel"]) {
-            return .abs
-        }
-        if contains(["trx push-up"]) { return .chest }
-        if contains(["bench press", "incline bench", "decline bench", "close grip bench press", "push-up", "push up", "machine chest press", "pec deck", "dumbbell fly", "cable fly", "chest supported fly"]) {
-            return .chest
-        }
-        if contains(["overhead press", "shoulder press", "arnold press", "lateral raise", "front raise", "upright row", "plate front raise", "cuban press", "push press", "landmine press"]) {
-            return .shoulders
-        }
-        if contains(["curl", "bicep", "tricep", "skullcrusher", "tate press", "dip", "wrist curl", "reverse wrist curl", "plate pinch"]) {
-            return .arms
-        }
-        if contains(["squat", "lunge", "leg press", "leg extension", "leg curl", "calf", "step up", "pistol squat", "hack squat", "split squat", "box squat", "nordic curl", "sissy squat"]) {
-            return .legs
-        }
-        if contains(["hip thrust", "glute", "hip abductor", "hip adductor"]) {
-            return .glutes
-        }
-        if contains(["trx row"]) { return .back }
-        if contains(["deadlift", "row", "pulldown", "pull-up", "chin-up", "face pull", "reverse fly", "shrug", "rack pull", "meadows row", "pendlay row", "t-bar row", "renegade row", "seated row", "lat pulldown", "machine row", "machine pullover", "chest supported row", "band pull apart", "band pull down", "landmine row", "good morning"]) {
-            return .back
-        }
-        if contains(["clean", "snatch", "jerk", "turkish get-up", "farmer's walk", "suitcase carry", "carry"]) {
-            return .fullBody
-        }
-        if contains(["sled", "battle rope", "kettlebell swing"]) {
-            return .cardio
-        }
-        if contains(["kettlebell"]) {
-            return .fullBody
-        }
-        if contains(["trx"]) {
-            return .fullBody
-        }
-        if contains(["smith machine press"]) { return .chest }
-        if contains(["smith machine squat"]) { return .legs }
-        if contains(["smith machine row"]) { return .back }
-
-        return .other
-    }
-
-    private func backfillTagsIfNeeded() async {
-        var didChange = false
-        for exercise in exercises where exercise.tag == nil {
-            exercise.tag = ExerciseService.tagForExerciseName(exercise.name)
-            didChange = true
-        }
-        if didChange {
-            try? modelContext.save()
         }
     }
 
@@ -174,8 +80,7 @@ class ExerciseService {
         if exerciseName.isEmpty && exercises.isEmpty {
             // completely new user we just return the stock exercise names
             return exerciseNamesFromCSV.map {
-                let tag = exerciseNameToTagFromCSV[$0] ?? ExerciseService.tagForExerciseName($0)
-                return Exercise(name: $0, type: .strength, tag: tag)
+                Exercise(name: $0, type: .strength)
             }
         } else if exerciseName.isEmpty {
             return predictNextWorkout()
@@ -228,8 +133,7 @@ class ExerciseService {
         }
 
         let stockWorkoutMatch = exerciseNamesFromCSV.filter { $0.lowercased().contains(exerciseName.lowercased()) }.map {
-            let tag = exerciseNameToTagFromCSV[$0] ?? ExerciseService.tagForExerciseName($0)
-            return Exercise(name: $0, type: .strength, tag: tag)
+            Exercise(name: $0, type: .strength)
         }
 
         return existingWorkoutMatch + stockWorkoutMatch

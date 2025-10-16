@@ -9,7 +9,7 @@ import Foundation
 
 struct CSVImporter {
     // Define the expected CSV header
-    private let expectedHeader = ["id", "name", "type", "tag", "weight", "repCount", "setCount", "durationMinutes", "date"]
+    private let expectedHeader = ["id", "name", "type", "weight", "repCount", "setCount", "durationMinutes", "date"]
 
     // Date formatter matching the exporter
     private let dateFormatter: DateFormatter
@@ -70,12 +70,11 @@ struct CSVImporter {
             let idString = fields[0]
             let name = fields[1]
             let typeString = fields[2]
-            let tagString = fields[3]
-            let weightString = fields[4]
-            let repCountString = fields[5]
-            let setCountString = fields[6]
-            let durationMinutesString = fields[7]
-            let dateString = fields[8]
+            let weightString = fields[3]
+            let repCountString = fields[4]
+            let setCountString = fields[5]
+            let durationMinutesString = fields[6]
+            let dateString = fields[7]
 
             // Parse UUID
             guard let id = UUID(uuidString: idString) else {
@@ -111,11 +110,8 @@ struct CSVImporter {
                 throw CSVImportError.invalidRow(index: rowNumber, reason: "Unknown exercise type: \(typeString)")
             }
 
-            // Parse Tag
-            let tag = ExerciseTag(rawValue: tagString).map { Optional($0) } ?? nil
-
-            // Create Exercise instance
-            exercises.append(Exercise(date: date, name: name, type: type, tag: tag, sets: sets, durationInSeconds: durationSeconds))
+            // Create Workout instance
+            exercises.append(Exercise(date: date, name: name, type: type, sets: sets, durationInSeconds: durationSeconds))
         }
 
         return exercises

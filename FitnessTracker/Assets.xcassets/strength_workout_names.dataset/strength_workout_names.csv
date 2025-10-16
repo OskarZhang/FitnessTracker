@@ -1,1001 +1,141 @@
-Name,Tag
-Bench Press,Chest
-Squat,Legs
-Deadlift,Back
-Overhead Press,Shoulders
-Barbell Row,Back
-Pull-Up,Back
-Chin-Up,Back
-Push-Up,Chest
-Dumbbell Fly,Chest
-Incline Bench Press,Chest
-Decline Bench Press,Chest
-Leg Press,Legs
-Lunge,Legs
-Bulgarian Split Squat,Legs
-Leg Extension,Legs
-Leg Curl,Legs
-Calf Raise,Legs
-Hip Thrust,Glutes
-Glute Bridge,Glutes
-Lat Pulldown,Back
-Seated Row,Back
-Face Pull,Back
-Arnold Press,Shoulders
-Lateral Raise,Shoulders
-Front Raise,Shoulders
-Tricep Dip,Arms
-Tricep Extension,Arms
-Bicep Curl,Arms
-Hammer Curl,Arms
-Preacher Curl,Arms
-Skullcrusher,Arms
-Cable Fly,Chest
-Cable Row,Back
-Reverse Fly,Back
-Shrug,Back
-Farmer's Walk,Full Body
-Russian Twist,Abs
-Plank,Abs
-Hanging Leg Raise,Abs
-Crunch,Abs
-Cable Crunch,Abs
-Upright Row,Shoulders
-Clean and Press,Full Body
-Power Clean,Full Body
-Snatch,Full Body
-Hang Clean,Full Body
-Push Jerk,Full Body
-Push Press,Shoulders
-Sumo Deadlift,Back
-Sumo Deadlift High Pull,Back
-Trap Bar Deadlift,Back
-Romanian Deadlift,Back
-Stiff-Legged Deadlift,Back
-Good Morning,Back
-Zercher Squat,Legs
-Hack Squat,Legs
-Split Squat,Legs
-Box Squat,Legs
-Pistol Squat,Legs
-Step Up,Legs
-Single-Leg Deadlift,Back
-Nordic Curl,Legs
-Donkey Calf Raise,Legs
-Seated Calf Raise,Legs
-Machine Chest Press,Chest
-Pec Deck,Chest
-Machine Shoulder Press,Shoulders
-Machine Row,Back
-Machine Pullover,Back
-Machine Bicep Curl,Arms
-Machine Tricep Extension,Arms
-Machine Leg Press,Legs
-Machine Leg Curl,Legs
-Machine Leg Extension,Legs
-Hip Abductor,Glutes
-Hip Adductor,Glutes
-Ab Wheel Rollout,Abs
-Hanging Knee Raise,Abs
-Dragon Flag,Abs
-Cable Woodchopper,Abs
-Landmine Press,Shoulders
-Landmine Row,Back
-T-Bar Row,Back
-Incline Curl,Arms
-Concentration Curl,Arms
-Zottman Curl,Arms
-Drag Curl,Arms
-Spider Curl,Arms
-Tate Press,Arms
-Close Grip Bench Press,Chest
-Diamond Push-Up,Chest
-Clap Push-Up,Chest
-Deficit Push-Up,Chest
-Ring Dip,Arms
-TRX Row,Back
-TRX Push-Up,Chest
-Chest Supported Row,Back
-Chest Supported Fly,Chest
-Kneeling Squat,Legs
-Jefferson Deadlift,Back
-Sissy Squat,Legs
-Smith Machine Squat,Legs
-Smith Machine Press,Chest
-Smith Machine Row,Back
-Rack Pull,Back
-Pendlay Row,Back
-Meadows Row,Back
-Renegade Row,Back
-Cuban Press,Shoulders
-Plate Front Raise,Shoulders
-Plate Pinch,Arms
-Wrist Curl,Arms
-Reverse Wrist Curl,Arms
-Suitcase Carry,Full Body
-Turkish Get-Up,Full Body
-Weighted Dip,Arms
-Weighted Pull-Up,Back
-Weighted Push-Up,Chest
-Weighted Lunge,Legs
-Weighted Step Up,Legs
-Band Pull Apart,Back
-Band Face Pull,Back
-Band Pull Down,Back
-Sled Push,Cardio
-Sled Drag,Cardio
-Kettlebell Swing,Cardio
-Kettlebell Clean,Full Body
-Kettlebell Snatch,Full Body
-Kettlebell Turkish Get-Up,Full Body
-Kettlebell Goblet Squat,Full Body
-Kettlebell Deadlift,Full Body
-Kettlebell Lunge,Full Body
-Medicine Ball Slam,Full Body
-Medicine Ball Throw,Full Body
-Medicine Ball Chest Pass,Chest
-Medicine Ball Twist,Abs
-Battle Rope Wave,Cardio
-Battle Rope Slam,Cardio
-Battle Rope Snakes,Cardio
-Battle Rope Circles,Cardio
-Barbell Bench Press,Chest
-Dumbbell Bench Press,Chest
-Machine Bench Press,Chest
-Cable Bench Press,Chest
-Resistance Band Bench Press,Chest
-Bodyweight Bench Press,Chest
-Kettlebell Bench Press,Chest
-Smith Machine Bench Press,Chest
-Barbell Squat,Legs
-Dumbbell Squat,Legs
-Machine Squat,Legs
-Cable Squat,Legs
-Resistance Band Squat,Legs
-Bodyweight Squat,Legs
-Kettlebell Squat,Legs
-Barbell Deadlift,Back
-Dumbbell Deadlift,Back
-Machine Deadlift,Back
-Cable Deadlift,Back
-Resistance Band Deadlift,Back
-Bodyweight Deadlift,Back
-Kettlebell Deadlift,Back
-Smith Machine Deadlift,Back
-Barbell Overhead Press,Shoulders
-Dumbbell Overhead Press,Shoulders
-Machine Overhead Press,Shoulders
-Cable Overhead Press,Shoulders
-Resistance Band Overhead Press,Shoulders
-Bodyweight Overhead Press,Shoulders
-Kettlebell Overhead Press,Shoulders
-Smith Machine Overhead Press,Shoulders
-Dumbbell Barbell Row,Back
-Machine Barbell Row,Back
-Cable Barbell Row,Back
-Resistance Band Barbell Row,Back
-Bodyweight Barbell Row,Back
-Kettlebell Barbell Row,Back
-Smith Machine Barbell Row,Back
-Barbell Pull-Up,Back
-Dumbbell Pull-Up,Back
-Machine Pull-Up,Back
-Cable Pull-Up,Back
-Resistance Band Pull-Up,Back
-Bodyweight Pull-Up,Back
-Kettlebell Pull-Up,Back
-Smith Machine Pull-Up,Back
-Barbell Chin-Up,Back
-Dumbbell Chin-Up,Back
-Machine Chin-Up,Back
-Cable Chin-Up,Back
-Resistance Band Chin-Up,Back
-Bodyweight Chin-Up,Back
-Kettlebell Chin-Up,Back
-Smith Machine Chin-Up,Back
-Barbell Push-Up,Chest
-Dumbbell Push-Up,Chest
-Machine Push-Up,Chest
-Cable Push-Up,Chest
-Resistance Band Push-Up,Chest
-Bodyweight Push-Up,Chest
-Kettlebell Push-Up,Chest
-Smith Machine Push-Up,Chest
-Barbell Dumbbell Fly,Chest
-Machine Dumbbell Fly,Chest
-Cable Dumbbell Fly,Chest
-Resistance Band Dumbbell Fly,Chest
-Bodyweight Dumbbell Fly,Chest
-Kettlebell Dumbbell Fly,Chest
-Smith Machine Dumbbell Fly,Chest
-Barbell Incline Bench Press,Chest
-Dumbbell Incline Bench Press,Chest
-Machine Incline Bench Press,Chest
-Cable Incline Bench Press,Chest
-Resistance Band Incline Bench Press,Chest
-Bodyweight Incline Bench Press,Chest
-Kettlebell Incline Bench Press,Chest
-Smith Machine Incline Bench Press,Chest
-Barbell Decline Bench Press,Chest
-Dumbbell Decline Bench Press,Chest
-Machine Decline Bench Press,Chest
-Cable Decline Bench Press,Chest
-Resistance Band Decline Bench Press,Chest
-Bodyweight Decline Bench Press,Chest
-Kettlebell Decline Bench Press,Chest
-Smith Machine Decline Bench Press,Chest
-Barbell Leg Press,Legs
-Dumbbell Leg Press,Legs
-Cable Leg Press,Legs
-Resistance Band Leg Press,Legs
-Bodyweight Leg Press,Legs
-Kettlebell Leg Press,Legs
-Smith Machine Leg Press,Legs
-Barbell Lunge,Legs
-Dumbbell Lunge,Legs
-Machine Lunge,Legs
-Cable Lunge,Legs
-Resistance Band Lunge,Legs
-Bodyweight Lunge,Legs
-Kettlebell Lunge,Legs
-Smith Machine Lunge,Legs
-Barbell Bulgarian Split Squat,Legs
-Dumbbell Bulgarian Split Squat,Legs
-Machine Bulgarian Split Squat,Legs
-Cable Bulgarian Split Squat,Legs
-Resistance Band Bulgarian Split Squat,Legs
-Bodyweight Bulgarian Split Squat,Legs
-Kettlebell Bulgarian Split Squat,Legs
-Smith Machine Bulgarian Split Squat,Legs
-Barbell Leg Extension,Legs
-Dumbbell Leg Extension,Legs
-Cable Leg Extension,Legs
-Resistance Band Leg Extension,Legs
-Bodyweight Leg Extension,Legs
-Kettlebell Leg Extension,Legs
-Smith Machine Leg Extension,Legs
-Barbell Leg Curl,Legs
-Dumbbell Leg Curl,Legs
-Cable Leg Curl,Legs
-Resistance Band Leg Curl,Legs
-Bodyweight Leg Curl,Legs
-Kettlebell Leg Curl,Legs
-Smith Machine Leg Curl,Legs
-Barbell Calf Raise,Legs
-Dumbbell Calf Raise,Legs
-Machine Calf Raise,Legs
-Cable Calf Raise,Legs
-Resistance Band Calf Raise,Legs
-Bodyweight Calf Raise,Legs
-Kettlebell Calf Raise,Legs
-Smith Machine Calf Raise,Legs
-Barbell Hip Thrust,Glutes
-Dumbbell Hip Thrust,Glutes
-Machine Hip Thrust,Glutes
-Cable Hip Thrust,Glutes
-Resistance Band Hip Thrust,Glutes
-Bodyweight Hip Thrust,Glutes
-Kettlebell Hip Thrust,Glutes
-Smith Machine Hip Thrust,Glutes
-Barbell Glute Bridge,Glutes
-Dumbbell Glute Bridge,Glutes
-Machine Glute Bridge,Glutes
-Cable Glute Bridge,Glutes
-Resistance Band Glute Bridge,Glutes
-Bodyweight Glute Bridge,Glutes
-Kettlebell Glute Bridge,Glutes
-Smith Machine Glute Bridge,Glutes
-Barbell Lat Pulldown,Back
-Dumbbell Lat Pulldown,Back
-Machine Lat Pulldown,Back
-Cable Lat Pulldown,Back
-Resistance Band Lat Pulldown,Back
-Bodyweight Lat Pulldown,Back
-Kettlebell Lat Pulldown,Back
-Smith Machine Lat Pulldown,Back
-Barbell Seated Row,Back
-Dumbbell Seated Row,Back
-Machine Seated Row,Back
-Cable Seated Row,Back
-Resistance Band Seated Row,Back
-Bodyweight Seated Row,Back
-Kettlebell Seated Row,Back
-Smith Machine Seated Row,Back
-Barbell Face Pull,Back
-Dumbbell Face Pull,Back
-Machine Face Pull,Back
-Cable Face Pull,Back
-Resistance Band Face Pull,Back
-Bodyweight Face Pull,Back
-Kettlebell Face Pull,Back
-Smith Machine Face Pull,Back
-Barbell Arnold Press,Shoulders
-Dumbbell Arnold Press,Shoulders
-Machine Arnold Press,Shoulders
-Cable Arnold Press,Shoulders
-Resistance Band Arnold Press,Shoulders
-Bodyweight Arnold Press,Shoulders
-Kettlebell Arnold Press,Shoulders
-Smith Machine Arnold Press,Shoulders
-Barbell Lateral Raise,Shoulders
-Dumbbell Lateral Raise,Shoulders
-Machine Lateral Raise,Shoulders
-Cable Lateral Raise,Shoulders
-Resistance Band Lateral Raise,Shoulders
-Bodyweight Lateral Raise,Shoulders
-Kettlebell Lateral Raise,Shoulders
-Smith Machine Lateral Raise,Shoulders
-Barbell Front Raise,Shoulders
-Dumbbell Front Raise,Shoulders
-Machine Front Raise,Shoulders
-Cable Front Raise,Shoulders
-Resistance Band Front Raise,Shoulders
-Bodyweight Front Raise,Shoulders
-Kettlebell Front Raise,Shoulders
-Smith Machine Front Raise,Shoulders
-Barbell Tricep Dip,Arms
-Dumbbell Tricep Dip,Arms
-Machine Tricep Dip,Arms
-Cable Tricep Dip,Arms
-Resistance Band Tricep Dip,Arms
-Bodyweight Tricep Dip,Arms
-Kettlebell Tricep Dip,Arms
-Smith Machine Tricep Dip,Arms
-Barbell Tricep Extension,Arms
-Dumbbell Tricep Extension,Arms
-Cable Tricep Extension,Arms
-Resistance Band Tricep Extension,Arms
-Bodyweight Tricep Extension,Arms
-Kettlebell Tricep Extension,Arms
-Smith Machine Tricep Extension,Arms
-Barbell Bicep Curl,Arms
-Dumbbell Bicep Curl,Arms
-Cable Bicep Curl,Arms
-Resistance Band Bicep Curl,Arms
-Bodyweight Bicep Curl,Arms
-Kettlebell Bicep Curl,Arms
-Smith Machine Bicep Curl,Arms
-Barbell Hammer Curl,Arms
-Dumbbell Hammer Curl,Arms
-Machine Hammer Curl,Arms
-Cable Hammer Curl,Arms
-Resistance Band Hammer Curl,Arms
-Bodyweight Hammer Curl,Arms
-Kettlebell Hammer Curl,Arms
-Smith Machine Hammer Curl,Arms
-Barbell Preacher Curl,Arms
-Dumbbell Preacher Curl,Arms
-Machine Preacher Curl,Arms
-Cable Preacher Curl,Arms
-Resistance Band Preacher Curl,Arms
-Bodyweight Preacher Curl,Arms
-Kettlebell Preacher Curl,Arms
-Smith Machine Preacher Curl,Arms
-Barbell Skullcrusher,Arms
-Dumbbell Skullcrusher,Arms
-Machine Skullcrusher,Arms
-Cable Skullcrusher,Arms
-Resistance Band Skullcrusher,Arms
-Bodyweight Skullcrusher,Arms
-Kettlebell Skullcrusher,Arms
-Smith Machine Skullcrusher,Arms
-Barbell Cable Fly,Chest
-Dumbbell Cable Fly,Chest
-Machine Cable Fly,Chest
-Resistance Band Cable Fly,Chest
-Bodyweight Cable Fly,Chest
-Kettlebell Cable Fly,Chest
-Smith Machine Cable Fly,Chest
-Barbell Cable Row,Back
-Dumbbell Cable Row,Back
-Machine Cable Row,Back
-Resistance Band Cable Row,Back
-Bodyweight Cable Row,Back
-Kettlebell Cable Row,Back
-Smith Machine Cable Row,Back
-Barbell Reverse Fly,Back
-Dumbbell Reverse Fly,Back
-Machine Reverse Fly,Back
-Cable Reverse Fly,Back
-Resistance Band Reverse Fly,Back
-Bodyweight Reverse Fly,Back
-Kettlebell Reverse Fly,Back
-Smith Machine Reverse Fly,Back
-Barbell Shrug,Back
-Dumbbell Shrug,Back
-Machine Shrug,Back
-Cable Shrug,Back
-Resistance Band Shrug,Back
-Bodyweight Shrug,Back
-Kettlebell Shrug,Back
-Smith Machine Shrug,Back
-Barbell Farmer's Walk,Full Body
-Dumbbell Farmer's Walk,Full Body
-Machine Farmer's Walk,Full Body
-Cable Farmer's Walk,Full Body
-Resistance Band Farmer's Walk,Full Body
-Bodyweight Farmer's Walk,Full Body
-Kettlebell Farmer's Walk,Full Body
-Smith Machine Farmer's Walk,Full Body
-Barbell Russian Twist,Abs
-Dumbbell Russian Twist,Abs
-Machine Russian Twist,Abs
-Cable Russian Twist,Abs
-Resistance Band Russian Twist,Abs
-Bodyweight Russian Twist,Abs
-Kettlebell Russian Twist,Abs
-Smith Machine Russian Twist,Abs
-Barbell Plank,Abs
-Dumbbell Plank,Abs
-Machine Plank,Abs
-Cable Plank,Abs
-Resistance Band Plank,Abs
-Bodyweight Plank,Abs
-Kettlebell Plank,Abs
-Smith Machine Plank,Abs
-Barbell Hanging Leg Raise,Abs
-Dumbbell Hanging Leg Raise,Abs
-Machine Hanging Leg Raise,Abs
-Cable Hanging Leg Raise,Abs
-Resistance Band Hanging Leg Raise,Abs
-Bodyweight Hanging Leg Raise,Abs
-Kettlebell Hanging Leg Raise,Abs
-Smith Machine Hanging Leg Raise,Abs
-Barbell Crunch,Abs
-Dumbbell Crunch,Abs
-Machine Crunch,Abs
-Resistance Band Crunch,Abs
-Bodyweight Crunch,Abs
-Kettlebell Crunch,Abs
-Smith Machine Crunch,Abs
-Barbell Cable Crunch,Abs
-Dumbbell Cable Crunch,Abs
-Machine Cable Crunch,Abs
-Resistance Band Cable Crunch,Abs
-Bodyweight Cable Crunch,Abs
-Kettlebell Cable Crunch,Abs
-Smith Machine Cable Crunch,Abs
-Barbell Upright Row,Shoulders
-Dumbbell Upright Row,Shoulders
-Machine Upright Row,Shoulders
-Cable Upright Row,Shoulders
-Resistance Band Upright Row,Shoulders
-Bodyweight Upright Row,Shoulders
-Kettlebell Upright Row,Shoulders
-Smith Machine Upright Row,Shoulders
-Barbell Clean and Press,Full Body
-Dumbbell Clean and Press,Full Body
-Machine Clean and Press,Full Body
-Cable Clean and Press,Full Body
-Resistance Band Clean and Press,Full Body
-Bodyweight Clean and Press,Full Body
-Kettlebell Clean and Press,Full Body
-Smith Machine Clean and Press,Full Body
-Barbell Power Clean,Full Body
-Dumbbell Power Clean,Full Body
-Machine Power Clean,Full Body
-Cable Power Clean,Full Body
-Resistance Band Power Clean,Full Body
-Bodyweight Power Clean,Full Body
-Kettlebell Power Clean,Full Body
-Smith Machine Power Clean,Full Body
-Barbell Snatch,Full Body
-Dumbbell Snatch,Full Body
-Machine Snatch,Full Body
-Cable Snatch,Full Body
-Resistance Band Snatch,Full Body
-Bodyweight Snatch,Full Body
-Smith Machine Snatch,Full Body
-Barbell Hang Clean,Full Body
-Dumbbell Hang Clean,Full Body
-Machine Hang Clean,Full Body
-Cable Hang Clean,Full Body
-Resistance Band Hang Clean,Full Body
-Bodyweight Hang Clean,Full Body
-Kettlebell Hang Clean,Full Body
-Smith Machine Hang Clean,Full Body
-Barbell Push Jerk,Full Body
-Dumbbell Push Jerk,Full Body
-Machine Push Jerk,Full Body
-Cable Push Jerk,Full Body
-Resistance Band Push Jerk,Full Body
-Bodyweight Push Jerk,Full Body
-Kettlebell Push Jerk,Full Body
-Smith Machine Push Jerk,Full Body
-Barbell Push Press,Shoulders
-Dumbbell Push Press,Shoulders
-Machine Push Press,Shoulders
-Cable Push Press,Shoulders
-Resistance Band Push Press,Shoulders
-Bodyweight Push Press,Shoulders
-Kettlebell Push Press,Shoulders
-Smith Machine Push Press,Shoulders
-Barbell Sumo Deadlift,Back
-Dumbbell Sumo Deadlift,Back
-Machine Sumo Deadlift,Back
-Cable Sumo Deadlift,Back
-Resistance Band Sumo Deadlift,Back
-Bodyweight Sumo Deadlift,Back
-Kettlebell Sumo Deadlift,Back
-Smith Machine Sumo Deadlift,Back
-Barbell Sumo Deadlift High Pull,Back
-Dumbbell Sumo Deadlift High Pull,Back
-Machine Sumo Deadlift High Pull,Back
-Cable Sumo Deadlift High Pull,Back
-Resistance Band Sumo Deadlift High Pull,Back
-Bodyweight Sumo Deadlift High Pull,Back
-Kettlebell Sumo Deadlift High Pull,Back
-Smith Machine Sumo Deadlift High Pull,Back
-Barbell Trap Bar Deadlift,Back
-Dumbbell Trap Bar Deadlift,Back
-Machine Trap Bar Deadlift,Back
-Cable Trap Bar Deadlift,Back
-Resistance Band Trap Bar Deadlift,Back
-Bodyweight Trap Bar Deadlift,Back
-Kettlebell Trap Bar Deadlift,Back
-Smith Machine Trap Bar Deadlift,Back
-Barbell Romanian Deadlift,Back
-Dumbbell Romanian Deadlift,Back
-Machine Romanian Deadlift,Back
-Cable Romanian Deadlift,Back
-Resistance Band Romanian Deadlift,Back
-Bodyweight Romanian Deadlift,Back
-Kettlebell Romanian Deadlift,Back
-Smith Machine Romanian Deadlift,Back
-Barbell Stiff-Legged Deadlift,Back
-Dumbbell Stiff-Legged Deadlift,Back
-Machine Stiff-Legged Deadlift,Back
-Cable Stiff-Legged Deadlift,Back
-Resistance Band Stiff-Legged Deadlift,Back
-Bodyweight Stiff-Legged Deadlift,Back
-Kettlebell Stiff-Legged Deadlift,Back
-Smith Machine Stiff-Legged Deadlift,Back
-Barbell Good Morning,Back
-Dumbbell Good Morning,Back
-Machine Good Morning,Back
-Cable Good Morning,Back
-Resistance Band Good Morning,Back
-Bodyweight Good Morning,Back
-Kettlebell Good Morning,Back
-Smith Machine Good Morning,Back
-Barbell Zercher Squat,Legs
-Dumbbell Zercher Squat,Legs
-Machine Zercher Squat,Legs
-Cable Zercher Squat,Legs
-Resistance Band Zercher Squat,Legs
-Bodyweight Zercher Squat,Legs
-Kettlebell Zercher Squat,Legs
-Smith Machine Zercher Squat,Legs
-Barbell Hack Squat,Legs
-Dumbbell Hack Squat,Legs
-Machine Hack Squat,Legs
-Cable Hack Squat,Legs
-Resistance Band Hack Squat,Legs
-Bodyweight Hack Squat,Legs
-Kettlebell Hack Squat,Legs
-Smith Machine Hack Squat,Legs
-Barbell Split Squat,Legs
-Dumbbell Split Squat,Legs
-Machine Split Squat,Legs
-Cable Split Squat,Legs
-Resistance Band Split Squat,Legs
-Bodyweight Split Squat,Legs
-Kettlebell Split Squat,Legs
-Smith Machine Split Squat,Legs
-Barbell Box Squat,Legs
-Dumbbell Box Squat,Legs
-Machine Box Squat,Legs
-Cable Box Squat,Legs
-Resistance Band Box Squat,Legs
-Bodyweight Box Squat,Legs
-Kettlebell Box Squat,Legs
-Smith Machine Box Squat,Legs
-Barbell Pistol Squat,Legs
-Dumbbell Pistol Squat,Legs
-Machine Pistol Squat,Legs
-Cable Pistol Squat,Legs
-Resistance Band Pistol Squat,Legs
-Bodyweight Pistol Squat,Legs
-Kettlebell Pistol Squat,Legs
-Smith Machine Pistol Squat,Legs
-Barbell Step Up,Legs
-Dumbbell Step Up,Legs
-Machine Step Up,Legs
-Cable Step Up,Legs
-Resistance Band Step Up,Legs
-Bodyweight Step Up,Legs
-Kettlebell Step Up,Legs
-Smith Machine Step Up,Legs
-Barbell Single-Leg Deadlift,Back
-Dumbbell Single-Leg Deadlift,Back
-Machine Single-Leg Deadlift,Back
-Cable Single-Leg Deadlift,Back
-Resistance Band Single-Leg Deadlift,Back
-Bodyweight Single-Leg Deadlift,Back
-Kettlebell Single-Leg Deadlift,Back
-Smith Machine Single-Leg Deadlift,Back
-Barbell Nordic Curl,Legs
-Dumbbell Nordic Curl,Legs
-Machine Nordic Curl,Legs
-Cable Nordic Curl,Legs
-Resistance Band Nordic Curl,Legs
-Bodyweight Nordic Curl,Legs
-Kettlebell Nordic Curl,Legs
-Smith Machine Nordic Curl,Legs
-Barbell Donkey Calf Raise,Legs
-Dumbbell Donkey Calf Raise,Legs
-Machine Donkey Calf Raise,Legs
-Cable Donkey Calf Raise,Legs
-Resistance Band Donkey Calf Raise,Legs
-Bodyweight Donkey Calf Raise,Legs
-Kettlebell Donkey Calf Raise,Legs
-Smith Machine Donkey Calf Raise,Legs
-Barbell Seated Calf Raise,Legs
-Dumbbell Seated Calf Raise,Legs
-Machine Seated Calf Raise,Legs
-Cable Seated Calf Raise,Legs
-Resistance Band Seated Calf Raise,Legs
-Bodyweight Seated Calf Raise,Legs
-Kettlebell Seated Calf Raise,Legs
-Smith Machine Seated Calf Raise,Legs
-Barbell Machine Chest Press,Chest
-Dumbbell Machine Chest Press,Chest
-Cable Machine Chest Press,Chest
-Resistance Band Machine Chest Press,Chest
-Bodyweight Machine Chest Press,Chest
-Kettlebell Machine Chest Press,Chest
-Smith Machine Machine Chest Press,Chest
-Barbell Pec Deck,Chest
-Dumbbell Pec Deck,Chest
-Machine Pec Deck,Chest
-Cable Pec Deck,Chest
-Resistance Band Pec Deck,Chest
-Bodyweight Pec Deck,Chest
-Kettlebell Pec Deck,Chest
-Smith Machine Pec Deck,Chest
-Barbell Machine Shoulder Press,Shoulders
-Dumbbell Machine Shoulder Press,Shoulders
-Cable Machine Shoulder Press,Shoulders
-Resistance Band Machine Shoulder Press,Shoulders
-Bodyweight Machine Shoulder Press,Shoulders
-Kettlebell Machine Shoulder Press,Shoulders
-Smith Machine Machine Shoulder Press,Shoulders
-Barbell Machine Row,Back
-Dumbbell Machine Row,Back
-Cable Machine Row,Back
-Resistance Band Machine Row,Back
-Bodyweight Machine Row,Back
-Kettlebell Machine Row,Back
-Smith Machine Machine Row,Back
-Barbell Machine Pullover,Back
-Dumbbell Machine Pullover,Back
-Cable Machine Pullover,Back
-Resistance Band Machine Pullover,Back
-Bodyweight Machine Pullover,Back
-Kettlebell Machine Pullover,Back
-Smith Machine Machine Pullover,Back
-Barbell Machine Bicep Curl,Arms
-Dumbbell Machine Bicep Curl,Arms
-Cable Machine Bicep Curl,Arms
-Resistance Band Machine Bicep Curl,Arms
-Bodyweight Machine Bicep Curl,Arms
-Kettlebell Machine Bicep Curl,Arms
-Smith Machine Machine Bicep Curl,Arms
-Barbell Machine Tricep Extension,Arms
-Dumbbell Machine Tricep Extension,Arms
-Cable Machine Tricep Extension,Arms
-Resistance Band Machine Tricep Extension,Arms
-Bodyweight Machine Tricep Extension,Arms
-Kettlebell Machine Tricep Extension,Arms
-Smith Machine Machine Tricep Extension,Arms
-Barbell Machine Leg Press,Legs
-Dumbbell Machine Leg Press,Legs
-Cable Machine Leg Press,Legs
-Resistance Band Machine Leg Press,Legs
-Bodyweight Machine Leg Press,Legs
-Kettlebell Machine Leg Press,Legs
-Smith Machine Machine Leg Press,Legs
-Barbell Machine Leg Curl,Legs
-Dumbbell Machine Leg Curl,Legs
-Cable Machine Leg Curl,Legs
-Resistance Band Machine Leg Curl,Legs
-Bodyweight Machine Leg Curl,Legs
-Kettlebell Machine Leg Curl,Legs
-Smith Machine Machine Leg Curl,Legs
-Barbell Machine Leg Extension,Legs
-Dumbbell Machine Leg Extension,Legs
-Cable Machine Leg Extension,Legs
-Resistance Band Machine Leg Extension,Legs
-Bodyweight Machine Leg Extension,Legs
-Kettlebell Machine Leg Extension,Legs
-Smith Machine Machine Leg Extension,Legs
-Barbell Hip Abductor,Glutes
-Dumbbell Hip Abductor,Glutes
-Machine Hip Abductor,Glutes
-Cable Hip Abductor,Glutes
-Resistance Band Hip Abductor,Glutes
-Bodyweight Hip Abductor,Glutes
-Kettlebell Hip Abductor,Glutes
-Smith Machine Hip Abductor,Glutes
-Barbell Hip Adductor,Glutes
-Dumbbell Hip Adductor,Glutes
-Machine Hip Adductor,Glutes
-Cable Hip Adductor,Glutes
-Resistance Band Hip Adductor,Glutes
-Bodyweight Hip Adductor,Glutes
-Kettlebell Hip Adductor,Glutes
-Smith Machine Hip Adductor,Glutes
-Barbell Ab Wheel Rollout,Abs
-Dumbbell Ab Wheel Rollout,Abs
-Machine Ab Wheel Rollout,Abs
-Cable Ab Wheel Rollout,Abs
-Resistance Band Ab Wheel Rollout,Abs
-Bodyweight Ab Wheel Rollout,Abs
-Kettlebell Ab Wheel Rollout,Abs
-Smith Machine Ab Wheel Rollout,Abs
-Barbell Hanging Knee Raise,Abs
-Dumbbell Hanging Knee Raise,Abs
-Machine Hanging Knee Raise,Abs
-Cable Hanging Knee Raise,Abs
-Resistance Band Hanging Knee Raise,Abs
-Bodyweight Hanging Knee Raise,Abs
-Kettlebell Hanging Knee Raise,Abs
-Smith Machine Hanging Knee Raise,Abs
-Barbell Dragon Flag,Abs
-Dumbbell Dragon Flag,Abs
-Machine Dragon Flag,Abs
-Cable Dragon Flag,Abs
-Resistance Band Dragon Flag,Abs
-Bodyweight Dragon Flag,Abs
-Kettlebell Dragon Flag,Abs
-Smith Machine Dragon Flag,Abs
-Barbell Cable Woodchopper,Abs
-Dumbbell Cable Woodchopper,Abs
-Machine Cable Woodchopper,Abs
-Resistance Band Cable Woodchopper,Abs
-Bodyweight Cable Woodchopper,Abs
-Kettlebell Cable Woodchopper,Abs
-Smith Machine Cable Woodchopper,Abs
-Barbell Landmine Press,Shoulders
-Dumbbell Landmine Press,Shoulders
-Machine Landmine Press,Shoulders
-Cable Landmine Press,Shoulders
-Resistance Band Landmine Press,Shoulders
-Bodyweight Landmine Press,Shoulders
-Kettlebell Landmine Press,Shoulders
-Smith Machine Landmine Press,Shoulders
-Barbell Landmine Row,Back
-Dumbbell Landmine Row,Back
-Machine Landmine Row,Back
-Cable Landmine Row,Back
-Resistance Band Landmine Row,Back
-Bodyweight Landmine Row,Back
-Kettlebell Landmine Row,Back
-Smith Machine Landmine Row,Back
-Barbell T-Bar Row,Back
-Dumbbell T-Bar Row,Back
-Machine T-Bar Row,Back
-Cable T-Bar Row,Back
-Resistance Band T-Bar Row,Back
-Bodyweight T-Bar Row,Back
-Kettlebell T-Bar Row,Back
-Smith Machine T-Bar Row,Back
-Barbell Incline Curl,Arms
-Dumbbell Incline Curl,Arms
-Machine Incline Curl,Arms
-Cable Incline Curl,Arms
-Resistance Band Incline Curl,Arms
-Bodyweight Incline Curl,Arms
-Kettlebell Incline Curl,Arms
-Smith Machine Incline Curl,Arms
-Barbell Concentration Curl,Arms
-Dumbbell Concentration Curl,Arms
-Machine Concentration Curl,Arms
-Cable Concentration Curl,Arms
-Resistance Band Concentration Curl,Arms
-Bodyweight Concentration Curl,Arms
-Kettlebell Concentration Curl,Arms
-Smith Machine Concentration Curl,Arms
-Barbell Zottman Curl,Arms
-Dumbbell Zottman Curl,Arms
-Machine Zottman Curl,Arms
-Cable Zottman Curl,Arms
-Resistance Band Zottman Curl,Arms
-Bodyweight Zottman Curl,Arms
-Kettlebell Zottman Curl,Arms
-Smith Machine Zottman Curl,Arms
-Barbell Drag Curl,Arms
-Dumbbell Drag Curl,Arms
-Machine Drag Curl,Arms
-Cable Drag Curl,Arms
-Resistance Band Drag Curl,Arms
-Bodyweight Drag Curl,Arms
-Kettlebell Drag Curl,Arms
-Smith Machine Drag Curl,Arms
-Barbell Spider Curl,Arms
-Dumbbell Spider Curl,Arms
-Machine Spider Curl,Arms
-Cable Spider Curl,Arms
-Resistance Band Spider Curl,Arms
-Bodyweight Spider Curl,Arms
-Kettlebell Spider Curl,Arms
-Smith Machine Spider Curl,Arms
-Barbell Tate Press,Arms
-Dumbbell Tate Press,Arms
-Machine Tate Press,Arms
-Cable Tate Press,Arms
-Resistance Band Tate Press,Arms
-Bodyweight Tate Press,Arms
-Kettlebell Tate Press,Arms
-Smith Machine Tate Press,Arms
-Barbell Close Grip Bench Press,Chest
-Dumbbell Close Grip Bench Press,Chest
-Machine Close Grip Bench Press,Chest
-Cable Close Grip Bench Press,Chest
-Resistance Band Close Grip Bench Press,Chest
-Bodyweight Close Grip Bench Press,Chest
-Kettlebell Close Grip Bench Press,Chest
-Smith Machine Close Grip Bench Press,Chest
-Barbell Diamond Push-Up,Chest
-Dumbbell Diamond Push-Up,Chest
-Machine Diamond Push-Up,Chest
-Cable Diamond Push-Up,Chest
-Resistance Band Diamond Push-Up,Chest
-Bodyweight Diamond Push-Up,Chest
-Kettlebell Diamond Push-Up,Chest
-Smith Machine Diamond Push-Up,Chest
-Barbell Clap Push-Up,Chest
-Dumbbell Clap Push-Up,Chest
-Machine Clap Push-Up,Chest
-Cable Clap Push-Up,Chest
-Resistance Band Clap Push-Up,Chest
-Bodyweight Clap Push-Up,Chest
-Kettlebell Clap Push-Up,Chest
-Smith Machine Clap Push-Up,Chest
-Barbell Deficit Push-Up,Chest
-Dumbbell Deficit Push-Up,Chest
-Machine Deficit Push-Up,Chest
-Cable Deficit Push-Up,Chest
-Resistance Band Deficit Push-Up,Chest
-Bodyweight Deficit Push-Up,Chest
-Kettlebell Deficit Push-Up,Chest
-Smith Machine Deficit Push-Up,Chest
-Barbell Ring Dip,Arms
-Dumbbell Ring Dip,Arms
-Machine Ring Dip,Arms
-Cable Ring Dip,Arms
-Resistance Band Ring Dip,Arms
-Bodyweight Ring Dip,Arms
-Kettlebell Ring Dip,Arms
-Smith Machine Ring Dip,Arms
-Barbell TRX Row,Back
-Dumbbell TRX Row,Back
-Machine TRX Row,Back
-Cable TRX Row,Back
-Resistance Band TRX Row,Back
-Bodyweight TRX Row,Back
-Kettlebell TRX Row,Back
-Smith Machine TRX Row,Back
-Barbell TRX Push-Up,Chest
-Dumbbell TRX Push-Up,Chest
-Machine TRX Push-Up,Chest
-Cable TRX Push-Up,Chest
-Resistance Band TRX Push-Up,Chest
-Bodyweight TRX Push-Up,Chest
-Kettlebell TRX Push-Up,Chest
-Smith Machine TRX Push-Up,Chest
-Barbell Chest Supported Row,Back
-Dumbbell Chest Supported Row,Back
-Machine Chest Supported Row,Back
-Cable Chest Supported Row,Back
-Resistance Band Chest Supported Row,Back
-Bodyweight Chest Supported Row,Back
-Kettlebell Chest Supported Row,Back
-Smith Machine Chest Supported Row,Back
-Barbell Chest Supported Fly,Chest
-Dumbbell Chest Supported Fly,Chest
-Machine Chest Supported Fly,Chest
-Cable Chest Supported Fly,Chest
-Resistance Band Chest Supported Fly,Chest
-Bodyweight Chest Supported Fly,Chest
-Kettlebell Chest Supported Fly,Chest
-Smith Machine Chest Supported Fly,Chest
-Barbell Kneeling Squat,Legs
-Dumbbell Kneeling Squat,Legs
-Machine Kneeling Squat,Legs
-Cable Kneeling Squat,Legs
-Resistance Band Kneeling Squat,Legs
-Bodyweight Kneeling Squat,Legs
-Kettlebell Kneeling Squat,Legs
-Smith Machine Kneeling Squat,Legs
-Barbell Jefferson Deadlift,Back
-Dumbbell Jefferson Deadlift,Back
-Machine Jefferson Deadlift,Back
-Cable Jefferson Deadlift,Back
-Resistance Band Jefferson Deadlift,Back
-Bodyweight Jefferson Deadlift,Back
-Kettlebell Jefferson Deadlift,Back
-Smith Machine Jefferson Deadlift,Back
-Barbell Sissy Squat,Legs
-Dumbbell Sissy Squat,Legs
-Machine Sissy Squat,Legs
-Cable Sissy Squat,Legs
-Resistance Band Sissy Squat,Legs
-Bodyweight Sissy Squat,Legs
-Kettlebell Sissy Squat,Legs
-Smith Machine Sissy Squat,Legs
-Barbell Smith Machine Squat,Legs
-Dumbbell Smith Machine Squat,Legs
-Cable Smith Machine Squat,Legs
-Resistance Band Smith Machine Squat,Legs
-Bodyweight Smith Machine Squat,Legs
-Kettlebell Smith Machine Squat,Legs
-Barbell Smith Machine Press,Chest
-Dumbbell Smith Machine Press,Chest
-Cable Smith Machine Press,Chest
-Resistance Band Smith Machine Press,Chest
-Bodyweight Smith Machine Press,Chest
-Kettlebell Smith Machine Press,Chest
-Barbell Smith Machine Row,Back
-Dumbbell Smith Machine Row,Back
-Cable Smith Machine Row,Back
-Resistance Band Smith Machine Row,Back
-Bodyweight Smith Machine Row,Back
-Kettlebell Smith Machine Row,Back
-Barbell Rack Pull,Back
-Dumbbell Rack Pull,Back
-Machine Rack Pull,Back
-Cable Rack Pull,Back
-Resistance Band Rack Pull,Back
-Bodyweight Rack Pull,Back
-Kettlebell Rack Pull,Back
-Smith Machine Rack Pull,Back
-Barbell Pendlay Row,Back
-Dumbbell Pendlay Row,Back
-Machine Pendlay Row,Back
-Cable Pendlay Row,Back
-Resistance Band Pendlay Row,Back
-Bodyweight Pendlay Row,Back
-Kettlebell Pendlay Row,Back
-Smith Machine Pendlay Row,Back
-Barbell Meadows Row,Back
-Dumbbell Meadows Row,Back
-Machine Meadows Row,Back
-Cable Meadows Row,Back
-Resistance Band Meadows Row,Back
-Bodyweight Meadows Row,Back
-Kettlebell Meadows Row,Back
-Smith Machine Meadows Row,Back
-Barbell Renegade Row,Back
-Dumbbell Renegade Row,Back
-Machine Renegade Row,Back
-Cable Renegade Row,Back
-Resistance Band Renegade Row,Back
-Bodyweight Renegade Row,Back
-Kettlebell Renegade Row,Back
-Smith Machine Renegade Row,Back
-Barbell Cuban Press,Shoulders
-Dumbbell Cuban Press,Shoulders
-Machine Cuban Press,Shoulders
-Cable Cuban Press,Shoulders
-Resistance Band Cuban Press,Shoulders
-Bodyweight Cuban Press,Shoulders
-Kettlebell Cuban Press,Shoulders
-Smith Machine Cuban Press,Shoulders
-Barbell Plate Front Raise,Shoulders
-Dumbbell Plate Front Raise,Shoulders
-Machine Plate Front Raise,Shoulders
-Cable Plate Front Raise,Shoulders
-Resistance Band Plate Front Raise,Shoulders
-Bodyweight Plate Front Raise,Shoulders
-Kettlebell Plate Front Raise,Shoulders
-Smith Machine Plate Front Raise,Shoulders
-Barbell Plate Pinch,Arms
-Dumbbell Plate Pinch,Arms
-Machine Plate Pinch,Arms
-Cable Plate Pinch,Arms
-Resistance Band Plate Pinch,Arms
-Bodyweight Plate Pinch,Arms
-Kettlebell Plate Pinch,Arms
-Smith Machine Plate Pinch,Arms
-Barbell Wrist Curl,Arms
+Name
+Bench Press
+Squat
+Deadlift
+Overhead Press
+Barbell Row
+Pull-Up
+Chin-Up
+Push-Up
+Dumbbell Fly
+Incline Bench Press
+Decline Bench Press
+Leg Press
+Lunge
+Bulgarian Split Squat
+Leg Extension
+Leg Curl
+Calf Raise
+Hip Thrust
+Glute Bridge
+Lat Pulldown
+Seated Row
+Face Pull
+Arnold Press
+Lateral Raise
+Front Raise
+Tricep Dip
+Tricep Extension
+Bicep Curl
+Hammer Curl
+Preacher Curl
+Skullcrusher
+Cable Fly
+Cable Row
+Reverse Fly
+Shrug
+Farmer's Walk
+Russian Twist
+Plank
+Hanging Leg Raise
+Crunch
+Cable Crunch
+Upright Row
+Clean and Press
+Power Clean
+Snatch
+Hang Clean
+Push Jerk
+Push Press
+Sumo Deadlift
+Sumo Deadlift High Pull
+Trap Bar Deadlift
+Romanian Deadlift
+Stiff-Legged Deadlift
+Good Morning
+Zercher Squat
+Hack Squat
+Split Squat
+Box Squat
+Pistol Squat
+Step Up
+Single-Leg Deadlift
+Nordic Curl
+Donkey Calf Raise
+Seated Calf Raise
+Machine Chest Press
+Pec Deck
+Machine Shoulder Press
+Machine Row
+Machine Pullover
+Machine Bicep Curl
+Machine Tricep Extension
+Machine Leg Press
+Machine Leg Curl
+Machine Leg Extension
+Hip Abductor
+Hip Adductor
+Ab Wheel Rollout
+Hanging Knee Raise
+Dragon Flag
+Cable Woodchopper
+Landmine Press
+Landmine Row
+T-Bar Row
+Incline Curl
+Concentration Curl
+Zottman Curl
+Drag Curl
+Spider Curl
+Tate Press
+Close Grip Bench Press
+Diamond Push-Up
+Clap Push-Up
+Deficit Push-Up
+Ring Dip
+TRX Row
+TRX Push-Up
+Chest Supported Row
+Chest Supported Fly
+Kneeling Squat
+Jefferson Deadlift
+Sissy Squat
+Smith Machine Squat
+Smith Machine Press
+Smith Machine Row
+Rack Pull
+Pendlay Row
+Meadows Row
+Renegade Row
+Cuban Press
+Plate Front Raise
+Plate Pinch
+Wrist Curl
+Reverse Wrist Curl
+Suitcase Carry
+Turkish Get-Up
+Weighted Dip
+Weighted Pull-Up
+Weighted Push-Up
+Weighted Lunge
+Weighted Step Up
+Band Pull Apart
+Band Face Pull
+Band Pull Down
+Sled Push
+Sled Drag
+Kettlebell Swing
+Kettlebell Clean
+Kettlebell Snatch
+Kettlebell Turkish Get-Up
+Kettlebell Goblet Squat
+Kettlebell Deadlift
+Kettlebell Lunge
+Medicine Ball Slam
+Medicine Ball Throw
+Medicine Ball Chest Pass
+Medicine Ball Twist
+Battle Rope Wave
+Battle Rope Slam
+Battle Rope Snakes
+Battle Rope Circles

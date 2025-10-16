@@ -17,14 +17,12 @@ struct ExercisePickerView: View {
     let confirmationImpact = UIImpactFeedbackGenerator(style: .medium)
 
 
-    var filteredExercises: [Exercise] {
-        let source: [Exercise]
+    var filteredExercises: [String] {
         if searchContext.debouncedSearchText.isEmpty {
-            source = viewModel.allStockExercises()
+            return allExercises
         } else {
-            source = viewModel.matchExercise(name: searchContext.debouncedSearchText)
+            return allExercises.filter { $0.lowercased().contains(searchContext.debouncedSearchText.lowercased()) }
         }
-        return filteredByTag(source)
     }
 
     var body: some View {
@@ -55,42 +53,13 @@ struct ExercisePickerView: View {
                 }
                 .padding(.top, 8)
 
-            HStack {
-                Menu {
-                    Picker("Tag", selection: Binding(
-                        get: { viewModel.selectedTag ?? .other },
-                        set: { viewModel.selectedTag = $0 }
-                    )) {
-                        ForEach(ExerciseTag.allCases, id: \.self) { tag in
-                            Text(tag.rawValue).tag(tag)
-                        }
-                    }
-                } label: {
-                    Label(viewModel.selectedTag?.rawValue ?? "Filter by Tag", systemImage: "line.3.horizontal.decrease.circle")
-                }
-                Spacer()
-            }
-            .padding(.horizontal)
-
-            List(filteredExercises, id: \.self) { exercise in
+            List(viewModel.matchExercise(name: searchContext.searchText), id: \.self) { exercise in
                 Button(action: {
                     selectedExercise = exercise.name
                     confirmationImpact.impactOccurred()
                 }) {
-                    HStack(spacing: 8) {
-                        Text(exercise.name)
-                            .font(.system(size: 18))
-                        if let tag = exercise.tag {
-                            Text(tag.rawValue)
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                                .padding(.vertical, 2)
-                                .padding(.horizontal, 6)
-                                .background(tag.color.opacity(0.15))
-                                .foregroundColor(tag.color)
-                                .clipShape(Capsule())
-                        }
-                    }
+                    Text(exercise.name)
+                        .font(.system(size: 18))
                 }
                 .listRowSeparator(.hidden)
 
@@ -101,11 +70,6 @@ struct ExercisePickerView: View {
             isNameFocused = true
 
         }
-    }
-
-    private func filteredByTag(_ exercises: [Exercise]) -> [Exercise] {
-        guard let selectedTag = viewModel.selectedTag else { return exercises }
-        return exercises.filter { $0.tag ?? ExerciseService.tagForExerciseName($0.name) == selectedTag }
     }
 
 }
