@@ -17,28 +17,27 @@ class SearchContext: ObservableObject {
 
 struct ExercisesListView: View {
 
-    private var exercises: [Exercise] {
-        exerciseService.exercises
-    }
 
     @Injected var exerciseService: ExerciseService
-
+    
     @Environment(\.colorScheme) var colorScheme
 
     @State private var isAddingWorkout = false
 
     @StateObject var searchContext = SearchContext()
     @Namespace var animation
+    
+    @State var groupedExercises: [(date: Date, exercises: [Exercise])] = []
 
     var body: some View {
         NavigationStack {
             ZStack {
                 VStack {
-                    if exercises.isEmpty {
+                    if exerciseService.exercises.isEmpty {
                         Text("No exercises found in the last 7 days")
                     } else {
                         List {
-                            ForEach(exerciseService.groupedWorkouts(query: searchContext.debouncedSearchText.lowercased()), id: \.date) { group in
+                            ForEach(groupedExercises, id: \.date) { group in
                                 Section(header: Text(group.date.customFormatted)) {
                                     ForEach(group.exercises) { exercise in
                                         NavigationLink {
@@ -51,7 +50,9 @@ struct ExercisesListView: View {
                                         .navigationLinkIndicatorVisibility(.hidden)
                                         .listRowSeparator(.hidden)
                                     }
-                                    .onDelete(perform: deleteWorkouts)
+                                    .onDelete { offsets in
+                                        deleteWorkouts(date: group.date, offsets: offsets)
+                                    }
                                 }
                             }
                         }
@@ -73,11 +74,32 @@ struct ExercisesListView: View {
         .sheet(isPresented: $isAddingWorkout) {
             AddWorkoutView(isPresented: $isAddingWorkout)
         }
+        .onReceive(exerciseService.objectWillChange) { _ in
+            fetchGroupedExercises()
+        }
+        .onAppear {
+            fetchGroupedExercises()
+        }
+    }
+    
+    private func fetchGroupedExercises() {
+        groupedExercises = exerciseService.groupedWorkouts(query: searchContext.debouncedSearchText.lowercased())
     }
 
-    private func deleteWorkouts(offsets: IndexSet) {
+    private func deleteWorkouts(date: Date, offsets: IndexSet) {
         withAnimation {
-            exerciseService.removeExerciseBulk(indexSet: offsets)
+            guard let exercises = groupedExercises.first(where: { $0.date == date })?.exercises else {
+                return
+            }
+            var idSet = Set<UUID>()
+            for index in offsets {
+                guard index < exercises.count else {
+                    fatalError("Something in the index is seriously off")
+                }
+                let exercise = exercises[index]
+                idSet.insert(exercise.id)
+            }
+            exerciseService.removeExerciseBulk(idSet: idSet)
         }
     }
 }

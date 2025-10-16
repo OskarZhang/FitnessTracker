@@ -15,6 +15,7 @@ struct FitnessTrackerApp: App {
         
         // Large Navigation Title global override
         UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.bratGreen]
+        UINavigationBar.appearance().tintColor = UIColor.bratGreen
     }
     var body: some Scene {
         WindowGroup {

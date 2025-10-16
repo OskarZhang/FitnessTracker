@@ -31,5 +31,6 @@ struct AddWorkoutView: View {
                 )
             }
         }
+        .accentColor(.bratGreen)
     }
 }

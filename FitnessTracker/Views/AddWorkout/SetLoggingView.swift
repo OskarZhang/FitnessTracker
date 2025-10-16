@@ -57,6 +57,17 @@ struct SetLoggingView: View {
         self.onSave = onSave
     }
 
+    func generateWeightAndSetSuggestion() {
+        // todo: Add some UI for loading state, and maybe separate into a view model as this view is getting big
+        Task {
+            let recommender = SuggestFirstSet(userWeight: 155, userHeight: "5 foot 7", workoutName: self.exerciseName)
+            if let response = try? await recommender.respond() {
+                self.sets[0].weightInLbs = Double(response.content.weight)
+                self.sets[0].reps = Int(response.content.reps)
+            }
+        }
+    }
+    
     var body: some View {
         VStack() {
             ZStack {
@@ -108,6 +119,11 @@ struct SetLoggingView: View {
         )
         .onDisappear {
             stopTimer()
+        }
+        .onAppear {
+            if self.sets.first?.weightInLbs == 0.0 {
+                generateWeightAndSetSuggestion()
+            }
         }
     }
 
@@ -218,7 +234,7 @@ struct SetLoggingView: View {
 
                 Button(action: addSet) {
                     Label("Add Set", systemImage: "plus.circle.fill")
-                        .foregroundStyle(Color.bratGreen)
+                        .foregroundStyle(Color.primary)
                 }
                 .listRowSeparator(.hidden)
             }
@@ -227,7 +243,6 @@ struct SetLoggingView: View {
             .selectionDisabled()
         }
     }
-
 
     @ViewBuilder
     private func numberPadField(_ index: Int, _ type: RecordType) -> some View {

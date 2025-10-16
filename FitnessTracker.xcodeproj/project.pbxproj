@@ -27,6 +27,7 @@
 		4BDFCCCE2EA160DC000861F4 /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCCD2EA160D5000861F4 /* Container.swift */; };
 		4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD02EA17AB1000861F4 /* Extensions.swift */; };
 		4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD22EA18360000861F4 /* NumberPad.swift */; };
+		4BDFCCD62EA1B328000861F4 /* OnDeviceRecommenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD52EA1B324000861F4 /* OnDeviceRecommenders.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -63,6 +64,7 @@
 		4BDFCCCD2EA160D5000861F4 /* Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
 		4BDFCCD02EA17AB1000861F4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		4BDFCCD22EA18360000861F4 /* NumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberPad.swift; sourceTree = "<group>"; };
+		4BDFCCD52EA1B324000861F4 /* OnDeviceRecommenders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceRecommenders.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +165,7 @@
 		4BDFCCC82EA15B6A000861F4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				4BDFCCD52EA1B324000861F4 /* OnDeviceRecommenders.swift */,
 				4BD095A62D7E588100F4769F /* ExerciseService.swift */,
 			);
 			path = Services;
@@ -268,6 +271,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4BDFCCCE2EA160DC000861F4 /* Container.swift in Sources */,
+				4BDFCCD62EA1B328000861F4 /* OnDeviceRecommenders.swift in Sources */,
 				4BDFCCC32EA15A25000861F4 /* WorkoutRowView.swift in Sources */,
 				4BA93FC32C86B7B300973198 /* ExercisesListView.swift in Sources */,
 				4BB21AAE2C8813E300C1DEDE /* WorkoutDetailView.swift in Sources */,

@@ -1,15 +1,17 @@
 import SwiftData
 import Foundation
+import Combine
 
-class ExerciseService {
+class ExerciseService: ObservableObject {
 
     static private let StartOfDayWorkoutToken: String = "StartOfDay"
 
+    
     private let modelContext: ModelContext
 
     private var transitions: [String: [String: Int]] = [:]
     private var transitionProbabilities: [String: [String: Double]] = [:]
-    var exercises: [Exercise] = []
+    @Published var exercises: [Exercise] = []
     
     lazy var exerciseNamesFromCSV: [String] = {
         guard let url = Bundle.main.url(forResource: "strength_workout_names", withExtension: "csv") else {
@@ -36,7 +38,7 @@ class ExerciseService {
         self.exercises = fetchWorkouts()
         Task {
             await buildTransitionProbabilityMatrix(data: self.exercises)
-        }
+        }   
     }
 
     func groupedWorkouts(query: String = "") -> [(date: Date, exercises: [Exercise])] {
@@ -55,19 +57,12 @@ class ExerciseService {
         return res
     }
     
-    func removeExerciseBulk(indexSet: IndexSet) {
-        // keep in-mem and database in sync
-        exercises = exercises.enumerated()
-            .map { (index, value) -> Exercise? in
-                if indexSet.contains(index) {
-                    modelContext.delete(value)
-                    return nil
-                } else {
-                    return value
-                }
-        }
-            .compactMap { $0 }
+    func removeExerciseBulk(idSet: Set<UUID>) {
+        try? modelContext.delete(model: Exercise.self, where: #Predicate { exercise in
+            idSet.contains(exercise.id)
+        })
         try? modelContext.save()
+        exercises = fetchWorkouts()   
     }
 
     /// build a Markov Chain prediction matrix with exercise data
