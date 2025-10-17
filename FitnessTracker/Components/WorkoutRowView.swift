@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct WorkoutRowView: View {
     enum ExerciseType {
         case strength(maxWeight: Double, maxRep: Int, setCount: Int)

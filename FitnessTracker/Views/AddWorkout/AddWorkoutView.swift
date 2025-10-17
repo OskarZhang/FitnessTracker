@@ -12,11 +12,7 @@ struct AddWorkoutView: View {
         NavigationStack() {
             ExercisePickerView(
                 viewModel: viewModel,
-                isPresented: $isPresented,
-                selectedExercise: Binding(
-                    get: { viewModel.selectedExercise ?? "" },
-                    set: { viewModel.selectedExercise = $0 }
-                )
+                isPresented: $isPresented
             )
             .navigationDestination(isPresented: $viewModel.showingSetLogger) {
                 SetLoggingView(

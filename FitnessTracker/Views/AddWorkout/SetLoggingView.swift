@@ -35,8 +35,6 @@ struct SetLoggingView: View {
         }
     }
 
-    @State var weight: Int = 0
-    @State var reps: Int = 0
     let exerciseName: String
     let onSave: ([StrengthSet]) -> Void
     @State var showingNumberPad: Bool = true
@@ -320,19 +318,5 @@ struct SetLoggingView: View {
         withAnimation {
             sets.remove(atOffsets: offsets)
         }
-    }
-}
-
-extension View {
-    func styledNumberPadText(height: CGFloat, colorScheme: ColorScheme) -> some View {
-        return self
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(colorScheme == .dark ? Color(.systemGray2) : Color(.white))
-                    .shadow(radius: 0.4)
-            )
-            .foregroundColor(.primary)
     }
 }

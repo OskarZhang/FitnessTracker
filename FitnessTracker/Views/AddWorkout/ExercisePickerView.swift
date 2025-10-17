@@ -3,7 +3,7 @@ import Combine
 import SwiftUIIntrospect
 
 struct ExercisePickerView: View {
-    @StateObject var viewModel: AddWorkoutViewModel
+    @ObservedObject var viewModel: AddWorkoutViewModel
 
     @Binding var isPresented: Bool
     @Binding var selectedExercise: String
@@ -16,13 +16,13 @@ struct ExercisePickerView: View {
 
     let confirmationImpact = UIImpactFeedbackGenerator(style: .medium)
 
-
-    var filteredExercises: [String] {
-        if searchContext.debouncedSearchText.isEmpty {
-            return allExercises
-        } else {
-            return allExercises.filter { $0.lowercased().contains(searchContext.debouncedSearchText.lowercased()) }
-        }
+    init(viewModel: AddWorkoutViewModel, isPresented: Binding<Bool>) {
+        self.viewModel = viewModel
+        self._isPresented = isPresented
+        self._selectedExercise = Binding(
+            get: { viewModel.selectedExercise ?? "" },
+            set: { viewModel.selectedExercise = $0 }
+        )
     }
 
     var body: some View {

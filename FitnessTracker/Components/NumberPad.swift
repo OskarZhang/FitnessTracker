@@ -57,8 +57,7 @@ struct NumberPad: View {
                     quickAddWeightButton(15)
                     quickAddWeightButton(20)
                 } else {
-                    quickSetReps(5)
-                    quickSetReps(8)
+                    quickSetReps(10)
                     quickSetReps(12)
                     quickSetReps(15)
                 }
@@ -184,4 +183,18 @@ struct NumberPad: View {
         return view
     }
 
+}
+
+private extension View {
+    func styledNumberPadText(height: CGFloat, colorScheme: ColorScheme) -> some View {
+        return self
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(colorScheme == .dark ? Color(.systemGray2) : Color(.white))
+                    .shadow(radius: 0.4)
+            )
+            .foregroundColor(.primary)
+    }
 }
