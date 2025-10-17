@@ -22,11 +22,21 @@ extension Recommender {
 
 @Generable
 struct SetRecommendation {
+    @Guide(description: "warmup weight in pounds")
+    let warmupWeight: Int
+    
+    @Guide(description: "warmup reps count")
+    let warmupReps: Int
+    
+    
     @Guide(description: "weight in pounds")
-    let weight: Int
+    let terminalWeight: Int
     
     @Guide(description: "reps count")
-    let reps: Int
+    let terminalReps: Int
+    
+    @Guide(description: "number of sets user should do")
+    let setCount: Int
 }
 
 struct SuggestFirstSet: Recommender {
@@ -38,7 +48,7 @@ struct SuggestFirstSet: Recommender {
     init(userWeight: Int, userHeight: String, workoutName: String) {
         self.systemPrompt = """
             The user is weighed \(userWeight) lbs and \(userHeight) tall. The user is experienced at weight lifting.
-            Suggest a weight and reps for doing \(workoutName)
+            Suggest a full set for doing \(workoutName)
             """
     }
 }

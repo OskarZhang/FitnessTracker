@@ -83,9 +83,13 @@ class AddWorkoutViewModel: ObservableObject {
         }
         Task { @MainActor in
             let recommender = SuggestFirstSet(userWeight: 155, userHeight: "5 foot 7", workoutName: selectedExercise)
-            if let response = try? await recommender.respond() {
-                self.sets[0].weightInLbs = Double(response.content.weight)
-                self.sets[0].reps = Int(response.content.reps)
+            if let content = try? await recommender.respond().content {
+                sets[0].weightInLbs = Double(content.warmupWeight)
+                sets[0].reps = content.warmupReps
+                
+                for _ in 0..<content.setCount {
+                    sets.append(StrengthSetData(weightInLbs: Double(content.terminalWeight), reps: Int(content.terminalReps)))
+                }
             }
         }
     }
