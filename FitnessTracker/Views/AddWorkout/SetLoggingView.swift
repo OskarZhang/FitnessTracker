@@ -36,7 +36,7 @@ struct SetLoggingView: View {
             }
         )
         .onAppear {
-            viewModel.generateWeightAndSetSuggestion()
+//            viewModel.generateWeightAndSetSuggestion()
         }
     }
 
@@ -44,6 +44,7 @@ struct SetLoggingView: View {
     var addSetView: some View {
         VStack(alignment: .leading) {
             Text(viewModel.selectedExercise)
+                .shimmer(enabled: viewModel.isGeneratingRecommendations)
                 .padding()
                 .font(.largeTitle)
                 .fontWeight(.medium)

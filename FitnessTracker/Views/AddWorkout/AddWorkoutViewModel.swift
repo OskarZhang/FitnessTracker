@@ -48,6 +48,8 @@ class AddWorkoutViewModel: ObservableObject {
 
     @Published var sets: [StrengthSetData] = []
 
+    @Published var isGeneratingRecommendations = false
+
     @Injected private var exerciseService: ExerciseService
 
     private var currentFocusIndexState: FocusIndex? = .initial {
@@ -77,14 +79,17 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
     func generateWeightAndSetSuggestion() {
-        // todo: Add some UI for loading state, and maybe separate into a view model as this view is getting big
         guard sets.first?.weightInLbs == 0.0 else {
             return
         }
+        isGeneratingRecommendations = true
         Task {
             let recommender = SuggestFirstSet(userWeight: 155, userHeight: "5 foot 7", workoutName: selectedExercise)
 
             guard let content = try? await recommender.respond().content else {
+                await MainActor.run {
+                    isGeneratingRecommendations = false
+                }
                 return
             }
 
@@ -95,6 +100,8 @@ class AddWorkoutViewModel: ObservableObject {
                 for _ in 0..<content.setCount {
                     sets.append(StrengthSetData(weightInLbs: Double(content.terminalWeight), reps: Int(content.terminalReps)))
                 }
+
+                isGeneratingRecommendations = false
             }
         }
     }
