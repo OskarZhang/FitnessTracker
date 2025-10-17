@@ -81,18 +81,18 @@ struct SetLoggingView: View {
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
-                    .padding(.leading, 4)
-                    .padding(.trailing, 4)
+                    .padding(.leading, 8)
+                    .padding(.trailing, 8)
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)
-                                .foregroundStyle(colorScheme == .dark ? .white : .black)
+                                .foregroundStyle(colorScheme == .dark ? .white : .bratGreen)
                                 .transition(.opacity)
                         }
                     }
                 Text(type.labelForValue(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps))
-                    .padding(.leading, 4)
-                    .padding(.trailing, 4)
+                    .padding(.leading, 8)
+                    .padding(.trailing, 8)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
             }
@@ -116,6 +116,6 @@ struct SetLoggingView: View {
                 }
             }
         }
-        .frame(width: 100)
+        .frame(width: 120)
     }
 }
