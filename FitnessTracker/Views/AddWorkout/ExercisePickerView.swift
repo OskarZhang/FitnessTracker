@@ -20,7 +20,7 @@ struct ExercisePickerView: View {
         self.viewModel = viewModel
         self._isPresented = isPresented
         self._selectedExercise = Binding(
-            get: { viewModel.selectedExercise ?? "" },
+            get: { viewModel.selectedExercise },
             set: { viewModel.selectedExercise = $0 }
         )
     }
@@ -35,7 +35,8 @@ struct ExercisePickerView: View {
                     .fontWeight(.medium)
                     .padding()
                     .focused($isNameFocused)
-                    .introspect(.textField, on: .iOS(.v13, .v14, .v15, .v16, .v17, .v18), customize: { textField in
+                    .introspect(.textField, on: .iOS(.v26), customize: { textField in
+                        // this makes keyboard bring-up significantly faster
                         if !hasSetInitialFocus && isPresented {
                             textField.becomeFirstResponder()
                             hasSetInitialFocus = true
@@ -60,7 +61,6 @@ struct ExercisePickerView: View {
                             .font(.system(size: 18))
                     }
                     .listRowSeparator(.hidden)
-                    
                 }
                 .listStyle(.plain)
             }

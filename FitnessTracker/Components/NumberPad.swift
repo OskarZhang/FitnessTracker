@@ -19,6 +19,13 @@ enum RecordType {
     }
 }
 
+
+enum NumberEditMode {
+    case overwrite
+    case append
+}
+
+
 struct OnReturnModifier: ViewModifier {
     let action: () -> Void
     
@@ -37,12 +44,12 @@ struct NumberPad: View {
 
     @Binding var value: Int
     
-    @Binding private var shouldOverwrite: Bool
+    @Binding private var editMode: NumberEditMode
 
-    init(type: RecordType, value: Binding<Int>, shouldOverwrite: Binding<Bool>) {
+    init(type: RecordType, value: Binding<Int>, editMode: Binding<NumberEditMode>) {
         self.type = type
         self._value = value
-        self._shouldOverwrite = shouldOverwrite
+        self._editMode = editMode
     }
     
     private let lightImpact = UIImpactFeedbackGenerator(style: .light)
@@ -123,7 +130,7 @@ struct NumberPad: View {
     private func numberButton(_ number: Int) -> some View {
         Button {
             lightImpact.impactOccurred()
-            updateCurrentFocusedField(numberTapped: number)
+            didTap(number)
         } label: {
             Text("\(number)")
                 .font(.system(size: 36, weight: .regular))
@@ -132,15 +139,12 @@ struct NumberPad: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private func updateCurrentFocusedField(numberTapped: Int) {
-        if shouldOverwrite {
-            value = numberTapped
+    private func didTap(_ number: Int) {
+        if editMode == .overwrite {
+            value = number
+            editMode = .append
         } else {
-            value = value * 10 + numberTapped
-        }
-
-        if shouldOverwrite {
-            shouldOverwrite = false
+            value = value * 10 + number
         }
     }
 

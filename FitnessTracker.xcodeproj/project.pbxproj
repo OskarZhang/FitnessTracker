@@ -28,6 +28,9 @@
 		4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD02EA17AB1000861F4 /* Extensions.swift */; };
 		4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD22EA18360000861F4 /* NumberPad.swift */; };
 		4BDFCCD62EA1B328000861F4 /* OnDeviceRecommenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD52EA1B324000861F4 /* OnDeviceRecommenders.swift */; };
+		4BEB135D2EA2193600D99818 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB135C2EA2193600D99818 /* SwiftUIIntrospect-Static */; };
+		4BEB13612EA21A4D00D99818 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB13602EA21A4D00D99818 /* SwiftUIIntrospect */; };
+		4BEB13652EA21A4D00D99818 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB13642EA21A4D00D99818 /* SwiftUIIntrospect-Static */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,7 +75,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BEB135D2EA2193600D99818 /* SwiftUIIntrospect-Static in Frameworks */,
+				4BEB13652EA21A4D00D99818 /* SwiftUIIntrospect-Static in Frameworks */,
 				4B2D17802CB1F9D0001137F7 /* SwiftUIIntrospect in Frameworks */,
+				4BEB13612EA21A4D00D99818 /* SwiftUIIntrospect in Frameworks */,
 				4B2D17862CB1F9F2001137F7 /* SwiftUIIntrospect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -505,8 +511,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.0;
+				kind = exactVersion;
+				version = 26.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -521,6 +527,18 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B2D177E2CB1F9D0001137F7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
 			productName = SwiftUIIntrospect;
+		};
+		4BEB135C2EA2193600D99818 /* SwiftUIIntrospect-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "SwiftUIIntrospect-Static";
+		};
+		4BEB13602EA21A4D00D99818 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftUIIntrospect;
+		};
+		4BEB13642EA21A4D00D99818 /* SwiftUIIntrospect-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "SwiftUIIntrospect-Static";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
