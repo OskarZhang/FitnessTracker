@@ -17,10 +17,12 @@ struct SetLoggingView: View {
     var body: some View {
         addSetView
             .navigationBarItems(
-                trailing: Button("Done") {
+                trailing: Button("Done", systemImage: "checkmark.rectangle.stack.fill") {
                     confirmationImpact.impactOccurred()
                     viewModel.saveWorkout()
                 }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.bratGreen)
             )
             .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
             .onAppear {
@@ -36,13 +38,10 @@ struct SetLoggingView: View {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 recordGridView
-                    .onTapGesture {
-                        viewModel.loseFocus()
-                    }
                     .onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
-                        if let setNum = newValue?.setNum {
+                        if let setIndex = newValue?.setIndex {
                             withAnimation {
-                                proxy.scrollTo(setNum)
+                                proxy.scrollTo(setIndex)
                             }
                         }
                     }
@@ -57,7 +56,7 @@ struct SetLoggingView: View {
                     editMode: $viewModel.editMode
                 )
                 .onNext {
-                    viewModel.setFocusOnNext()
+                    viewModel.onNumberPadReturn()
                 }
             }
         }
@@ -83,6 +82,15 @@ struct SetLoggingView: View {
                         Spacer()
                         recordTextField(index, .weight)
                         recordTextField(index, .rep)
+                        
+                        Button(action: {
+                            viewModel.toggleSetCompletion(setIndex: index)
+                        }) {
+                            Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.square.fill" : "checkmark.square") // SF Symbol
+                                .font(.system(size: 22))
+                                .foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .primary)
+                        }
+                        .padding(.leading, 8)
                     }
                     .listRowSeparator(.hidden)
                 }
@@ -190,7 +198,7 @@ struct SetLoggingView: View {
                 if viewModel.isFocused(at: index, type: type) {
                     viewModel.loseFocus()
                 } else {
-                    viewModel.setFocus(setNum: index, type: type)
+                    viewModel.setFocus(setIndex: index, type: type)
                 }
         }
         .frame(width: 120)

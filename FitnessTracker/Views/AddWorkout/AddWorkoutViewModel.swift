@@ -7,24 +7,25 @@ struct StrengthSetData {
     var reps: Int
     var restSeconds: Int?
     var rpe: Int?
+    var isCompleted: Bool = false
 }
 
 struct FocusIndex: Equatable, Hashable {
-    var setNum: Int
+    var setIndex: Int
     var type: RecordType
 
-    static let initial = FocusIndex(setNum: 0, type: .weight)
+    static let initial = FocusIndex(setIndex: 0, type: .weight)
 
     func next() -> FocusIndex {
-        var nextSetNum = setNum
+        var nextsetIndex = setIndex
         var nextType = type
         if type == .rep {
-            nextSetNum += 1
+            nextsetIndex += 1
             nextType = .weight
         } else {
             nextType = .rep
         }
-        return Self.init(setNum: nextSetNum, type: nextType)
+        return Self.init(setIndex: nextsetIndex, type: nextType)
     }
 }
 
@@ -70,7 +71,7 @@ class AddWorkoutViewModel: ObservableObject {
         let exercise = Exercise(
             name: selectedExercise,
             type: .strength,
-            sets: sets.map {
+            sets: sets.filter { $0.isCompleted }.map {
                 StrengthSet(weightInLbs: $0.weightInLbs, reps: $0.reps, restSeconds: $0.restSeconds, rpe: $0.rpe)
             }
         )
@@ -111,32 +112,45 @@ class AddWorkoutViewModel: ObservableObject {
     var isFocused: Bool {
         currentFocusIndexState != nil
     }
+    
+    func toggleSetCompletion(setIndex: Int) {
+        let isCompleted = sets[setIndex].isCompleted
+        withAnimation {
+            sets[setIndex].isCompleted = !isCompleted
+        }
+    }
 
     var focusedFieldType: RecordType? {
         return currentFocusIndexState?.type
     }
 
-    func isFocused(at setNum: Int, type: RecordType) -> Bool {
-        currentFocusIndexState == FocusIndex(setNum: setNum, type: type)
+    func isFocused(at setIndex: Int, type: RecordType) -> Bool {
+        currentFocusIndexState == FocusIndex(setIndex: setIndex, type: type)
     }
 
-    func isFocusedAndOverwriteEnabled(at setNum: Int, type: RecordType) -> Bool {
-        currentFocusIndexState == FocusIndex(setNum: setNum, type: type) && editMode == .overwrite
+    func isFocusedAndOverwriteEnabled(at setIndex: Int, type: RecordType) -> Bool {
+        currentFocusIndexState == FocusIndex(setIndex: setIndex, type: type) && editMode == .overwrite
     }
 
-    func setFocus(setNum: Int, type: RecordType) {
+    func setFocus(setIndex: Int, type: RecordType) {
+        assert(setIndex < sets.count)
         withAnimation {
-            currentFocusIndexState = FocusIndex(setNum: setNum, type: type)
+            currentFocusIndexState = FocusIndex(setIndex: setIndex, type: type)
         }
     }
 
-    func setFocusOnNext() {
+    func onNumberPadReturn() {
         let nextFocus = currentFocusIndexState?.next()
         withAnimation {
+            if currentFocusIndexState?.type == .rep,
+               let setIndex = currentFocusIndexState?.setIndex
+            {
+                sets[setIndex].isCompleted = true
+            }
             currentFocusIndexState = nextFocus
         }
         if let currentFocusIndexState,
-           currentFocusIndexState.setNum + 1 > sets.count
+           currentFocusIndexState.setIndex + 1 > sets.count
         {
             addSet()
         }
@@ -168,7 +182,7 @@ class AddWorkoutViewModel: ObservableObject {
            sets.count > 0
         {
             // auto-focus at 0,0
-            currentFocusIndexState = FocusIndex(setNum: 0, type: .weight)
+            currentFocusIndexState = FocusIndex(setIndex: 0, type: .weight)
         }
     }
 
@@ -181,14 +195,14 @@ class AddWorkoutViewModel: ObservableObject {
                 guard let self else {
                     return 0
                 }
-                let set = sets[currentFocusIndexState.setNum]
+                let set = sets[currentFocusIndexState.setIndex]
                 return currentFocusIndexState.type == .weight ? Int(set.weightInLbs) : set.reps
             },
             set: { [weak self] value in
                 if currentFocusIndexState.type == .weight {
-                    self?.sets[currentFocusIndexState.setNum].weightInLbs = Double(value)
+                    self?.sets[currentFocusIndexState.setIndex].weightInLbs = Double(value)
                 } else {
-                    self?.sets[currentFocusIndexState.setNum].reps = value
+                    self?.sets[currentFocusIndexState.setIndex].reps = value
                 }
             })
     }

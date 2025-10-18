@@ -28,7 +28,7 @@ struct WorkoutDetailView: View {
                 if case .strength = exercise.type,
                    let sets = exercise.sets {
                     ForEach(sets.indices, id: \.self) { setIndex in
-                        StrengthSetView(weight: Int(sets[setIndex].weightInLbs), repCount: sets[setIndex].reps, setNumber: setIndex + 1)
+                        StrengthSetView(weight: Int(sets[setIndex].weightInLbs), repCount: sets[setIndex].reps, setIndexber: setIndex + 1)
                     }
                 }
 
@@ -50,11 +50,11 @@ struct WorkoutDetailView: View {
 struct StrengthSetView: View {
     let weight: Int
     let repCount: Int
-    let setNumber: Int
+    let setIndexber: Int
 
     var body: some View {
         HStack {
-            Text("Set \(setNumber)")
+            Text("Set \(setIndexber)")
                 .foregroundStyle(.gray)
             Spacer()
             Text("\(weight) lb")

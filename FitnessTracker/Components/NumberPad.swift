@@ -89,7 +89,11 @@ struct NumberPad: View {
             HStack {
                 backspaceButton
                 numberButton(0)
-                nextButton
+                if type == .weight {
+                    nextButton
+                } else {
+                    completeSetButton
+                }
             }
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -178,6 +182,27 @@ struct NumberPad: View {
                 .font(.system(size: 30, weight: .medium))
                 .styledNumberPadText(height: 60, colorScheme: colorScheme)
 
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    
+    @ViewBuilder
+    private var completeSetButton: some View {
+        Button {
+            lightImpact.impactOccurred()
+            self.nextAction?()
+        } label: {
+            Image(systemName: "checkmark.square")
+                .font(.system(size: 30, weight: .medium))
+                .frame(maxWidth: .infinity)
+                .frame(height: 60)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.bratGreen)
+                        .shadow(radius: 0.4)
+                )
+                .foregroundColor(.white)
         }
         .buttonStyle(PlainButtonStyle())
     }
