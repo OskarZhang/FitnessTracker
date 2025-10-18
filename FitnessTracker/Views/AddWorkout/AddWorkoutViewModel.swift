@@ -42,7 +42,6 @@ class AddWorkoutViewModel: ObservableObject {
             if !selectedExercise.isEmpty {
                 sets = lastExerciseSession() ?? []
                 showingSetLogger = true
-                showNewExerciseOnboarding = !hasSeenNewExerciseOnboarding && (lastExerciseSession()?.isEmpty ?? true)
             }
         }
     }
@@ -156,6 +155,10 @@ class AddWorkoutViewModel: ObservableObject {
 
     func loseFoucs() {
         currentFocusIndexState = nil
+    }
+    
+    func displayModalIfNeeded() {
+        showNewExerciseOnboarding = !hasSeenNewExerciseOnboarding && (lastExerciseSession()?.isEmpty ?? true)
     }
 
     var numberPadValueBinding: Binding<Int>? {

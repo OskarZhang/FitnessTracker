@@ -7,6 +7,7 @@ struct SetLoggingView: View {
     let confirmationImpact = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.colorScheme) var colorScheme
 
+    @State private var sheetHeight: CGFloat = .zero
     @ObservedObject var viewModel: AddWorkoutViewModel
 
     init(viewModel: AddWorkoutViewModel) {
@@ -21,9 +22,7 @@ struct SetLoggingView: View {
                     viewModel.saveWorkout()
                 }
             )
-            .onDisappear {
-                viewModel.loseFoucs()
-            }
+            .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
             .introspect(.list, on: .iOS(.v26)) { collectionView in
                 // swiftui defaults to giving you a ~24 section header top padding which is annoying. This introspect hack fixes it
                 var layoutConfig = UICollectionLayoutListConfiguration(appearance: .plain)
@@ -31,6 +30,12 @@ struct SetLoggingView: View {
                 layoutConfig.headerTopPadding = 0
                 let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
                 collectionView.collectionViewLayout = listLayout
+            }
+            .onAppear {
+                viewModel.displayModalIfNeeded()
+            }
+            .onDisappear {
+                viewModel.loseFoucs()
             }
     }
     
@@ -60,17 +65,13 @@ struct SetLoggingView: View {
             Section(header:HStack(spacing: 0) {
                 Text(viewModel.selectedExercise)
                     .shimmer(enabled: viewModel.isGeneratingRecommendations)
-                    .padding(.leading, 16)
-                    .padding(.trailing, 16)
-                    .padding(.top, 16 + 60) // nav bar height
-                    .padding(.bottom, 16)
+                    .padding()
                     .foregroundStyle(colorScheme == .light ? .black : .white)
                     .font(.largeTitle)
                     .fontWeight(.medium)
                 Spacer()
             }
                 .listRowInsets(.init())
-                .glassEffect(.clear, in: .rect)
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
                     HStack {
@@ -90,9 +91,58 @@ struct SetLoggingView: View {
                 .listRowSeparator(.hidden)
             }
         }
-        .ignoresSafeArea(.container)
         .listStyle(.plain)
         .selectionDisabled()
+    }
+    
+    @ViewBuilder
+    private var aiSuggestionModal: some View {
+        VStack(alignment: .leading) {
+            Text("First time? ")
+                .multilineTextAlignment(.leading)
+                .font(.title)
+                .fontWeight(.medium)
+                .padding(.top)
+            Text("GTFG AI can recommend you a full set based on your data.")
+                .multilineTextAlignment(.leading)
+                .font(.subheadline)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            Spacer(minLength: 16)
+            Button {
+                viewModel.showNewExerciseOnboarding = false
+                viewModel.generateWeightAndSetSuggestion()
+            } label: {
+                Text("Generate full set")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 30)
+            }
+            .tint(Color.bratGreen)
+            .buttonStyle(.glassProminent)
+            
+            Button() {
+                viewModel.showNewExerciseOnboarding = false
+            } label: {
+                Text("Nah! Let me log my own")
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 30)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.bratGreen)
+            }
+            .buttonStyle(.glass)
+        }
+        .padding()
+        .overlay {
+            GeometryReader { geometry in
+                Color.clear.preference(key: InnerHeightPreferenceKey.self, value: geometry.size.height)
+            }
+        }
+        .onPreferenceChange(InnerHeightPreferenceKey.self) { newHeight in
+            sheetHeight = newHeight
+        }
+        .presentationDetents([.height(sheetHeight)])
+
     }
 
     @ViewBuilder
@@ -142,5 +192,12 @@ struct SetLoggingView: View {
             }
         }
         .frame(width: 120)
+    }
+}
+
+struct InnerHeightPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = .zero
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
