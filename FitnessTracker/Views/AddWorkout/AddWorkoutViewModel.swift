@@ -9,7 +9,7 @@ struct StrengthSetData {
     var rpe: Int?
 }
 
-private struct FocusIndex: Equatable, Hashable {
+struct FocusIndex: Equatable, Hashable {
     var setNum: Int
     var type: RecordType
 
@@ -54,7 +54,7 @@ class AddWorkoutViewModel: ObservableObject {
 
     @Injected private var exerciseService: ExerciseService
 
-    private var currentFocusIndexState: FocusIndex? = nil {
+    @Published var currentFocusIndexState: FocusIndex? = nil {
         didSet {
             editMode = .overwrite
         }
@@ -125,7 +125,9 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
     func setFocus(setNum: Int, type: RecordType) {
-        currentFocusIndexState = FocusIndex(setNum: setNum, type: type)
+        withAnimation {
+            currentFocusIndexState = FocusIndex(setNum: setNum, type: type)
+        }
     }
 
     func setFocusOnNext() {
@@ -142,6 +144,7 @@ class AddWorkoutViewModel: ObservableObject {
 
     func deleteSet(at offsets: IndexSet) {
         withAnimation {
+            currentFocusIndexState = nil
             sets.remove(atOffsets: offsets)
         }
     }
@@ -153,12 +156,20 @@ class AddWorkoutViewModel: ObservableObject {
         }
     }
 
-    func loseFoucs() {
-        currentFocusIndexState = nil
+    func loseFocus() {
+        withAnimation {
+            currentFocusIndexState = nil
+        }
     }
     
-    func displayModalIfNeeded() {
+    func onAppear() {
         showNewExerciseOnboarding = !hasSeenNewExerciseOnboarding && (lastExerciseSession()?.isEmpty ?? true)
+        if !showNewExerciseOnboarding,
+           sets.count > 0
+        {
+            // auto-focus at 0,0
+            currentFocusIndexState = FocusIndex(setNum: 0, type: .weight)
+        }
     }
 
     var numberPadValueBinding: Binding<Int>? {

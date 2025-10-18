@@ -92,6 +92,7 @@ struct NumberPad: View {
                 nextButton
             }
         }
+        .transition(.move(edge: .bottom).combined(with: .opacity))
         .padding(.leading, 8)
         .padding(.trailing, 8)
         .background(colorScheme == .dark ? Color.black : Color(.systemGray5))

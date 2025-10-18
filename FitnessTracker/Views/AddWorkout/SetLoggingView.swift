@@ -23,26 +23,30 @@ struct SetLoggingView: View {
                 }
             )
             .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
-            .introspect(.list, on: .iOS(.v26)) { collectionView in
-                // swiftui defaults to giving you a ~24 section header top padding which is annoying. This introspect hack fixes it
-                var layoutConfig = UICollectionLayoutListConfiguration(appearance: .plain)
-                layoutConfig.headerMode = .supplementary
-                layoutConfig.headerTopPadding = 0
-                let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
-                collectionView.collectionViewLayout = listLayout
-            }
             .onAppear {
-                viewModel.displayModalIfNeeded()
+                viewModel.onAppear()
             }
             .onDisappear {
-                viewModel.loseFoucs()
+                viewModel.loseFocus()
             }
     }
     
     @ViewBuilder
     var addSetView: some View {
         VStack(spacing: 0) {
-            recordGridView
+            ScrollViewReader { proxy in
+                recordGridView
+                    .onTapGesture {
+                        viewModel.loseFocus()
+                    }
+                    .onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
+                        if let setNum = newValue?.setNum {
+                            withAnimation {
+                                proxy.scrollTo(setNum)
+                            }
+                        }
+                    }
+            }
             if viewModel.isFocused,
                let focusedType = viewModel.focusedFieldType,
                let valueBinding = viewModel.numberPadValueBinding
@@ -183,13 +187,11 @@ struct SetLoggingView: View {
         .onTapGesture {
             lightImpact.impactOccurred()
 
-            withAnimation {
                 if viewModel.isFocused(at: index, type: type) {
-                    viewModel.loseFoucs()
+                    viewModel.loseFocus()
                 } else {
                     viewModel.setFocus(setNum: index, type: type)
                 }
-            }
         }
         .frame(width: 120)
     }
