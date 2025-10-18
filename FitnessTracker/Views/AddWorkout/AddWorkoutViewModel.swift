@@ -40,8 +40,9 @@ class AddWorkoutViewModel: ObservableObject {
     @Published var selectedExercise: String = "" {
         didSet {
             if !selectedExercise.isEmpty {
-                sets = lastExerciseSession() ?? [StrengthSetData(weightInLbs: 0, reps: 0)]
+                sets = lastExerciseSession() ?? []
                 showingSetLogger = true
+                showNewExerciseOnboarding = !hasSeenNewExerciseOnboarding && (lastExerciseSession()?.isEmpty ?? true)
             }
         }
     }
@@ -49,15 +50,19 @@ class AddWorkoutViewModel: ObservableObject {
     @Published var sets: [StrengthSetData] = []
 
     @Published var isGeneratingRecommendations = false
+    
+    private var hasSeenNewExerciseOnboarding = false
 
     @Injected private var exerciseService: ExerciseService
 
-    private var currentFocusIndexState: FocusIndex? = .initial {
+    private var currentFocusIndexState: FocusIndex? = nil {
         didSet {
             editMode = .overwrite
         }
     }
-
+    
+    @Published var showNewExerciseOnboarding: Bool = false
+    
     init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
@@ -79,13 +84,9 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
     func generateWeightAndSetSuggestion() {
-        guard sets.first?.weightInLbs == 0.0 else {
-            return
-        }
         isGeneratingRecommendations = true
         Task {
-            let recommender = SuggestFirstSet(userWeight: 155, userHeight: "5 foot 7", workoutName: selectedExercise)
-
+            let recommender = SuggestFullSetForExercise(userWeight: 155, userHeight: "5 foot 7", workoutName: selectedExercise)
             guard let content = try? await recommender.respond().content else {
                 await MainActor.run {
                     isGeneratingRecommendations = false
@@ -94,8 +95,10 @@ class AddWorkoutViewModel: ObservableObject {
             }
 
             await MainActor.run {
-                sets[0].weightInLbs = Double(content.warmupWeight)
-                sets[0].reps = content.warmupReps
+                sets = []
+                sets.append(
+                    StrengthSetData(weightInLbs: Double(content.warmupWeight), reps: Int(content.warmupReps))
+                )
 
                 for _ in 0..<content.setCount {
                     sets.append(StrengthSetData(weightInLbs: Double(content.terminalWeight), reps: Int(content.terminalReps)))
