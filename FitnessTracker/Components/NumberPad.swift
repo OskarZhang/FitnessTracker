@@ -193,7 +193,7 @@ struct NumberPad: View {
             lightImpact.impactOccurred()
             self.nextAction?()
         } label: {
-            Image(systemName: "checkmark.square")
+            Image(systemName: "checkmark.rectangle")
                 .font(.system(size: 30, weight: .medium))
                 .frame(maxWidth: .infinity)
                 .frame(height: 60)

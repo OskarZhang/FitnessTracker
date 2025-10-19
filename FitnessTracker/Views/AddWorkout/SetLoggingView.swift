@@ -79,6 +79,7 @@ struct SetLoggingView: View {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
                     HStack {
                         Text("Set \(index + 1)")
+                            .foregroundStyle(recordColor(at: index))
                         Spacer()
                         recordTextField(index, .weight)
                         recordTextField(index, .rep)
@@ -86,25 +87,25 @@ struct SetLoggingView: View {
                         Button(action: {
                             viewModel.toggleSetCompletion(setIndex: index)
                         }) {
-                            Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.square.fill" : "checkmark.square") // SF Symbol
+                            Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
                                 .font(.system(size: 22))
-                                .foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .primary)
+                                .foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
                         }
                         .padding(.leading, 8)
                     }
                     .listRowSeparator(.hidden)
                 }
                 .onDelete(perform: viewModel.deleteSet)
-                
                 Button(action: viewModel.addSet) {
                     Label("Add Set", systemImage: "plus.circle.fill")
                         .foregroundStyle(Color.primary)
                 }
                 .listRowSeparator(.hidden)
             }
+            
         }
         .listStyle(.plain)
-        .selectionDisabled()
+        
     }
     
     @ViewBuilder
@@ -157,6 +158,13 @@ struct SetLoggingView: View {
 
     }
 
+    private func recordColor(at index: Int) -> Color {
+        if viewModel.sets[index].isCompleted {
+            return .primary
+        } else {
+            return .secondary
+        }
+    }
     @ViewBuilder
     private func recordTextField(_ index: Int, _ type: RecordType) -> some View {
         HStack {
@@ -164,7 +172,7 @@ struct SetLoggingView: View {
             HStack {
                 Text("\(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps)")
                     .lineLimit(1)
-                    .foregroundStyle(viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) ? (colorScheme == .dark ? .black : .white) : .primary)
+                    .foregroundStyle(viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) ? (colorScheme == .dark ? .black : .white) : (recordColor(at: index)))
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
@@ -178,6 +186,7 @@ struct SetLoggingView: View {
                         }
                     }
                 Text(type.labelForValue(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps))
+                    .foregroundStyle(recordColor(at: index))
                     .padding(.leading, 8)
                     .padding(.trailing, 8)
                     .padding(.top, 8)

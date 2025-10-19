@@ -99,6 +99,10 @@ class AddWorkoutViewModel: ObservableObject {
                 sets.append(
                     StrengthSetData(weightInLbs: Double(content.warmupWeight), reps: Int(content.warmupReps))
                 )
+                
+                withAnimation {
+                    currentFocusIndexState = .initial
+                }
 
                 for _ in 0..<content.setCount {
                     sets.append(StrengthSetData(weightInLbs: Double(content.terminalWeight), reps: Int(content.terminalReps)))
@@ -182,7 +186,7 @@ class AddWorkoutViewModel: ObservableObject {
            sets.count > 0
         {
             // auto-focus at 0,0
-            currentFocusIndexState = FocusIndex(setIndex: 0, type: .weight)
+            currentFocusIndexState = .initial
         }
     }
 
