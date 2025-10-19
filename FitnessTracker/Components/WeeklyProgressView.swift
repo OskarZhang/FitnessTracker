@@ -39,10 +39,13 @@ struct WeeklyProgressView: View {
                 }
             }
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 12)
-        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)))
-        .padding(.horizontal, 8)
+        .padding(.vertical, 32)
+        .padding(.horizontal, 32)
+        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)), in: .rect(
+            corners: .concentric(minimum: 24),
+            isUniform: true
+        ))
+        .padding(.horizontal, 16)
     }
 
     private func getWeekdayName(for index: Int) -> String {
