@@ -39,7 +39,9 @@ struct WeeklyProgressView: View {
                 }
             }
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 12)
+        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)))
         .padding(.horizontal, 8)
     }
 

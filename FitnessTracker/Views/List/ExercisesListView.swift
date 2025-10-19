@@ -43,7 +43,10 @@ struct ExercisesListView: View {
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
                             ForEach(groupedExercises, id: \.date) { group in
-                                Section(header: Text(group.date.customFormatted)) {
+                                Section(header:
+                                            Text(group.date.customFormatted)
+                                    .foregroundStyle(Color.bratGreen)
+                                ) {
                                     ForEach(group.exercises) { exercise in
                                         NavigationLink {
                                             WorkoutDetailView(exercise: exercise)
