@@ -98,3 +98,30 @@ struct SuggestTodaysWorkout: Recommender {
             """
     }
 }
+
+
+@Generable
+struct ExerciseCategory {
+    @Guide(description: "list of exercise categories")
+    let categories: [String]
+}
+
+struct ExerciseCategorizer: Recommender {
+    
+    typealias GeneratingType = ExerciseCategory
+    let tools: [any Tool] = []
+    
+    let systemPrompt: String
+    let userMessage: String
+    
+    init(exerciseName: String) {
+        self.systemPrompt = """
+            You are a fitness expert who is responsible for categorizing an exercise; 
+            You MUST choose from the following exercise categories: abs, chest, shoulders, arms, legs, glutes, back, fullBody, cardio
+            """
+        
+        self.userMessage = """
+            Categorize \(exerciseName).
+            """
+    }
+}
