@@ -37,6 +37,11 @@ struct ExercisesListView: View {
                         Text("No exercises found in the last 7 days")
                     } else {
                         List {
+                            Section {
+                                WeeklyProgressView()
+                            }
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
                             ForEach(groupedExercises, id: \.date) { group in
                                 Section(header: Text(group.date.customFormatted)) {
                                     ForEach(group.exercises) { exercise in
