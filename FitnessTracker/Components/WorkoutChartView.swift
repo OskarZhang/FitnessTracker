@@ -144,3 +144,7 @@ struct WorkoutChartView: View {
         return #Predicate<Exercise> { $0.name == exerciseName}
     }
 }
+
+#Preview {
+    WorkoutChartView("Bench Press")
+}

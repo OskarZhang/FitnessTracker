@@ -18,5 +18,11 @@ struct AddWorkoutView: View {
         }
         .accentColor(.bratGreen)
     }
+
+  
+}
+
+#Preview {
+    AddWorkoutView(isPresented: .constant(true))
 }
 

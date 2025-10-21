@@ -117,6 +117,10 @@ struct ExercisesListView: View {
     }
 }
 
+#Preview {
+    ExercisesListView()
+}
+
 private extension Date {
     var customFormatted: String {
         let calendar = Calendar.current

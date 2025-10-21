@@ -3,6 +3,8 @@ import SwiftUIIntrospect
 
 struct SetLoggingView: View {
 
+	private static let bottomActionRowHeight: CGFloat = 80.0
+
     let lightImpact = UIImpactFeedbackGenerator(style: .light)
     let confirmationImpact = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.colorScheme) var colorScheme
@@ -16,14 +18,6 @@ struct SetLoggingView: View {
 
     var body: some View {
         addSetView
-            .navigationBarItems(
-                trailing: Button("Done", systemImage: "checkmark.rectangle.stack.fill") {
-                    confirmationImpact.impactOccurred()
-                    viewModel.saveWorkout()
-                }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.bratGreen)
-            )
             .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
             .onAppear {
                 viewModel.onAppear()
@@ -36,16 +30,22 @@ struct SetLoggingView: View {
     @ViewBuilder
     var addSetView: some View {
         VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                recordGridView
-                    .onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
-                        if let setIndex = newValue?.setIndex {
-                            withAnimation {
-                                proxy.scrollTo(setIndex)
-                            }
-                        }
-                    }
-            }
+			ZStack {
+				ScrollViewReader { proxy in
+					recordGridView
+						.onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
+							if let setIndex = newValue?.setIndex {
+								withAnimation {
+									proxy.scrollTo(setIndex)
+								}
+							}
+						}
+				}
+				VStack {
+					Spacer()
+					bottomActionRow
+				}
+			}
             if viewModel.isFocused,
                let focusedType = viewModel.focusedFieldType,
                let valueBinding = viewModel.numberPadValueBinding
@@ -58,6 +58,7 @@ struct SetLoggingView: View {
                 .onNext {
                     viewModel.onNumberPadReturn()
                 }
+
             }
         }
     }
@@ -77,37 +78,83 @@ struct SetLoggingView: View {
                 .listRowInsets(.init())
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
-                    HStack {
-                        Text("Set \(index + 1)")
-                            .foregroundStyle(recordColor(at: index))
-                        Spacer()
-                        recordTextField(index, .weight)
-                        recordTextField(index, .rep)
-                        
-                        Button(action: {
-                            viewModel.toggleSetCompletion(setIndex: index)
-                        }) {
-                            Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
-                                .font(.system(size: 22))
-                                .foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
-                        }
-                        .padding(.leading, 8)
-                    }
-                    .listRowSeparator(.hidden)
+					ZStack(alignment: .bottom) {
+						HStack {
+							Text("Set \(index + 1)")
+								.foregroundStyle(recordColor(at: index))
+							Spacer()
+							recordTextField(index, .weight)
+							recordTextField(index, .rep)
+
+							Button(action: {
+								viewModel.toggleSetCompletion(setIndex: index)
+							}) {
+								Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
+									.font(.system(size: 22))
+									.foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
+							}
+							.padding(.leading, 8)
+						}
+						.padding()
+						VStack(spacing: 0) {
+							Spacer()
+							if viewModel.activeTimerSetId == viewModel.sets[index].id {
+								GeometryReader { geo in
+									HStack {
+										Color.bratGreen
+
+											.frame(width: geo.frame(in: .local).width * viewModel.timerPercentage)
+										Spacer()
+									}
+								}
+								.frame(height: 4.0)
+							}
+						}
+						.padding(.horizontal)
+					}
+					.id(viewModel.sets[index].id)
+					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
-                Button(action: viewModel.addSet) {
-                    Label("Add Set", systemImage: "plus.circle.fill")
-                        .foregroundStyle(Color.primary)
-                }
-                .listRowSeparator(.hidden)
+
             }
-            
         }
+		.safeAreaPadding(.bottom, Self.bottomActionRowHeight)
         .listStyle(.plain)
-        
     }
-    
+
+	@ViewBuilder
+	private var bottomActionRow: some View {
+		HStack() {
+			Button(action: viewModel.addSet) {
+				Label("Add Set", systemImage: "plus.circle.fill")
+
+					.foregroundStyle(Color.primary)
+
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+			}
+			.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
+
+			if viewModel.hasCompletedAnySet {
+				Button(action: viewModel.startTimer) {
+					Label("Start timer", systemImage: "timer")
+						.foregroundStyle(Color.bratGreen)
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+				}
+				.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive())
+				Button(action: viewModel.saveWorkout) {
+					Text("Save")
+						.frame(maxHeight: .infinity)
+				}
+				.buttonStyle(.glassProminent)
+				.tint(.bratGreen)
+			}
+		}
+		.padding()
+		.frame(height: Self.bottomActionRowHeight)
+
+	}
+
     @ViewBuilder
     private var aiSuggestionModal: some View {
         VStack(alignment: .leading) {
@@ -169,15 +216,15 @@ struct SetLoggingView: View {
     private func recordTextField(_ index: Int, _ type: RecordType) -> some View {
         HStack {
             Spacer()
-            HStack {
+			HStack(spacing: 0) {
                 Text("\(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps)")
                     .lineLimit(1)
                     .foregroundStyle(viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) ? (colorScheme == .dark ? .black : .white) : (recordColor(at: index)))
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
-                    .padding(.leading, 8)
-                    .padding(.trailing, 8)
+					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 4 : 0)
+                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 4 : 0)
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)
@@ -187,8 +234,8 @@ struct SetLoggingView: View {
                     }
                 Text(type.labelForValue(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps))
                     .foregroundStyle(recordColor(at: index))
-                    .padding(.leading, 8)
-                    .padding(.trailing, 8)
+                    .padding(.leading, 4)
+                    .padding(.trailing, 4)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
             }
@@ -219,4 +266,28 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
+}
+
+#Preview {
+    SetLoggingView(
+		viewModel: AddWorkoutViewModel.mocked
+    )
+}
+
+
+fileprivate extension AddWorkoutViewModel {
+  static var mocked: AddWorkoutViewModel {
+
+	  let vm = AddWorkoutViewModel(isPresented: .constant(true))
+
+	  vm.selectedExercise = "Bench Press"
+
+	  vm.sets = [
+		StrengthSetData(weightInLbs: 200, reps: 10),
+		StrengthSetData(weightInLbs: 200, reps: 10),
+		StrengthSetData(weightInLbs: 200, reps: 10)
+	  ]
+	  vm.hasSeenNewExerciseOnboarding = true
+	  return vm
+  }
 }

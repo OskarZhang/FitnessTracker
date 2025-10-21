@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 
 struct StrengthSetData {
+	let id: UUID = UUID()
     var weightInLbs: Double
     var reps: Int
     var restSeconds: Int?
@@ -51,7 +52,7 @@ class AddWorkoutViewModel: ObservableObject {
 
     @Published var isGeneratingRecommendations = false
     
-    private var hasSeenNewExerciseOnboarding = false
+    var hasSeenNewExerciseOnboarding = false
 
     @Injected private var exerciseService: ExerciseService
 
@@ -62,7 +63,11 @@ class AddWorkoutViewModel: ObservableObject {
     }
     
     @Published var showNewExerciseOnboarding: Bool = false
-    
+
+	var timer: Timer?
+	@Published var timerPercentage: CGFloat = 0.0
+	@Published var activeTimerSetId: UUID?
+
     init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
@@ -116,7 +121,9 @@ class AddWorkoutViewModel: ObservableObject {
     var isFocused: Bool {
         currentFocusIndexState != nil
     }
-    
+
+	var hasCompletedAnySet: Bool { sets.first { $0.isCompleted } != nil }
+
     func toggleSetCompletion(setIndex: Int) {
         let isCompleted = sets[setIndex].isCompleted
         withAnimation {
@@ -142,6 +149,28 @@ class AddWorkoutViewModel: ObservableObject {
             currentFocusIndexState = FocusIndex(setIndex: setIndex, type: type)
         }
     }
+
+	func startTimer() {
+		// grab the last set index that is completed
+		let completedSet = sets.last { $0.isCompleted }
+		guard let completedSet else { return }
+		activeTimerSetId = completedSet.id
+		timerPercentage = 1.0
+		timer?.invalidate()
+		timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true, block: { [weak self] _ in
+			DispatchQueue.main.async {
+				guard let self else { return }
+				if self.timerPercentage <= 0.0 {
+					self.timer?.invalidate()
+					self.timer = nil
+					self.activeTimerSetId = nil
+				} else {
+					self.timerPercentage = max(0, self.timerPercentage - 1.0 / 60.0 / 30.0)
+				}
+			}
+		})
+
+	}
 
     func onNumberPadReturn() {
         let nextFocus = currentFocusIndexState?.next()
