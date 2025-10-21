@@ -18,14 +18,6 @@ struct SetLoggingView: View {
 
     var body: some View {
         addSetView
-            .navigationBarItems(
-                trailing: Button("Done", systemImage: "checkmark.rectangle.stack.fill") {
-                    confirmationImpact.impactOccurred()
-                    viewModel.saveWorkout()
-                }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.bratGreen)
-            )
             .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
             .onAppear {
                 viewModel.onAppear()
@@ -86,7 +78,7 @@ struct SetLoggingView: View {
                 .listRowInsets(.init())
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
-					VStack(spacing: 0) {
+					ZStack(alignment: .bottom) {
 						HStack {
 							Text("Set \(index + 1)")
 								.foregroundStyle(recordColor(at: index))
@@ -104,20 +96,23 @@ struct SetLoggingView: View {
 							.padding(.leading, 8)
 						}
 						.padding()
-						// thick timer line
-						if viewModel.activeTimerSetId == viewModel.sets[index].id {
-							GeometryReader { geo in
-								HStack {
-									Color.bratGreen
-										.frame(height: 2.0)
-										.frame(width: geo.frame(in: .local).width * viewModel.timerPercentage)
-									Spacer()
+						VStack(spacing: 0) {
+							Spacer()
+							if viewModel.activeTimerSetId == viewModel.sets[index].id {
+								GeometryReader { geo in
+									HStack {
+										Color.bratGreen
+
+											.frame(width: geo.frame(in: .local).width * viewModel.timerPercentage)
+										Spacer()
+									}
 								}
+								.frame(height: 4.0)
 							}
 						}
+						.padding(.horizontal)
 					}
 					.id(viewModel.sets[index].id)
-                    .listRowSeparator(.hidden)
 					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
@@ -133,19 +128,26 @@ struct SetLoggingView: View {
 		HStack() {
 			Button(action: viewModel.addSet) {
 				Label("Add Set", systemImage: "plus.circle.fill")
-					.foregroundStyle(Color.bratGreen)
+
+					.foregroundStyle(Color.primary)
+
 					.frame(maxWidth: .infinity, maxHeight: .infinity)
 			}
-			.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive())
+			.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
 
 			if viewModel.hasCompletedAnySet {
 				Button(action: viewModel.startTimer) {
 					Label("Start timer", systemImage: "timer")
-						.foregroundStyle(Color.primary)
+						.foregroundStyle(Color.bratGreen)
 						.frame(maxWidth: .infinity, maxHeight: .infinity)
 				}
-				.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
-
+				.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive())
+				Button(action: viewModel.saveWorkout) {
+					Text("Save")
+						.frame(maxHeight: .infinity)
+				}
+				.buttonStyle(.glassProminent)
+				.tint(.bratGreen)
 			}
 		}
 		.padding()
