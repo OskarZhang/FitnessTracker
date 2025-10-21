@@ -41,7 +41,7 @@ struct WeeklyProgressView: View {
         }
         .padding(.vertical, 32)
         .padding(.horizontal, 32)
-        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)), in: .rect(
+        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)).interactive(true), in: .rect(
             corners: .concentric(minimum: 24),
             isUniform: true
         ))
