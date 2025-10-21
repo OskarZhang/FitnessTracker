@@ -72,3 +72,10 @@ struct ExercisePickerView: View {
     }
 
 }
+
+#Preview {
+  ExercisePickerView(
+	viewModel: AddWorkoutViewModel(isPresented: .constant(true)),
+	isPresented: .constant(true)
+  )
+}

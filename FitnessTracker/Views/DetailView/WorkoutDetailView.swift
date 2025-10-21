@@ -54,14 +54,19 @@ struct StrengthSetView: View {
 
     var body: some View {
         HStack {
-            Text("Set \(setIndexber)")
-                .foregroundStyle(.gray)
-            Spacer()
-            Text("\(weight) lb")
-                .fontWeight(.semibold)
-            Spacer()
-            Text("\(repCount) reps")
-                .fontWeight(.semibold)
+          Text("Set \(setIndexber)")
+              .foregroundStyle(.gray)
+          Spacer()
+          Text("\(weight) lb")
+              .fontWeight(.semibold)
+          Spacer()
+          Text("\(repCount) reps")
+              .fontWeight(.semibold)
         }
     }
+}
+
+#Preview {
+  let exercise = Exercise(name: "Bench Press", type: .strength)
+  WorkoutDetailView(exercise: exercise)
 }

@@ -53,3 +53,10 @@ extension WorkoutRowView {
         }
     }
 }
+
+#Preview {
+    WorkoutRowView(
+        name: "Bench Press",
+        type: .strength(maxWeight: 185, maxRep: 8, setCount: 3)
+    )
+}

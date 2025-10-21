@@ -169,15 +169,15 @@ struct SetLoggingView: View {
     private func recordTextField(_ index: Int, _ type: RecordType) -> some View {
         HStack {
             Spacer()
-            HStack {
+			HStack(spacing: 0) {
                 Text("\(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps)")
                     .lineLimit(1)
                     .foregroundStyle(viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) ? (colorScheme == .dark ? .black : .white) : (recordColor(at: index)))
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
-                    .padding(.leading, 8)
-                    .padding(.trailing, 8)
+					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 4 : 0)
+                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 4 : 0)
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)
@@ -187,8 +187,8 @@ struct SetLoggingView: View {
                     }
                 Text(type.labelForValue(type == .weight ? Int(viewModel.sets[index].weightInLbs) : viewModel.sets[index].reps))
                     .foregroundStyle(recordColor(at: index))
-                    .padding(.leading, 8)
-                    .padding(.trailing, 8)
+                    .padding(.leading, 4)
+                    .padding(.trailing, 4)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
             }
@@ -219,4 +219,28 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
+}
+
+#Preview {
+    SetLoggingView(
+		viewModel: AddWorkoutViewModel.mocked
+    )
+}
+
+
+fileprivate extension AddWorkoutViewModel {
+  static var mocked: AddWorkoutViewModel {
+
+	  let vm = AddWorkoutViewModel(isPresented: .constant(true))
+
+	  vm.selectedExercise = "Bench Press"
+
+	  vm.sets = [
+		StrengthSetData(weightInLbs: 200, reps: 10),
+		StrengthSetData(weightInLbs: 200, reps: 10),
+		StrengthSetData(weightInLbs: 200, reps: 10)
+	  ]
+	  vm.showNewExerciseOnboarding = false
+	  return vm
+  }
 }
