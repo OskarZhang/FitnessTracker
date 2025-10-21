@@ -66,15 +66,24 @@ struct SetLoggingView: View {
     @ViewBuilder
     var recordGridView: some View {
         List {
-            Section(header:HStack(spacing: 0) {
-                Text(viewModel.selectedExercise)
-                    .shimmer(enabled: viewModel.isGeneratingRecommendations)
-                    .padding()
-                    .foregroundStyle(colorScheme == .light ? .black : .white)
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
-                Spacer()
-            }
+			Section(header: HStack(spacing: 0) {
+				VStack(alignment: .leading, spacing: 0) {
+					if viewModel.isGeneratingRecommendations {
+						Text("Generating a full set for")
+							.multilineTextAlignment(.leading)
+							.foregroundStyle(.secondary)
+							.font(.title3)
+					}
+					Text(viewModel.selectedExercise)
+						.multilineTextAlignment(.leading)
+						.shimmer(enabled: viewModel.isGeneratingRecommendations)
+						.foregroundStyle(colorScheme == .light ? .black : .white)
+						.font(.largeTitle)
+						.fontWeight(.medium)
+				}
+				.padding()
+				Spacer()
+			}
                 .listRowInsets(.init())
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
@@ -150,6 +159,7 @@ struct SetLoggingView: View {
 				.tint(.bratGreen)
 			}
 		}
+		.background(colorScheme == .light ? Color.white.blur(radius: 16) : Color.black.blur(radius: 16))
 		.padding()
 		.frame(height: Self.bottomActionRowHeight)
 
