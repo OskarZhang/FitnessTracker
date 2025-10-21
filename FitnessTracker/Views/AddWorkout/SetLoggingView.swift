@@ -3,6 +3,8 @@ import SwiftUIIntrospect
 
 struct SetLoggingView: View {
 
+	private static let bottomActionRowHeight: CGFloat = 80.0
+
     let lightImpact = UIImpactFeedbackGenerator(style: .light)
     let confirmationImpact = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.colorScheme) var colorScheme
@@ -36,16 +38,22 @@ struct SetLoggingView: View {
     @ViewBuilder
     var addSetView: some View {
         VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                recordGridView
-                    .onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
-                        if let setIndex = newValue?.setIndex {
-                            withAnimation {
-                                proxy.scrollTo(setIndex)
-                            }
-                        }
-                    }
-            }
+			ZStack {
+				ScrollViewReader { proxy in
+					recordGridView
+						.onChange(of: viewModel.currentFocusIndexState) { oldValue, newValue in
+							if let setIndex = newValue?.setIndex {
+								withAnimation {
+									proxy.scrollTo(setIndex)
+								}
+							}
+						}
+				}
+				VStack {
+					Spacer()
+					bottomActionRow
+				}
+			}
             if viewModel.isFocused,
                let focusedType = viewModel.focusedFieldType,
                let valueBinding = viewModel.numberPadValueBinding
@@ -58,6 +66,7 @@ struct SetLoggingView: View {
                 .onNext {
                     viewModel.onNumberPadReturn()
                 }
+
             }
         }
     }
@@ -77,37 +86,73 @@ struct SetLoggingView: View {
                 .listRowInsets(.init())
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
-                    HStack {
-                        Text("Set \(index + 1)")
-                            .foregroundStyle(recordColor(at: index))
-                        Spacer()
-                        recordTextField(index, .weight)
-                        recordTextField(index, .rep)
-                        
-                        Button(action: {
-                            viewModel.toggleSetCompletion(setIndex: index)
-                        }) {
-                            Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
-                                .font(.system(size: 22))
-                                .foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
-                        }
-                        .padding(.leading, 8)
-                    }
+					VStack(spacing: 0) {
+						HStack {
+							Text("Set \(index + 1)")
+								.foregroundStyle(recordColor(at: index))
+							Spacer()
+							recordTextField(index, .weight)
+							recordTextField(index, .rep)
+
+							Button(action: {
+								viewModel.toggleSetCompletion(setIndex: index)
+							}) {
+								Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
+									.font(.system(size: 22))
+									.foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
+							}
+							.padding(.leading, 8)
+						}
+						.padding()
+						// thick timer line
+						if viewModel.activeTimerSetId == viewModel.sets[index].id {
+							GeometryReader { geo in
+								HStack {
+									Color.bratGreen
+										.frame(height: 2.0)
+										.frame(width: geo.frame(in: .local).width * viewModel.timerPercentage)
+									Spacer()
+								}
+							}
+						}
+					}
+					.id(viewModel.sets[index].id)
                     .listRowSeparator(.hidden)
+					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
-                Button(action: viewModel.addSet) {
-                    Label("Add Set", systemImage: "plus.circle.fill")
-                        .foregroundStyle(Color.primary)
-                }
-                .listRowSeparator(.hidden)
+
             }
-            
         }
+		.safeAreaPadding(.bottom, Self.bottomActionRowHeight)
         .listStyle(.plain)
-        
     }
-    
+
+	@ViewBuilder
+	private var bottomActionRow: some View {
+		HStack() {
+			Button(action: viewModel.addSet) {
+				Label("Add Set", systemImage: "plus.circle.fill")
+					.foregroundStyle(Color.bratGreen)
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+			}
+			.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive())
+
+			if viewModel.hasCompletedAnySet {
+				Button(action: viewModel.startTimer) {
+					Label("Start timer", systemImage: "timer")
+						.foregroundStyle(Color.primary)
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+				}
+				.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
+
+			}
+		}
+		.padding()
+		.frame(height: Self.bottomActionRowHeight)
+
+	}
+
     @ViewBuilder
     private var aiSuggestionModal: some View {
         VStack(alignment: .leading) {
@@ -240,7 +285,7 @@ fileprivate extension AddWorkoutViewModel {
 		StrengthSetData(weightInLbs: 200, reps: 10),
 		StrengthSetData(weightInLbs: 200, reps: 10)
 	  ]
-	  vm.showNewExerciseOnboarding = false
+	  vm.hasSeenNewExerciseOnboarding = true
 	  return vm
   }
 }
