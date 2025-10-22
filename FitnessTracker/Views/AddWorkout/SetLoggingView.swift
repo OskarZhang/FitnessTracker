@@ -224,8 +224,8 @@ struct SetLoggingView: View {
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
-					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 4 : 0)
-                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 4 : 0)
+					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 8 : 4)
+                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 8 : 4)
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)
