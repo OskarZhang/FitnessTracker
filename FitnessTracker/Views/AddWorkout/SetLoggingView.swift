@@ -116,7 +116,17 @@ struct SetLoggingView: View {
 					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
-
+            }
+            Section {
+                Button(action: viewModel.addSet) {
+                    Label("Add Set", systemImage: "plus")
+                        .foregroundStyle(Color.primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                }
+                .buttonStyle(.glass)
+                .glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
+                .listRowSeparator(.hidden)
             }
         }
 		.safeAreaPadding(.bottom, Self.bottomActionRowHeight)
@@ -126,15 +136,6 @@ struct SetLoggingView: View {
 	@ViewBuilder
 	private var bottomActionRow: some View {
 		HStack() {
-			Button(action: viewModel.addSet) {
-				Label("Add Set", systemImage: "plus.circle.fill")
-
-					.foregroundStyle(Color.primary)
-
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-			}
-			.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
-
 			if viewModel.hasCompletedAnySet {
 				Button(action: viewModel.startTimer) {
 					Label("Start timer", systemImage: "timer")
