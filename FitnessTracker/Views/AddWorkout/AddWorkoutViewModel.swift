@@ -64,7 +64,8 @@ class AddWorkoutViewModel: ObservableObject {
     
     @Published var showNewExerciseOnboarding: Bool = false
 
-	var timer: Timer?
+	private var timer: Timer?
+    private var timerEndTime: Date?
 	@Published var timerPercentage: CGFloat = 0.0
 	@Published var activeTimerSetId: UUID?
 
@@ -157,15 +158,18 @@ class AddWorkoutViewModel: ObservableObject {
 		activeTimerSetId = completedSet.id
 		timerPercentage = 1.0
 		timer?.invalidate()
+        timerEndTime = Date().advanced(by: 60)
 		timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true, block: { [weak self] _ in
 			DispatchQueue.main.async {
-				guard let self else { return }
-				if self.timerPercentage <= 0.0 {
+				guard let self,
+                      let timerEndTime = self.timerEndTime else { return }
+				if Date() >= timerEndTime {
 					self.timer?.invalidate()
 					self.timer = nil
+                    self.timerEndTime = nil
 					self.activeTimerSetId = nil
 				} else {
-					self.timerPercentage = max(0, self.timerPercentage - 1.0 / 60.0 / 30.0)
+                    self.timerPercentage = timerEndTime.timeIntervalSince(Date()) / 60.0
 				}
 			}
 		})
