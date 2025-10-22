@@ -114,6 +114,20 @@ class ExerciseService: ObservableObject {
         return exercises.filter { $0.name.lowercased() == name.lowercased()}.first
     }
 
+    func hasExercise(on date: Date) -> Bool {
+        let calendar = Calendar.current
+        let targetDayStart = calendar.startOfDay(for: date)
+        let targetDayEnd = targetDayStart.advanced(by: 60 * 60 * 24)
+        let descriptor = FetchDescriptor<Exercise>(
+            predicate: #Predicate { exercise in
+                exercise.date < targetDayEnd && exercise.date >= targetDayStart
+            }
+        )
+
+        let count = (try? modelContext.fetchCount(descriptor)) ?? 0
+        return count > 0
+    }
+
     private func predictNextWorkout() -> [String] {
         var lastWorkoutName: String = ExerciseService.StartOfDayWorkoutToken
         if let mostRecentWorkout = exercises.first,

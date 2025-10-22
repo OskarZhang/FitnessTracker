@@ -28,6 +28,7 @@
 		4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD02EA17AB1000861F4 /* Extensions.swift */; };
 		4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD22EA18360000861F4 /* NumberPad.swift */; };
 		4BDFCCD62EA1B328000861F4 /* LocalRecommenders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD52EA1B324000861F4 /* LocalRecommenders.swift */; };
+		4BDFCCDA2EA4A16C000861F4 /* WeeklyProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD92EA4A16C000861F4 /* WeeklyProgressView.swift */; };
 		4BEB135D2EA2193600D99818 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB135C2EA2193600D99818 /* SwiftUIIntrospect-Static */; };
 		4BEB13612EA21A4D00D99818 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB13602EA21A4D00D99818 /* SwiftUIIntrospect */; };
 /* End PBXBuildFile section */
@@ -67,6 +68,7 @@
 		4BDFCCD02EA17AB1000861F4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		4BDFCCD22EA18360000861F4 /* NumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberPad.swift; sourceTree = "<group>"; };
 		4BDFCCD52EA1B324000861F4 /* LocalRecommenders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRecommenders.swift; sourceTree = "<group>"; };
+		4BDFCCD92EA4A16C000861F4 /* WeeklyProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyProgressView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 				4BDFCCC22EA15A1E000861F4 /* WorkoutRowView.swift */,
 				4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */,
 				4BDFCCC92EA15BDB000861F4 /* WorkoutChartView.swift */,
+				4BDFCCD92EA4A16C000861F4 /* WeeklyProgressView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -290,6 +293,7 @@
 				4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */,
 				4B10B8A42EA0B6FB00890AC6 /* AddExerciseButton.swift in Sources */,
 				4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */,
+				4BDFCCDA2EA4A16C000861F4 /* WeeklyProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

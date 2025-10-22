@@ -125,7 +125,17 @@ struct SetLoggingView: View {
 					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
-
+            }
+            Section {
+                Button(action: viewModel.addSet) {
+                    Label("Add Set", systemImage: "plus")
+                        .foregroundStyle(Color.primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                }
+                .buttonStyle(.glass)
+                .glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
+                .listRowSeparator(.hidden)
             }
         }
 		.safeAreaPadding(.bottom, Self.bottomActionRowHeight)
@@ -135,15 +145,6 @@ struct SetLoggingView: View {
 	@ViewBuilder
 	private var bottomActionRow: some View {
 		HStack() {
-			Button(action: viewModel.addSet) {
-				Label("Add Set", systemImage: "plus.circle.fill")
-
-					.foregroundStyle(Color.primary)
-
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-			}
-			.glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
-
 			if viewModel.hasCompletedAnySet {
 				Button(action: viewModel.startTimer) {
 					Label("Start timer", systemImage: "timer")
@@ -159,8 +160,8 @@ struct SetLoggingView: View {
 				.tint(.bratGreen)
 			}
 		}
-		.background(colorScheme == .light ? Color.white.blur(radius: 16) : Color.black.blur(radius: 16))
 		.padding()
+		.background(colorScheme == .light ? Color.white.blur(radius: 16) : Color.black.blur(radius: 16))
 		.frame(height: Self.bottomActionRowHeight)
 
 	}
@@ -233,8 +234,8 @@ struct SetLoggingView: View {
                     .fontWeight(.semibold)
                     .padding(.top, 8)
                     .padding(.bottom, 8)
-					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 4 : 0)
-                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 4 : 0)
+					.padding(.leading, viewModel.isFocused(at: index, type: type) ? 8 : 4)
+                    .padding(.trailing, viewModel.isFocused(at: index, type: type) ? 8 : 4)
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)

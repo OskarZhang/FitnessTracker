@@ -25,7 +25,6 @@ struct ExercisesListView: View {
     @State private var isAddingWorkout = false
 
     @StateObject var searchContext = SearchContext()
-    @Namespace var animation
     
     @State var groupedExercises: [(date: Date, exercises: [Exercise])] = []
 
@@ -37,15 +36,29 @@ struct ExercisesListView: View {
                         Text("No exercises found in the last 7 days")
                     } else {
                         List {
+                            Section {
+                                Text("GTFG")
+                                    .multilineTextAlignment(.center)
+                                    .font(.system(size: 44))
+                                    .fontWeight(.heavy)
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundStyle(Color.bratGreen)
+                                    .padding()
+                                WeeklyProgressView()
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
                             ForEach(groupedExercises, id: \.date) { group in
-                                Section(header: Text(group.date.customFormatted)) {
+                                Section(header:
+                                            Text(group.date.customFormatted)
+                                    .foregroundStyle(Color.bratGreen)
+                                ) {
                                     ForEach(group.exercises) { exercise in
                                         NavigationLink {
                                             WorkoutDetailView(exercise: exercise)
-                                                .navigationTransition(.zoom(sourceID: exercise.id, in: animation))
                                         } label: {
                                             WorkoutRowView(exercise: exercise)
-                                                .matchedTransitionSource(id: exercise.id, in: animation)
                                         }
                                         .navigationLinkIndicatorVisibility(.hidden)
                                         .listRowSeparator(.hidden)
@@ -54,12 +67,12 @@ struct ExercisesListView: View {
                                         deleteWorkouts(date: group.date, offsets: offsets)
                                     }
                                 }
+                                .listRowBackground(Color.clear)
                             }
                         }
-                        .listStyle(.plain)
+                        .listStyle(.grouped)
                     }
                 }
-                .navigationTitle("GTFG")
                 .tint(.bratGreen)
                 VStack {
                     Spacer()
@@ -70,7 +83,7 @@ struct ExercisesListView: View {
                 }
             }
         }
-        .searchable(text: $searchContext.searchText, placement: .navigationBarDrawer)
+        .toolbarVisibility(.hidden, for: .navigationBar)
         .sheet(isPresented: $isAddingWorkout) {
             AddWorkoutView(isPresented: $isAddingWorkout)
         }
