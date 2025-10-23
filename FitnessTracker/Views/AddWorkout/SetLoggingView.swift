@@ -147,11 +147,25 @@ struct SetLoggingView: View {
 		HStack() {
 			if viewModel.hasCompletedAnySet {
 				Button(action: viewModel.startTimer) {
-					Label("Start timer", systemImage: "timer")
-						.foregroundStyle(Color.bratGreen)
-						.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    GeometryReader { geo in
+                            Label("Start timer", systemImage: "timer")
+                                .foregroundStyle(Color.bratGreen)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background {
+                                    if viewModel.activeTimerSetId != nil {
+                                        HStack {
+                                            Capsule()
+                                                .fill(Color.bratGreen)
+                                                .frame(width: geo.size.width * viewModel.timerPercentage)
+                                            Spacer()
+                                        }
+                                    }
+
+                                }
+                    }
 				}
-				.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive())
+                .glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive(), in: .capsule)
+
 				Button(action: viewModel.saveWorkout) {
 					Text("Save")
 						.frame(maxHeight: .infinity)

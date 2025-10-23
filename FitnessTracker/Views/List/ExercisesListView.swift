@@ -45,6 +45,7 @@ struct ExercisesListView: View {
                                     .foregroundStyle(Color.bratGreen)
                                     .padding()
                                 WeeklyProgressView()
+                                    .padding(.vertical)
                             }
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets())
