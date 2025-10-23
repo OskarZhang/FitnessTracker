@@ -67,8 +67,7 @@ class AddWorkoutViewModel: ObservableObject {
 	private var timer: Timer?
     private var timerEndTime: Date?
 	@Published var timerPercentage: CGFloat = 0.0
-	@Published var activeTimerSetId: UUID?
-
+	var timeInSecLeft: Int { Int(timerPercentage * 60) }
     init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
@@ -152,10 +151,6 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
 	func startTimer() {
-		// grab the last set index that is completed
-		let completedSet = sets.last { $0.isCompleted }
-		guard let completedSet else { return }
-		activeTimerSetId = completedSet.id
 		timerPercentage = 1.0
 		timer?.invalidate()
         timerEndTime = Date().advanced(by: 60)
@@ -167,7 +162,7 @@ class AddWorkoutViewModel: ObservableObject {
 					self.timer?.invalidate()
 					self.timer = nil
                     self.timerEndTime = nil
-					self.activeTimerSetId = nil
+					self.timerPercentage = 0.0
 				} else {
                     self.timerPercentage = timerEndTime.timeIntervalSince(Date()) / 60.0
 				}

@@ -87,42 +87,24 @@ struct SetLoggingView: View {
                 .listRowInsets(.init())
             ) {
                 ForEach(viewModel.sets.indices, id: \.self) { index in
-					ZStack(alignment: .bottom) {
-						HStack {
-							Text("Set \(index + 1)")
-								.foregroundStyle(recordColor(at: index))
-							Spacer()
-							recordTextField(index, .weight)
-							recordTextField(index, .rep)
+					HStack {
+						Text("Set \(index + 1)")
+							.foregroundStyle(recordColor(at: index))
+						Spacer()
+						recordTextField(index, .weight)
+						recordTextField(index, .rep)
 
-							Button(action: {
-								viewModel.toggleSetCompletion(setIndex: index)
-							}) {
-								Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
-									.font(.system(size: 22))
-									.foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
-							}
-							.padding(.leading, 8)
+						Button(action: {
+							viewModel.toggleSetCompletion(setIndex: index)
+						}) {
+							Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
+								.font(.system(size: 22))
+								.foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
 						}
-						.padding()
-						VStack(spacing: 0) {
-							Spacer()
-							if viewModel.activeTimerSetId == viewModel.sets[index].id {
-								GeometryReader { geo in
-									HStack {
-										Color.bratGreen
-
-											.frame(width: geo.frame(in: .local).width * viewModel.timerPercentage)
-										Spacer()
-									}
-								}
-								.frame(height: 4.0)
-							}
-						}
-						.padding(.horizontal)
+						.padding(.leading, 8)
 					}
+					.listRowSeparator(.hidden)
 					.id(viewModel.sets[index].id)
-					.listRowInsets(.init())
                 }
                 .onDelete(perform: viewModel.deleteSet)
             }
@@ -147,24 +129,42 @@ struct SetLoggingView: View {
 		HStack() {
 			if viewModel.hasCompletedAnySet {
 				Button(action: viewModel.startTimer) {
-                    GeometryReader { geo in
-                            Label("Start timer", systemImage: "timer")
-                                .foregroundStyle(Color.bratGreen)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background {
-                                    if viewModel.activeTimerSetId != nil {
-                                        HStack {
-                                            Capsule()
-                                                .fill(Color.bratGreen)
-                                                .frame(width: geo.size.width * viewModel.timerPercentage)
-                                            Spacer()
-                                        }
-                                    }
+					Label("Start timer", systemImage: "timer")
+						.foregroundStyle(Color.bratGreen)
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+						.blendMode(.sourceAtop)
+						.opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
+						.background {
+							GeometryReader { geo in
+								if viewModel.timerPercentage > 0.0 {
+									ZStack(alignment: .leading) {
+										HStack(spacing: 0) {
+											Rectangle()
+												.fill(Color.bratGreen)
+												.frame(width: geo.size.width * viewModel.timerPercentage)
+											Spacer()
+										}
+										// inverted color text when timer progress moves
+										Text("\(viewModel.timeInSecLeft)s")
+											.multilineTextAlignment(.center)
+											.font(.headline.monospaced())
+											.foregroundStyle(.white)
+											.frame(width: geo.size.width)
+										Text("\(viewModel.timeInSecLeft)s")
+											.multilineTextAlignment(.center)
+											.font(.headline.monospaced())
+											.foregroundStyle(Color.bratGreen)
+											.frame(width: geo.size.width)
+											.mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
+									}
+								}
+							}
+						}
+						.clipShape(Capsule())
 
-                                }
-                    }
 				}
-                .glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive(), in: .capsule)
+				.glassEffect(.regular.tint(Color.bratGreen.opacity(0.15)).interactive(), in: .capsule)
+
 
 				Button(action: viewModel.saveWorkout) {
 					Text("Save")
