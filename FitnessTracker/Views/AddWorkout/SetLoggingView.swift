@@ -113,10 +113,8 @@ struct SetLoggingView: View {
                     Label("Add Set", systemImage: "plus")
                         .foregroundStyle(Color.primary)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 30)
                 }
-                .buttonStyle(.glass)
-                .glassEffect(.regular.tint(Color.secondary.opacity(0.15)).interactive(true))
+				.buttonStyle(.borderless)
                 .listRowSeparator(.hidden)
             }
         }

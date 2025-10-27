@@ -190,8 +190,24 @@ class AddWorkoutViewModel: ObservableObject {
 
     func deleteSet(at offsets: IndexSet) {
         withAnimation {
-            currentFocusIndexState = nil
+			var focusedIndexId: UUID?
+			if let focusedIndex = currentFocusIndexState?.setIndex
+			{
+				if offsets.contains(focusedIndex) {
+					currentFocusIndexState = nil
+				} else {
+					// grab the id
+					focusedIndexId = sets[focusedIndex].id
+				}
+
+			}
             sets.remove(atOffsets: offsets)
+			if let setIndex = sets.firstIndex(where: { $0.id == focusedIndexId }),
+			   let prevFocusedType = currentFocusIndexState?.type {
+				// restore the focused index after removal
+				currentFocusIndexState = .init(setIndex: setIndex, type: prevFocusedType)
+			}
+
         }
     }
 
