@@ -129,38 +129,39 @@ struct SetLoggingView: View {
 	private var bottomActionRow: some View {
 
 		HStack() {
-				Button(action: viewModel.startTimer) {
-				Label("Start timer", systemImage: "timer")
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-					.foregroundStyle(colorScheme == .light ? .black : .white)
-					.opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
-					.background {
-						GeometryReader { geo in
-							if viewModel.timerPercentage > 0.0 {
-								ZStack(alignment: .leading) {
-									HStack(spacing: 0) {
-										Rectangle()
-											.fill(Color.bratGreen)
-											.frame(width: geo.size.width * viewModel.timerPercentage)
-										Spacer()
-									}
-									// inverted color text when timer progress moves
-									Text("\(viewModel.timeInSecLeft)s")
-										.multilineTextAlignment(.center)
-										.font(.headline.monospaced())
-										.foregroundStyle(.white)
-										.frame(width: geo.size.width)
-									Text("\(viewModel.timeInSecLeft)s")
-										.multilineTextAlignment(.center)
-										.font(.headline.monospaced())
-										.foregroundStyle(Color.black)
-										.frame(width: geo.size.width)
-										.mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
-								}
-							}
-						}
-					}
-
+            Button(action: viewModel.startTimer) {
+                TimelineView(.animation) { _ in
+                    Label("Start timer", systemImage: "timer")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .foregroundStyle(colorScheme == .light ? .black : .white)
+                        .opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
+                        .background {
+                            GeometryReader { geo in
+                                if viewModel.timerPercentage > 0.0 {
+                                    ZStack(alignment: .leading) {
+                                        HStack(spacing: 0) {
+                                            Rectangle()
+                                                .fill(Color.bratGreen)
+                                                .frame(width: geo.size.width * viewModel.timerPercentage)
+                                            Spacer()
+                                        }
+                                        // inverted color text when timer progress moves
+                                        Text("\(viewModel.timeInSecLeft)s")
+                                            .multilineTextAlignment(.center)
+                                            .font(.headline.monospaced())
+                                            .foregroundStyle(.white)
+                                            .frame(width: geo.size.width)
+                                        Text("\(viewModel.timeInSecLeft)s")
+                                            .multilineTextAlignment(.center)
+                                            .font(.headline.monospaced())
+                                            .foregroundStyle(Color.black)
+                                            .frame(width: geo.size.width)
+                                            .mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
+                                    }
+                                }
+                            }
+                        }
+                    }
 				}
 				.clipShape(Capsule())
 				.glassEffect(.regular.interactive(true))

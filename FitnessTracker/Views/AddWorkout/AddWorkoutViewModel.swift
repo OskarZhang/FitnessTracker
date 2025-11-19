@@ -66,8 +66,22 @@ class AddWorkoutViewModel: ObservableObject {
 
 	private var timer: Timer?
     private var timerEndTime: Date?
-	@Published var timerPercentage: CGFloat = 0.0
-	var timeInSecLeft: Int { Int(timerPercentage * 60) }
+    
+    var timerPercentage: Double {
+        guard let timerEndTime = self.timerEndTime else { return 0 }
+        let timerPercentage: Double
+        if Date() >= timerEndTime {
+            self.timerEndTime = nil
+            return 0.0
+        } else {
+            return timerEndTime.timeIntervalSince(Date()) / 60.0
+        }
+    }
+	
+var timeInSecLeft: Int {
+        return Int(timerPercentage * 60)
+    }
+    
     init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
@@ -151,24 +165,7 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
 	func startTimer() {
-		timerPercentage = 1.0
-		timer?.invalidate()
         timerEndTime = Date().advanced(by: 60)
-		timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 120.0, repeats: true, block: { [weak self] _ in
-			DispatchQueue.main.async {
-				guard let self,
-                      let timerEndTime = self.timerEndTime else { return }
-				if Date() >= timerEndTime {
-					self.timer?.invalidate()
-					self.timer = nil
-                    self.timerEndTime = nil
-					self.timerPercentage = 0.0
-				} else {
-                    self.timerPercentage = timerEndTime.timeIntervalSince(Date()) / 60.0
-				}
-			}
-		})
-
 	}
 
     func onNumberPadReturn() {
