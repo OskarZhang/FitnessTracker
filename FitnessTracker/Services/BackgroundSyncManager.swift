@@ -5,8 +5,8 @@ final class BackgroundSyncManager {
     static let shared = BackgroundSyncManager()
     static let taskIdentifier = "com.oz.fitness.FitnessTracker.healthkitSync"
 
-    private let minimumInterval: TimeInterval = 20 * 60
-    private let lastExportedDateKey = "healthKitLastExportedDate"
+    private static let minimumInterval: TimeInterval = 20 * 60
+    private static let lastExportedDateKey = "healthKitLastExportedDate"
 
     private init() {}
 
@@ -50,9 +50,9 @@ final class BackgroundSyncManager {
 
         guard let latestExercise = exerciseService.exercises.first else { return false }
         let elapsed = Date().timeIntervalSince(latestExercise.date)
-        guard elapsed >= minimumInterval else { return false }
+        guard elapsed >= Self.minimumInterval else { return false }
 
-        if let lastExportedDate = UserDefaults.standard.object(forKey: lastExportedDateKey) as? Date,
+        if let lastExportedDate = UserDefaults.standard.object(forKey: Self.lastExportedDateKey) as? Date,
            lastExportedDate >= latestExercise.date {
             return false
         }
@@ -61,7 +61,7 @@ final class BackgroundSyncManager {
 
         do {
             try await healthKitManager.writeStrengthWorkout(exercises: latestDay.exercises)
-            UserDefaults.standard.set(Date(), forKey: lastExportedDateKey)
+            UserDefaults.standard.set(Date(), forKey: Self.lastExportedDateKey)
             return true
         } catch {
             return false
@@ -71,9 +71,9 @@ final class BackgroundSyncManager {
     private func nextEligibleDate() -> Date? {
         let exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
         guard let latestExercise = exerciseService.exercises.first else {
-            return Date().addingTimeInterval(minimumInterval)
+            return Date().addingTimeInterval(Self.minimumInterval)
         }
-        let threshold = latestExercise.date.addingTimeInterval(minimumInterval)
+        let threshold = latestExercise.date.addingTimeInterval(Self.minimumInterval)
         return max(Date(), threshold)
     }
 }

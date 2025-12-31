@@ -55,17 +55,29 @@ final class HealthKitManager: ObservableObject {
         )
 
         let energyBurned = HKQuantity(unit: .kilocalorie(), doubleValue: calories)
-        let workout = HKWorkout(
-            activityType: .traditionalStrengthTraining,
-            start: startDate,
-            end: endDate,
-            duration: endDate.timeIntervalSince(startDate),
-            totalEnergyBurned: energyBurned,
-            totalDistance: nil,
-            metadata: [HKMetadataKeyWorkoutBrandName: "FitnessTracker"]
-        )
-
+        let config = HKWorkoutConfiguration()
+        config.activityType = .functionalStrengthTraining
+        let builder = HKWorkoutBuilder(healthStore: healthStore, configuration: config, device: nil)
+        let quantityType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let sample = HKCumulativeQuantitySample(type: quantityType,
+                                                quantity: energyBurned,
+                                                start: startDate,
+                                                end: endDate)
+        let workout: HKWorkout?
+        do {
+            try await builder.addSamples([sample])
+            try await builder.endCollection(at: endDate)
+            workout = try await builder.finishWorkout()
+        } catch {
+            debugPrint("Finishing workout failed \(error)")
+            return
+        }
+        guard let workout else {
+            return
+        }
+        
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            
             healthStore.save(workout) { success, error in
                 if let error {
                     continuation.resume(throwing: error)
