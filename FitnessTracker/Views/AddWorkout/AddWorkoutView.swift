@@ -6,14 +6,16 @@ struct AddWorkoutView: View {
 
     init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
-        self._viewModel = StateObject(wrappedValue: AddWorkoutViewModel(isPresented: isPresented))
+        self._viewModel = StateObject(wrappedValue: AddWorkoutViewModel())
     }
 
     var body: some View {
         NavigationStack() {
             ExercisePickerView(viewModel: viewModel, isPresented: $isPresented)
                 .navigationDestination(isPresented: $viewModel.showingSetLogger) {
-                    SetLoggingView(viewModel: viewModel)
+                    if let setLoggingViewModel = viewModel.setLoggingViewModel {
+                        SetLoggingView(viewModel: setLoggingViewModel, onSave: { isPresented = false })
+                    }
                 }
         }
         .accentColor(.bratGreen)
@@ -25,4 +27,3 @@ struct AddWorkoutView: View {
 #Preview {
     AddWorkoutView(isPresented: .constant(true))
 }
-

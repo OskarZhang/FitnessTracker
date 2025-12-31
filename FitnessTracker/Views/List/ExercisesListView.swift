@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import HealthKitUI
 import Combine
 
 class SearchContext: ObservableObject {
@@ -23,6 +22,8 @@ struct ExercisesListView: View {
     @Environment(\.colorScheme) var colorScheme
 
     @State private var isAddingWorkout = false
+    @State private var isShowingSettings = false
+    @State private var hasAutoRestoredPendingSession = false
 
     @StateObject var searchContext = SearchContext()
     
@@ -82,17 +83,42 @@ struct ExercisesListView: View {
                         AddExerciseButton(isAddingWorkout: $isAddingWorkout)
                     }
                 }
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            isShowingSettings = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(Color.bratGreen)
+                                .padding(10)
+                                .background(Color(.systemBackground).opacity(0.9), in: Circle())
+                        }
+                        .accessibilityLabel("Settings")
+                        .padding(.trailing, 16)
+                        .padding(.top, 8)
+                    }
+                    Spacer()
+                }
             }
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
         .sheet(isPresented: $isAddingWorkout) {
             AddWorkoutView(isPresented: $isAddingWorkout)
         }
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView()
+        }
         .onReceive(exerciseService.objectWillChange) { _ in
             fetchGroupedExercises()
         }
         .onAppear {
             fetchGroupedExercises()
+            if !hasAutoRestoredPendingSession, SetLoggingSessionStore.hasPendingSession {
+                isAddingWorkout = true
+                hasAutoRestoredPendingSession = true
+            }
         }
     }
     

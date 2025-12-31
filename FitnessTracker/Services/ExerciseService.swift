@@ -152,6 +152,12 @@ class ExerciseService: ObservableObject {
         try? modelContext.save()
     }
 
+    func updateExercise(_ exercise: Exercise, sets: [StrengthSet]) {
+        exercise.sets = sets
+        try? modelContext.save()
+        exercises = fetchWorkouts()
+    }
+
     private func matchWorkout(exerciseName: String) -> [Exercise] {
         let existingWorkoutMatch = exercises.filter { $0.name.lowercased().contains(exerciseName.lowercased())}
             .reduce((uniqueWorkoutNames: Set<String>(), list: [Exercise]())) { partialResult, exercise in

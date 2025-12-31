@@ -11,9 +11,12 @@ import Charts
 
 struct WorkoutDetailView: View {
     let exercise: Exercise
+    @State private var isEditing = false
+    @StateObject private var editViewModel: SetLoggingViewModel
 
     init(exercise: Exercise) {
         self.exercise = exercise
+        self._editViewModel = StateObject(wrappedValue: SetLoggingViewModel(mode: .edit(exercise: exercise)))
     }
 
     var body: some View {
@@ -44,6 +47,16 @@ struct WorkoutDetailView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Edit") {
+                    isEditing = true
+                }
+            }
+        }
+        .navigationDestination(isPresented: $isEditing) {
+            SetLoggingView(viewModel: editViewModel)
+        }
     }
 }
 

@@ -10,10 +10,13 @@ struct SetLoggingView: View {
     @Environment(\.colorScheme) var colorScheme
 
     @State private var sheetHeight: CGFloat = .zero
-    @ObservedObject var viewModel: AddWorkoutViewModel
+    @ObservedObject var viewModel: SetLoggingViewModel
+    let onSave: (() -> Void)?
+    @Environment(\.dismiss) private var dismiss
 
-    init(viewModel: AddWorkoutViewModel) {
+    init(viewModel: SetLoggingViewModel, onSave: (() -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onSave = onSave
     }
 
     var body: some View {
@@ -24,6 +27,7 @@ struct SetLoggingView: View {
             }
             .onDisappear {
                 viewModel.loseFocus()
+                viewModel.persistPendingSessionIfNeeded()
             }
     }
     
@@ -167,7 +171,14 @@ struct SetLoggingView: View {
 				.glassEffect(.regular.interactive(true))
 				Spacer()
 
-				Button(action: viewModel.saveWorkout) {
+				Button(action: {
+                    viewModel.saveWorkout()
+                    if let onSave {
+                        onSave()
+                    } else {
+                        dismiss()
+                    }
+                }) {
 					Text("Save")
 						.frame(maxHeight: .infinity)
 				}
@@ -196,7 +207,7 @@ struct SetLoggingView: View {
             
             Spacer(minLength: 16)
             Button {
-                viewModel.showNewExerciseOnboarding = false
+                viewModel.markOnboardingSeen()
                 viewModel.generateWeightAndSetSuggestion()
             } label: {
                 Text("Generate full set")
@@ -208,7 +219,7 @@ struct SetLoggingView: View {
             .buttonStyle(.glassProminent)
             
             Button() {
-                viewModel.showNewExerciseOnboarding = false
+                viewModel.markOnboardingSeen()
             } label: {
                 Text("Nah! Let me log my own")
                     .frame(maxWidth: .infinity)
@@ -296,24 +307,6 @@ struct InnerHeightPreferenceKey: PreferenceKey {
 
 #Preview {
     SetLoggingView(
-		viewModel: AddWorkoutViewModel.mocked
+		viewModel: SetLoggingViewModel.mocked
     )
-}
-
-
-fileprivate extension AddWorkoutViewModel {
-  static var mocked: AddWorkoutViewModel {
-
-	  let vm = AddWorkoutViewModel(isPresented: .constant(true))
-
-	  vm.selectedExercise = "Bench Press"
-
-	  vm.sets = [
-		StrengthSetData(weightInLbs: 200, reps: 10),
-		StrengthSetData(weightInLbs: 200, reps: 10),
-		StrengthSetData(weightInLbs: 200, reps: 10)
-	  ]
-	  vm.hasSeenNewExerciseOnboarding = true
-	  return vm
-  }
 }

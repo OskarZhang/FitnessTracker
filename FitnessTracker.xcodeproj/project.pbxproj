@@ -8,12 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		4B10B8A42EA0B6FB00890AC6 /* AddExerciseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */; };
+		4B1C2D6C2F4A1A0100B1C2D3 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */; };
+		4B1C2D6D2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */; };
 		4B2D17802CB1F9D0001137F7 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2D177F2CB1F9D0001137F7 /* SwiftUIIntrospect */; };
 		4B2D17862CB1F9F2001137F7 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2D17852CB1F9F2001137F7 /* SwiftUIIntrospect */; };
 		4B78EC452D4825EF005BD630 /* AddWorkoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B78EC442D4825EA005BD630 /* AddWorkoutViewModel.swift */; };
+		4B7A1C1F2F4A000100A1B2C3 /* SetLoggingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7A1C1E2F4A000100A1B2C3 /* SetLoggingViewModel.swift */; };
 		4B99D9D42E28B60200073F3F /* strength_workout_names.csv in Resources */ = {isa = PBXBuildFile; fileRef = 4B99D9D32E28B60200073F3F /* strength_workout_names.csv */; };
 		4B9E490E2E2F449200C8D273 /* ExercisePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E490D2E2F449200C8D273 /* ExercisePickerView.swift */; };
 		4B9E49102E2F449E00C8D273 /* SetLoggingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E490F2E2F449E00C8D273 /* SetLoggingView.swift */; };
+		4BA1A4D72F4A1A5E00C3D4E5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA1A4D62F4A1A5E00C3D4E5 /* SettingsView.swift */; };
 		4BA93FC12C86B7B300973198 /* FitnessTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA93FC02C86B7B300973198 /* FitnessTrackerApp.swift */; };
 		4BA93FC32C86B7B300973198 /* ExercisesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA93FC22C86B7B300973198 /* ExercisesListView.swift */; };
 		4BA93FC52C86B7B400973198 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4BA93FC42C86B7B400973198 /* Assets.xcassets */; };
@@ -48,11 +52,16 @@
 
 /* Begin PBXFileReference section */
 		4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExerciseButton.swift; sourceTree = "<group>"; };
+		4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncManager.swift; sourceTree = "<group>"; };
+		4B784A412F05B229008CA92D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4B78EC442D4825EA005BD630 /* AddWorkoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorkoutViewModel.swift; sourceTree = "<group>"; };
+		4B7A1C1E2F4A000100A1B2C3 /* SetLoggingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetLoggingViewModel.swift; sourceTree = "<group>"; };
 		4B85B4812D8BDB1D000E6206 /* FitnessTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FitnessTracker.entitlements; sourceTree = "<group>"; };
 		4B99D9D32E28B60200073F3F /* strength_workout_names.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = strength_workout_names.csv; sourceTree = "<group>"; };
 		4B9E490D2E2F449200C8D273 /* ExercisePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExercisePickerView.swift; sourceTree = "<group>"; };
 		4B9E490F2E2F449E00C8D273 /* SetLoggingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetLoggingView.swift; sourceTree = "<group>"; };
+		4BA1A4D62F4A1A5E00C3D4E5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		4BA93FBD2C86B7B300973198 /* FitnessTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BA93FC02C86B7B300973198 /* FitnessTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessTrackerApp.swift; sourceTree = "<group>"; };
 		4BA93FC22C86B7B300973198 /* ExercisesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExercisesListView.swift; sourceTree = "<group>"; };
@@ -98,6 +107,14 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		4BA1A4D52F4A1A4B00C3D4E5 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				4BA1A4D62F4A1A5E00C3D4E5 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		4BA93FB42C86B7B300973198 = {
 			isa = PBXGroup;
 			children = (
@@ -118,6 +135,7 @@
 		4BA93FBF2C86B7B300973198 /* FitnessTracker */ = {
 			isa = PBXGroup;
 			children = (
+				4B784A412F05B229008CA92D /* Info.plist */,
 				4BDFCCCF2EA17AAC000861F4 /* Utils */,
 				4BDFCCCC2EA160C8000861F4 /* DependencyInjection */,
 				4BDFCCC82EA15B6A000861F4 /* Services */,
@@ -146,6 +164,7 @@
 				4BDFCCCB2EA15BEB000861F4 /* DetailView */,
 				4BDFCCC72EA15B42000861F4 /* AddWorkout */,
 				4BDFCCC62EA15B2C000861F4 /* List */,
+				4BA1A4D52F4A1A4B00C3D4E5 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -165,6 +184,7 @@
 				4B78EC442D4825EA005BD630 /* AddWorkoutViewModel.swift */,
 				4B9E490D2E2F449200C8D273 /* ExercisePickerView.swift */,
 				4B9E490F2E2F449E00C8D273 /* SetLoggingView.swift */,
+				4B7A1C1E2F4A000100A1B2C3 /* SetLoggingViewModel.swift */,
 			);
 			path = AddWorkout;
 			sourceTree = "<group>";
@@ -174,6 +194,8 @@
 			children = (
 				4BDFCCD52EA1B324000861F4 /* LocalRecommenders.swift */,
 				4BD095A62D7E588100F4769F /* ExerciseService.swift */,
+				4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */,
+				4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -284,12 +306,16 @@
 				4BB21AAE2C8813E300C1DEDE /* WorkoutDetailView.swift in Sources */,
 				4BB21AA62C86D48300C1DEDE /* AddWorkoutView.swift in Sources */,
 				4B78EC452D4825EF005BD630 /* AddWorkoutViewModel.swift in Sources */,
+				4B7A1C1F2F4A000100A1B2C3 /* SetLoggingViewModel.swift in Sources */,
 				4B9E490E2E2F449200C8D273 /* ExercisePickerView.swift in Sources */,
 				4BA93FC12C86B7B300973198 /* FitnessTrackerApp.swift in Sources */,
 				4BDFCCCA2EA15BDB000861F4 /* WorkoutChartView.swift in Sources */,
 				4BB21AA82C86D4BC00C1DEDE /* Models.swift in Sources */,
 				4BD095A72D7E588300F4769F /* ExerciseService.swift in Sources */,
+				4B1C2D6C2F4A1A0100B1C2D3 /* HealthKitManager.swift in Sources */,
 				4B9E49102E2F449E00C8D273 /* SetLoggingView.swift in Sources */,
+				4B1C2D6D2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift in Sources */,
+				4BA1A4D72F4A1A5E00C3D4E5 /* SettingsView.swift in Sources */,
 				4BDFCCD32EA18363000861F4 /* NumberPad.swift in Sources */,
 				4B10B8A42EA0B6FB00890AC6 /* AddExerciseButton.swift in Sources */,
 				4BDFCCD12EA17AB4000861F4 /* Extensions.swift in Sources */,
@@ -430,12 +456,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FitnessTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = RYRSSY3589;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Push your workout logs to your Health app";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Push your workout logs to your Health app";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FitnessTracker/Info.plist;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -463,12 +485,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FitnessTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = RYRSSY3589;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Push your workout logs to your Health app";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Push your workout logs to your Health app";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FitnessTracker/Info.plist;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
