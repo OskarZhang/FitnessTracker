@@ -27,24 +27,23 @@ struct WeeklyProgressView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(weeks, id: \.self) { date in
-                            WeekCardView(weekStartDate: date)
-                                .frame(width: geo.size.width)
-                                .id(date)
-                        }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(weeks, id: \.self) { date in
+                        WeekCardView(weekStartDate: date)
+                            .containerRelativeFrame(.horizontal)
+                            .id(date)
                     }
-                    .scrollTargetLayout()
-                    .background(.clear)
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollIndicators(.hidden)
-                .onAppear {
-                    proxy.scrollTo(Self.weekStartDate(offset: 0))
-                }
+                .scrollTargetLayout()
+                .background(.clear)
+            }
+            .contentMargins(.horizontal, 16, for: .scrollContent)
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .onAppear {
+                proxy.scrollTo(Self.weekStartDate(offset: 0))
             }
         }
         .frame(height: height)
@@ -112,7 +111,6 @@ struct WeekCardView: View {
             corners: .concentric(minimum: 24),
             isUniform: true
         ))
-        .padding(.horizontal, 16)
         .background(
             GeometryReader { geo in
                 Color.clear
