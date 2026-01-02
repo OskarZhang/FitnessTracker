@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @Injected private var healthKitManager: HealthKitManager
+    @StateObject private var healthKitManager: HealthKitManager = Container.shared.resolve(HealthKitManager.self)
     @Injected private var exerciseService: ExerciseService
 
     @State private var isAuthorizing = false

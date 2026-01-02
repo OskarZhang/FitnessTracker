@@ -4,8 +4,18 @@ import HealthKit
 @MainActor
 final class HealthKitManager: ObservableObject {
     private let healthStore = HKHealthStore()
+
     private let workoutType = HKObjectType.workoutType()
+    private let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
     private let bodyMassType = HKObjectType.quantityType(forIdentifier: .bodyMass)!
+
+    let typesToShare: Set<HKSampleType>
+    let typesToRead: Set<HKObjectType>
+
+    init() {
+        typesToShare = [workoutType, activeEnergyType]
+        typesToRead = [bodyMassType]
+    }
 
     @Published var isAvailable: Bool = HKHealthStore.isHealthDataAvailable()
     @Published var workoutAuthorizationStatus: HKAuthorizationStatus = .notDetermined
@@ -13,16 +23,15 @@ final class HealthKitManager: ObservableObject {
     func refreshAuthorizationStatus() {
         guard isAvailable else { return }
         workoutAuthorizationStatus = healthStore.authorizationStatus(for: workoutType)
+        debugPrint("authorized status: \(workoutAuthorizationStatus)")
     }
 
     func requestAuthorization() async throws {
         guard isAvailable else { return }
-        let shareTypes: Set<HKSampleType> = [workoutType]
-        let readTypes: Set<HKObjectType> = [bodyMassType]
-
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { success, error in
+            healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead) { success, error in
                 if let error {
+                    debugPrint("error \(error)")
                     continuation.resume(throwing: error)
                     return
                 }
@@ -64,14 +73,11 @@ final class HealthKitManager: ObservableObject {
                                                 start: startDate,
                                                 end: endDate)
         let workout: HKWorkout?
-        do {
-            try await builder.addSamples([sample])
-            try await builder.endCollection(at: endDate)
-            workout = try await builder.finishWorkout()
-        } catch {
-            debugPrint("Finishing workout failed \(error)")
-            return
-        }
+        
+        try await builder.beginCollection(at: startDate)
+        try await builder.addSamples([sample])
+        try await builder.endCollection(at: endDate)
+        workout = try await builder.finishWorkout()
         guard let workout else {
             return
         }

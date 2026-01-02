@@ -37,8 +37,10 @@ struct WeeklyProgressView: View {
                                 .id(date)
                         }
                     }
+                    .scrollTargetLayout()
                     .background(.clear)
                 }
+                .scrollTargetBehavior(.paging)
                 .scrollIndicators(.hidden)
                 .onAppear {
                     proxy.scrollTo(Self.weekStartDate(offset: 0))
@@ -55,12 +57,14 @@ struct WeeklyProgressView: View {
 }
 
 struct WeekCardView: View {
-    @Injected var exerciseService: ExerciseService
+    @ObservedObject private var exerciseService: ExerciseService
 
     private let calendar = Calendar.current
     @State var weekStartDate: Date
+    @State private var animateSymbols = false
     
-    init(weekStartDate: Date? = nil) {
+    init(weekStartDate: Date? = nil, exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)) {
+        self._exerciseService = ObservedObject(wrappedValue: exerciseService)
         if let weekStartDate {
             self.weekStartDate = weekStartDate
         } else {
@@ -91,10 +95,14 @@ struct WeekCardView: View {
             // Second row: Checkmarks
             HStack(spacing: 0) {
                 ForEach(0..<7) { index in
-                    Image(systemName: hasExerciseForDay(dayIndex: index) ? "checkmark.rectangle.portrait.fill" : "checkmark.rectangle.portrait")
+                    let shouldFill = hasExerciseForDay(dayIndex: index)
+                    let showsFill = animateSymbols && shouldFill
+                    Image(systemName: showsFill ? "checkmark.rectangle.portrait.fill" : "checkmark.rectangle.portrait")
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.bratGreen)
                         .frame(maxWidth: .infinity)
+                        .contentTransition(.symbolEffect(.replace))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: showsFill)
                 }
             }
         }
@@ -112,6 +120,12 @@ struct WeekCardView: View {
                                 value: geo.size.height)
             }
         )
+        .onAppear {
+            triggerIconAnimation()
+        }
+        .onReceive(exerciseService.$exercises) { _ in
+            triggerIconAnimation()
+        }
     }
 
     private func getWeekdayName(for index: Int) -> String {
@@ -132,7 +146,16 @@ struct WeekCardView: View {
             return false
         }
 
-        return exerciseService.hasExercise(on: targetDate)
+        let targetDayStart = calendar.startOfDay(for: targetDate)
+        let exerciseDays = Set(exerciseService.exercises.map { calendar.startOfDay(for: $0.date) })
+        return exerciseDays.contains(targetDayStart)
+    }
+
+    private func triggerIconAnimation() {
+        animateSymbols = false
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            animateSymbols = true
+        }
     }
 }
 
