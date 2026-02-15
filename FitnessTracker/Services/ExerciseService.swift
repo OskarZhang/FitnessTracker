@@ -61,9 +61,7 @@ class ExerciseService: ObservableObject {
 
     private func finishInitialization() {
         exercises = fetchWorkouts()
-        Task {
-            await buildTransitionProbabilityMatrix(data: exercises)
-        }
+        buildTransitionProbabilityMatrix(data: exercises)
     }
 
     func groupedWorkouts(query: String = "") -> [(date: Date, exercises: [Exercise])] {
@@ -87,11 +85,15 @@ class ExerciseService: ObservableObject {
             idSet.contains(exercise.id)
         })
         try? modelContext.save()
-        exercises = fetchWorkouts()   
+        exercises = fetchWorkouts()
+        buildTransitionProbabilityMatrix(data: exercises)
     }
 
     /// build a Markov Chain prediction matrix with exercise data
-    private func buildTransitionProbabilityMatrix(data: [Exercise]) async {
+    private func buildTransitionProbabilityMatrix(data: [Exercise]) {
+        transitions = [:]
+        transitionProbabilities = [:]
+
         // Group exercises by date
         let calendar = Calendar.current
         let groupedByDate = Dictionary(grouping: data) { entry in
@@ -103,7 +105,7 @@ class ExerciseService: ObservableObject {
             let sortedExercises = exercises.sorted { $0.date < $1.date }
 
             // allows us to also
-            let names = [""] + sortedExercises.map { $0.name }
+            let names = [ExerciseService.StartOfDayWorkoutToken] + sortedExercises.map { $0.name }
 
             for idx in 0..<(names.count - 1) {
                 let pair = (names[idx], names[idx + 1])
@@ -171,16 +173,26 @@ class ExerciseService: ObservableObject {
         return res
     }
 
+    func nextLikelyExercise(after exerciseName: String) -> String? {
+        let key = transitionProbabilities.keys.first { $0.lowercased() == exerciseName.lowercased() }
+        if let key, let prediction = transitionProbabilities[key]?.sorted(by: { $0.value > $1.value }).first?.key {
+            return prediction
+        }
+        return predictNextWorkout().first
+    }
+
     func addExercise(_ exercise: Exercise) {
         modelContext.insert(exercise)
         exercises.insert(exercise, at: 0)
         try? modelContext.save()
+        buildTransitionProbabilityMatrix(data: exercises)
     }
 
     func updateExercise(_ exercise: Exercise, sets: [StrengthSet]) {
         exercise.strengthSets = sets
         try? modelContext.save()
         exercises = fetchWorkouts()
+        buildTransitionProbabilityMatrix(data: exercises)
     }
 
     private func matchWorkout(exerciseName: String) -> [Exercise] {

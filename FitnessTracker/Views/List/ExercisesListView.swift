@@ -22,6 +22,7 @@ struct ExercisesListView: View {
     @State private var isAddingWorkout = false
     @State private var isShowingSettings = false
     @State private var hasAutoRestoredPendingSession = false
+    @State private var liveDeepLinkExerciseName: String?
     @State private var navigationPath: [NavigationTarget] = []
 
     @StateObject var searchContext = SearchContext()
@@ -128,8 +129,10 @@ struct ExercisesListView: View {
             }
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .sheet(isPresented: $isAddingWorkout) {
-            AddWorkoutView(isPresented: $isAddingWorkout)
+        .sheet(isPresented: $isAddingWorkout, onDismiss: {
+            liveDeepLinkExerciseName = nil
+        }) {
+            AddWorkoutView(isPresented: $isAddingWorkout, initialExerciseName: liveDeepLinkExerciseName)
         }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
@@ -192,16 +195,26 @@ struct ExercisesListView: View {
         switch target {
         case .home:
             navigationPath.removeAll()
+            liveDeepLinkExerciseName = nil
         case .addWorkout:
             SetLoggingSessionStore.clearRestoreRequest()
             navigationPath.removeAll()
+            liveDeepLinkExerciseName = nil
             isAddingWorkout = true
         case .settings:
             navigationPath.removeAll()
+            liveDeepLinkExerciseName = nil
             isShowingSettings = true
+        case let .liveWorkout(exerciseName):
+            SetLoggingSessionStore.clearRestoreRequest()
+            navigationPath.removeAll()
+            liveDeepLinkExerciseName = exerciseName
+            isAddingWorkout = true
         case let .workoutDetail(id):
+            liveDeepLinkExerciseName = nil
             navigationPath = [.workoutDetail(id)]
         case let .workoutEdit(id):
+            liveDeepLinkExerciseName = nil
             navigationPath = [.workoutEdit(id)]
         }
     }
@@ -215,6 +228,7 @@ private enum NavigationTarget: Hashable {
 private enum DeepLinkTarget {
     case home
     case addWorkout
+    case liveWorkout(String)
     case settings
     case workoutDetail(UUID)
     case workoutEdit(UUID)
@@ -232,6 +246,13 @@ private enum DeepLinkTarget {
             self = .home
         case "add":
             self = .addWorkout
+        case "live":
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                  let exercise = components.queryItems?.first(where: { $0.name == "exercise" })?.value,
+                  !exercise.isEmpty else {
+                return nil
+            }
+            self = .liveWorkout(exercise)
         case "settings":
             self = .settings
         case "workout":
