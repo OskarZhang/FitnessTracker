@@ -159,11 +159,13 @@ class SetLoggingViewModel: ObservableObject {
     private var shouldPersistPendingSession = false
 
     @Published private var timerEndTime: Date?
+    private var timerSyncTask: Task<Void, Never>?
     private let shouldRelaxCompletionRequirementForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
     @Injected private var exerciseService: ExerciseService
     @Injected private var healthKitManager: HealthKitManager
+    @Injected private var workoutLiveActivityService: WorkoutLiveActivityService
 
     init(mode: SetLoggingMode) {
         self.mode = mode
@@ -212,6 +214,7 @@ class SetLoggingViewModel: ObservableObject {
             )
             exerciseService.addExercise(exercise)
             SetLoggingSessionStore.clear()
+            workoutLiveActivityService.showNextLikely(afterSavedExercise: selectedExercise)
         case .edit(let exercise):
             let updatedSets = sets
                 .filter { $0.isCompleted }
@@ -331,6 +334,7 @@ class SetLoggingViewModel: ObservableObject {
         withAnimation {
             sets[setIndex].isCompleted = !isCompleted
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     var focusedFieldType: RecordType? {
@@ -350,10 +354,27 @@ class SetLoggingViewModel: ObservableObject {
         withAnimation {
             currentFocusIndexState = FocusIndex(setIndex: setIndex, type: type)
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     func startTimer() {
         timerEndTime = Date().advanced(by: 60)
+        workoutLiveActivityService.updateTimer(endDate: timerEndTime)
+        markLiveActivityInteractionIfNeeded()
+
+        timerSyncTask?.cancel()
+        let expectedTimerEnd = timerEndTime
+        timerSyncTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 61_000_000_000)
+            await MainActor.run {
+                guard let self else { return }
+                guard self.isAddMode else { return }
+                guard let expectedTimerEnd else { return }
+                if let timerEndTime = self.timerEndTime, timerEndTime <= Date(), timerEndTime == expectedTimerEnd {
+                    self.workoutLiveActivityService.updateTimer(endDate: nil)
+                }
+            }
+        }
     }
 
     func onNumberPadReturn() {
@@ -371,6 +392,7 @@ class SetLoggingViewModel: ObservableObject {
         {
             addSet()
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     func deleteSet(at offsets: IndexSet) {
@@ -392,6 +414,7 @@ class SetLoggingViewModel: ObservableObject {
             }
 
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     func addSet() {
@@ -399,15 +422,21 @@ class SetLoggingViewModel: ObservableObject {
         withAnimation {
             sets.append(StrengthSetData(weightInLbs: lastSet?.weightInLbs ?? 0, reps: lastSet?.reps ?? 0))
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     func loseFocus() {
         withAnimation {
             currentFocusIndexState = nil
         }
+        markLiveActivityInteractionIfNeeded()
     }
 
     func onAppear() {
+        if isAddMode {
+            workoutLiveActivityService.startOrUpdateForLogging(exerciseName: selectedExercise)
+            workoutLiveActivityService.recordInteraction()
+        }
         if sets.count > 0 {
             currentFocusIndexState = .initial
         }
@@ -461,6 +490,18 @@ class SetLoggingViewModel: ObservableObject {
         )
         SetLoggingSessionStore.save(session)
         return true
+    }
+
+    private var isAddMode: Bool {
+        if case .add = mode {
+            return true
+        }
+        return false
+    }
+
+    private func markLiveActivityInteractionIfNeeded() {
+        guard isAddMode else { return }
+        workoutLiveActivityService.recordInteraction()
     }
 }
 

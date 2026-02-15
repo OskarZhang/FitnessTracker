@@ -20,7 +20,12 @@ class AddWorkoutViewModel: ObservableObject {
 
     private var isRestoringPendingSession = false
 
-    init() {
+    init(initialExerciseName: String? = nil) {
+        if let initialExerciseName, !initialExerciseName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            selectedExercise = initialExerciseName
+            startLogging(exerciseName: initialExerciseName, pendingSession: nil)
+            return
+        }
         restorePendingSessionIfNeeded()
     }
 
