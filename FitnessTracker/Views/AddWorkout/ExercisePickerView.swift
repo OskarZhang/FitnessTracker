@@ -6,23 +6,17 @@ struct ExercisePickerView: View {
     @ObservedObject var viewModel: AddWorkoutViewModel
 
     @Binding var isPresented: Bool
-    @Binding var selectedExercise: String
 
     @FocusState private var isNameFocused
     @State private var hasSetInitialFocus = false
 
     @StateObject private var searchContext = SearchContext()
-    @State private var allExercises: [String] = []
 
     let confirmationImpact = UIImpactFeedbackGenerator(style: .medium)
 
     init(viewModel: AddWorkoutViewModel, isPresented: Binding<Bool>) {
         self.viewModel = viewModel
         self._isPresented = isPresented
-        self._selectedExercise = Binding(
-            get: { viewModel.selectedExercise },
-            set: { viewModel.selectedExercise = $0 }
-        )
     }
 
     var body: some View {
@@ -47,22 +41,25 @@ struct ExercisePickerView: View {
                             isNameFocused = true
                             return
                         }
-                        selectedExercise = searchContext.searchText
+                        viewModel.selectedExercise = searchContext.searchText
                         confirmationImpact.impactOccurred()
                     }
+                    .accessibilityIdentifier("addWorkout.exerciseInput")
                     .padding(.top, 8)
                 
                 List(viewModel.getExerciseSuggestions(name: searchContext.searchText), id: \.self) { exerciseName in
                     Button(action: {
-                        selectedExercise = exerciseName
+                        viewModel.selectedExercise = exerciseName
                         confirmationImpact.impactOccurred()
                     }) {
                         Text(exerciseName)
                             .font(.system(size: 18))
                     }
+                    .accessibilityIdentifier("addWorkout.suggestion.\(exerciseName)")
                     .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)
+                .accessibilityIdentifier("addWorkout.suggestionsList")
             }
             .onAppear {
                 isNameFocused = true

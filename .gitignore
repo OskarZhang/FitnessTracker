@@ -68,6 +68,7 @@ fastlane/test_output/
 #############
 *.ipa
 *.xcarchive
+artifacts/
 
 #############
 # Core Data / Realm #

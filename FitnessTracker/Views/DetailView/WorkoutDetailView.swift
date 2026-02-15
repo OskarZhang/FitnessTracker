@@ -28,8 +28,8 @@ struct WorkoutDetailView: View {
                 Text(exercise.date.formatted(date: .long, time: .omitted))
                     .foregroundStyle(.gray)
                     .fontWeight(.semibold)
-                if case .strength = exercise.type,
-                   let sets = exercise.sets {
+                if case .strength = exercise.type {
+                    let sets = exercise.orderedStrengthSets
                     ForEach(sets.indices, id: \.self) { setIndex in
                         StrengthSetView(weight: Int(sets[setIndex].weightInLbs), repCount: sets[setIndex].reps, setIndexber: setIndex + 1)
                     }
@@ -76,6 +76,8 @@ struct StrengthSetView: View {
           Text("\(repCount) reps")
               .fontWeight(.semibold)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("workoutDetail.setRow.\(setIndexber).\(weight)x\(repCount)")
     }
 }
 
