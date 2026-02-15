@@ -44,7 +44,7 @@ extension WorkoutRowView {
             self.type = .strength(
                 maxWeight: exercise.maxWeight,
                 maxRep: exercise.maxRep,
-                setCount: exercise.sets?.count ?? 0
+                setCount: exercise.orderedStrengthSets.count
             )
         case .cardio:
             self.type = .cardio(

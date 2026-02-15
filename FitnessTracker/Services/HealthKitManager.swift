@@ -51,7 +51,7 @@ final class HealthKitManager: ObservableObject {
 
         let startDate = exercises.map { $0.date }.min() ?? Date()
         let totalSets = exercises.reduce(0) { partialResult, exercise in
-            partialResult + (exercise.sets?.count ?? 0)
+            partialResult + exercise.orderedStrengthSets.count
         }
         let estimatedDurationMinutes = max(10, totalSets * 2)
         let endDate = startDate.addingTimeInterval(TimeInterval(estimatedDurationMinutes * 60))

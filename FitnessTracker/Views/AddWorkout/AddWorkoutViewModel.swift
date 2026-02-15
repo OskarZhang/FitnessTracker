@@ -29,6 +29,7 @@ class AddWorkoutViewModel: ObservableObject {
     }
 
     private func restorePendingSessionIfNeeded() {
+        guard SetLoggingSessionStore.consumeRestoreRequest() else { return }
         guard let pendingSession = SetLoggingSessionStore.load() else { return }
         isRestoringPendingSession = true
         selectedExercise = pendingSession.exerciseName

@@ -10,7 +10,7 @@ struct AddWorkoutView: View {
     }
 
     var body: some View {
-        NavigationStack() {
+        NavigationStack {
             ExercisePickerView(viewModel: viewModel, isPresented: $isPresented)
                 .navigationDestination(isPresented: $viewModel.showingSetLogger) {
                     if let setLoggingViewModel = viewModel.setLoggingViewModel {
@@ -18,7 +18,6 @@ struct AddWorkoutView: View {
                     }
                 }
         }
-        .accentColor(.bratGreen)
     }
 
   

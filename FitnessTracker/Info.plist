@@ -18,6 +18,19 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.oz.fitness.FitnessTracker</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fitnesstracker</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Push your workout logs to your Health app</string>
 	<key>NSHealthUpdateUsageDescription</key>

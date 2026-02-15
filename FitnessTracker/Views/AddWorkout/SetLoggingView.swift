@@ -8,6 +8,7 @@ struct SetLoggingView: View {
     let lightImpact = UIImpactFeedbackGenerator(style: .light)
     let confirmationImpact = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var sheetHeight: CGFloat = .zero
     @ObservedObject var viewModel: SetLoggingViewModel
@@ -27,7 +28,15 @@ struct SetLoggingView: View {
             }
             .onDisappear {
                 viewModel.loseFocus()
-                viewModel.persistPendingSessionIfNeeded()
+                if viewModel.persistPendingSessionIfNeeded() {
+                    SetLoggingSessionStore.requestRestoreOnNextLaunch()
+                }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                guard newPhase == .inactive || newPhase == .background else { return }
+                if viewModel.persistPendingSessionIfNeeded() {
+                    SetLoggingSessionStore.requestRestoreOnNextLaunch()
+                }
             }
     }
     
@@ -106,10 +115,12 @@ struct SetLoggingView: View {
 						}) {
 							Image(systemName: viewModel.sets[index].isCompleted ? "checkmark.rectangle.fill" : "checkmark.rectangle") // SF Symbol
 								.font(.system(size: 22))
-								.foregroundColor(viewModel.sets[index].isCompleted ? .bratGreen : .secondary)
+								.foregroundColor(viewModel.sets[index].isCompleted ? .accentColor : .secondary)
 						}
 						.padding(.leading, 8)
+                        .accessibilityIdentifier("setLogging.completeSetButton.\(index)")
 					}
+                    .accessibilityIdentifier("setLogging.row.\(index)")
 					.listRowSeparator(.hidden)
 					.id(viewModel.sets[index].id)
                 }
@@ -122,6 +133,7 @@ struct SetLoggingView: View {
                         .frame(maxWidth: .infinity)
                 }
 				.buttonStyle(.borderless)
+                .accessibilityIdentifier("setLogging.addSetButton")
                 .listRowSeparator(.hidden)
             }
         }
@@ -134,38 +146,13 @@ struct SetLoggingView: View {
 
 		HStack() {
             Button(action: viewModel.startTimer) {
-                TimelineView(.animation) { _ in
-                    Label("Start timer", systemImage: "timer")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .foregroundStyle(colorScheme == .light ? .black : .white)
-                        .opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
-                        .background {
-                            GeometryReader { geo in
-                                if viewModel.timerPercentage > 0.0 {
-                                    ZStack(alignment: .leading) {
-                                        HStack(spacing: 0) {
-                                            Rectangle()
-                                                .fill(Color.bratGreen)
-                                                .frame(width: geo.size.width * viewModel.timerPercentage)
-                                            Spacer()
-                                        }
-                                        // inverted color text when timer progress moves
-                                        Text("\(viewModel.timeInSecLeft)s")
-                                            .multilineTextAlignment(.center)
-                                            .font(.headline.monospaced())
-                                            .foregroundStyle(.white)
-                                            .frame(width: geo.size.width)
-                                        Text("\(viewModel.timeInSecLeft)s")
-                                            .multilineTextAlignment(.center)
-                                            .font(.headline.monospaced())
-                                            .foregroundStyle(Color.black)
-                                            .frame(width: geo.size.width)
-                                            .mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
-                                    }
-                                }
-                            }
-                        }
+                if viewModel.isTimerRunning {
+                    TimelineView(.periodic(from: .now, by: 0.2)) { _ in
+                        timerButtonContent
                     }
+                } else {
+                    timerButtonContent
+                }
 				}
 				.clipShape(Capsule())
 				.glassEffect(.regular.interactive(true))
@@ -183,10 +170,11 @@ struct SetLoggingView: View {
 						.frame(maxHeight: .infinity)
 				}
 				.buttonStyle(.glassProminent)
-				.tint(.bratGreen)
+				.tint(.accentColor)
+                .accessibilityIdentifier("setLogging.saveButton")
 			}
 		.padding()
-		.glassEffect(.clear.tint(.bratGreen.opacity(0.08)))
+		.glassEffect(.clear.tint(.accentColor.opacity(0.08)))
 		.padding()
 		.frame(height: Self.bottomActionRowHeight)
 
@@ -215,8 +203,9 @@ struct SetLoggingView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 30)
             }
-            .tint(Color.bratGreen)
+            .tint(Color.accentColor)
             .buttonStyle(.glassProminent)
+            .accessibilityIdentifier("setLogging.generateOnboardingButton")
             
             Button() {
                 viewModel.markOnboardingSeen()
@@ -225,9 +214,10 @@ struct SetLoggingView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 30)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color.bratGreen)
+                    .foregroundStyle(Color.accentColor)
             }
             .buttonStyle(.glass)
+            .accessibilityIdentifier("setLogging.skipOnboardingButton")
         }
         .padding()
         .overlay {
@@ -240,6 +230,40 @@ struct SetLoggingView: View {
         }
         .presentationDetents([.height(sheetHeight)])
 
+    }
+
+    @ViewBuilder
+    private var timerButtonContent: some View {
+        Label("Start timer", systemImage: "timer")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundStyle(colorScheme == .light ? .black : .white)
+            .opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
+            .background {
+                GeometryReader { geo in
+                    if viewModel.timerPercentage > 0.0 {
+                        ZStack(alignment: .leading) {
+                            HStack(spacing: 0) {
+                                Rectangle()
+                                    .fill(Color.accentColor)
+                                    .frame(width: geo.size.width * viewModel.timerPercentage)
+                                Spacer()
+                            }
+                            // Invert text color across timer progress fill.
+                            Text("\(viewModel.timeInSecLeft)s")
+                                .multilineTextAlignment(.center)
+                                .font(.headline.monospaced())
+                                .foregroundStyle(.white)
+                                .frame(width: geo.size.width)
+                            Text("\(viewModel.timeInSecLeft)s")
+                                .multilineTextAlignment(.center)
+                                .font(.headline.monospaced())
+                                .foregroundStyle(Color.black)
+                                .frame(width: geo.size.width)
+                                .mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
+                        }
+                    }
+                }
+            }
     }
 
     private func recordColor(at index: Int) -> Color {
@@ -265,7 +289,7 @@ struct SetLoggingView: View {
                     .background {
                         if viewModel.isFocusedAndOverwriteEnabled(at: index, type: type) {
                             RoundedRectangle(cornerRadius: 8, style: .circular)
-                                .foregroundStyle(colorScheme == .dark ? .white : .bratGreen)
+                                .foregroundStyle(colorScheme == .dark ? .white : .accentColor)
                                 .transition(.opacity)
                         }
                     }

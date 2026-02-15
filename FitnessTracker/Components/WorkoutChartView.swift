@@ -28,7 +28,7 @@ struct WorkoutChartView: View {
     var body: some View {
         if exercises.count <= 1 {
             // show empty state
-            Color.bratGreen
+            Color.accentColor
                 .opacity(0.1)
                 .cornerRadius(16)
                 .overlay {
@@ -50,12 +50,12 @@ struct WorkoutChartView: View {
                             x: .value("Date", exercise.date),
                             y: .value("Weight", exercise.maxWeight)
                         )
-                        .foregroundStyle(Color.bratGreen)
+                        .foregroundStyle(Color.accentColor)
                         PointMark(
                             x: .value("Date", exercise.date),
                             y: .value("Weight", exercise.maxWeight)
                         )
-                        .foregroundStyle(Color.bratGreen)
+                        .foregroundStyle(Color.accentColor)
                     }
                 }
             }

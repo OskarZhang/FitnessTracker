@@ -86,7 +86,7 @@ struct WeekCardView: View {
                 ForEach(0..<7) { index in
                     Text(getWeekdayName(for: index))
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(isCurrentDay(dayIndex: index) ? .bratGreen : .primary)
+                        .foregroundColor(isCurrentDay(dayIndex: index) ? .accentColor : .primary)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -98,7 +98,7 @@ struct WeekCardView: View {
                     let showsFill = animateSymbols && shouldFill
                     Image(systemName: showsFill ? "checkmark.rectangle.portrait.fill" : "checkmark.rectangle.portrait")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.bratGreen)
+                        .foregroundColor(.accentColor)
                         .frame(maxWidth: .infinity)
                         .contentTransition(.symbolEffect(.replace))
                         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: showsFill)
@@ -107,7 +107,7 @@ struct WeekCardView: View {
         }
         .padding(.vertical, 32)
         .padding(.horizontal, 32)
-        .glassEffect(.clear.tint(.bratGreen.opacity(0.08)), in: .rect(
+        .glassEffect(.clear.tint(.accentColor.opacity(0.08)), in: .rect(
             corners: .concentric(minimum: 24),
             isUniform: true
         ))

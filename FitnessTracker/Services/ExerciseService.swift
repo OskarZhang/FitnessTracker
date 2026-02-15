@@ -12,6 +12,15 @@ class ExerciseService: ObservableObject {
     private var transitions: [String: [String: Int]] = [:]
     private var transitionProbabilities: [String: [String: Double]] = [:]
     @Published var exercises: [Exercise] = []
+
+    private static func makeContainer() throws -> ModelContainer {
+        let schema = Schema(FitnessTrackerSchemaV1.models)
+        return try ModelContainer(
+            for: schema,
+            migrationPlan: FitnessTrackerMigrationPlan.self,
+            configurations: .init()
+        )
+    }
     
     lazy var exerciseNamesFromCSV: [String] = {
         guard let url = Bundle.main.url(forResource: "strength_workout_names", withExtension: "csv") else {
@@ -32,13 +41,29 @@ class ExerciseService: ObservableObject {
         }
     }()
 
-    init() {
-        let container = try! ModelContainer(for: Exercise.self, configurations: .init())
+    #if DEBUG
+    init(resetData: Bool = false) {
+        let container = try! Self.makeContainer()
         self.modelContext = ModelContext(container)
-        self.exercises = fetchWorkouts()
+        applyUITestResetIfNeeded(
+            resetData: resetData,
+            launchArguments: ProcessInfo.processInfo.arguments
+        )
+        finishInitialization()
+    }
+    #else
+    init() {
+        let container = try! Self.makeContainer()
+        self.modelContext = ModelContext(container)
+        finishInitialization()
+    }
+    #endif
+
+    private func finishInitialization() {
+        exercises = fetchWorkouts()
         Task {
-            await buildTransitionProbabilityMatrix(data: self.exercises)
-        }   
+            await buildTransitionProbabilityMatrix(data: exercises)
+        }
     }
 
     func groupedWorkouts(query: String = "") -> [(date: Date, exercises: [Exercise])] {
@@ -153,7 +178,7 @@ class ExerciseService: ObservableObject {
     }
 
     func updateExercise(_ exercise: Exercise, sets: [StrengthSet]) {
-        exercise.sets = sets
+        exercise.strengthSets = sets
         try? modelContext.save()
         exercises = fetchWorkouts()
     }
@@ -189,3 +214,45 @@ class ExerciseService: ObservableObject {
     }
 
 }
+
+#if DEBUG
+private extension ExerciseService {
+    func applyUITestResetIfNeeded(resetData: Bool, launchArguments: [String]) {
+        guard resetData else { return }
+
+        resetAllDataForUITests()
+        SetLoggingSessionStore.clear()
+
+        if launchArguments.contains("UI_TEST_SEED_ORDERING") {
+            seedOrderingUITestData()
+        }
+    }
+
+    func resetAllDataForUITests() {
+        let descriptor = FetchDescriptor<Exercise>()
+        guard let existing = try? modelContext.fetch(descriptor) else { return }
+        for exercise in existing {
+            modelContext.delete(exercise)
+        }
+        try? modelContext.save()
+    }
+
+    func seedOrderingUITestData() {
+        let exercise = Exercise(
+            name: "Order Check Bench",
+            type: .strength,
+            strengthSets: [
+                StrengthSet(weightInLbs: 35, reps: 10),
+                StrengthSet(weightInLbs: 40, reps: 10),
+                StrengthSet(weightInLbs: 50, reps: 10),
+            ]
+        )
+        modelContext.insert(exercise)
+        try? modelContext.save()
+    }
+}
+#else
+private extension ExerciseService {
+    func applyUITestResetIfNeeded(resetData: Bool, launchArguments: [String]) {}
+}
+#endif

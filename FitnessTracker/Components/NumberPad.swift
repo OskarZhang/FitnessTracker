@@ -199,7 +199,7 @@ struct NumberPad: View {
                 .frame(height: 60)
                 .background(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.bratGreen)
+                        .fill(Color.accentColor)
                         .shadow(radius: 0.4)
                 )
                 .foregroundColor(.white)

@@ -5,14 +5,48 @@ struct SettingsView: View {
 
     @StateObject private var healthKitManager: HealthKitManager = Container.shared.resolve(HealthKitManager.self)
     @Injected private var exerciseService: ExerciseService
+    @AppStorage(AppAccentColor.storageKey) private var appAccentColorID = AppAccentColor.brat.rawValue
 
     @State private var isAuthorizing = false
     @State private var isExporting = false
     @State private var statusMessage: String?
 
     var body: some View {
+        let selectedAccent = AppAccentColor.fromStoredValue(appAccentColorID).color
+
         NavigationStack {
             List {
+                Section("Appearance") {
+                    LabeledContent("Accent Color") {
+                        Menu {
+                            ForEach(AppAccentColor.allCases) { accent in
+                                Button {
+                                    appAccentColorID = accent.rawValue
+                                } label: {
+                                    HStack {
+                                        Circle()
+                                            .fill(accent.color)
+                                            .frame(width: 10, height: 10)
+                                        Text(accent.displayName)
+                                        Spacer()
+                                        if accent.rawValue == appAccentColorID {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(AppAccentColor.fromStoredValue(appAccentColorID).displayName)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption2)
+                            }
+                            .foregroundStyle(selectedAccent)
+                        }
+                    }
+                    .tint(selectedAccent)
+                }
+
                 Section("Health") {
                     HStack {
                         Text("HealthKit")
@@ -53,6 +87,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .tint(selectedAccent)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {

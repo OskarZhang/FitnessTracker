@@ -18,15 +18,18 @@ struct AddExerciseButton: View {
     }
     var body: some View {
         Button(action: {
+            // Manual add flow should always start from exercise picker.
+            SetLoggingSessionStore.clearRestoreRequest()
             isAddingWorkout = true
             addWorkoutImpact.impactOccurred()
         }) {
             Image(systemName: "plus")
-                .font(.title)
-                .frame(width: 60, height: 60)
-                .foregroundColor(.bratGreen)
+                .font(.system(size: 26, weight: .bold))
+                .frame(width: 64, height: 64)
+                .foregroundColor(.accentColor)
         }
-        .glassEffect(.regular.tint(.bratGreen.opacity(0.08)).interactive(true))
+        .glassEffect(.regular.tint(.accentColor.opacity(0.08)).interactive(true))
+        .accessibilityIdentifier("home.addWorkoutButton")
         .padding()
     }
 }
