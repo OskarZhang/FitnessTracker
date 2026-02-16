@@ -53,6 +53,7 @@ struct SettingsView: View {
                         Spacer()
                         Text(healthKitStatusLabel)
                             .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("settings.healthkitStatusLabel")
                     }
 
                     if !isHealthKitAuthorized {
@@ -66,6 +67,7 @@ struct SettingsView: View {
                             }
                         }
                         .disabled(isAuthorizing || !healthKitManager.isAvailable)
+                        .accessibilityIdentifier("settings.enableHealthKitButton")
                     }
 
                     Button {
@@ -78,6 +80,7 @@ struct SettingsView: View {
                         }
                     }
                     .disabled(!isHealthKitAuthorized || isExporting)
+                    .accessibilityIdentifier("settings.exportWorkoutButton")
 
                     if let statusMessage {
                         Text(statusMessage)
@@ -93,6 +96,7 @@ struct SettingsView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("settings.doneButton")
                 }
             }
             .onAppear {

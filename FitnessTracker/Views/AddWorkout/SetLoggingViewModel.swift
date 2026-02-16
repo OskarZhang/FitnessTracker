@@ -152,7 +152,7 @@ class SetLoggingViewModel: ObservableObject {
     private let shouldSkipOnboardingPromptForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
-    private var timerEndTime: Date?
+    @Published private var timerEndTime: Date?
     private var timerSyncTask: Task<Void, Never>?
     private let shouldRelaxCompletionRequirementForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
@@ -424,13 +424,8 @@ class SetLoggingViewModel: ObservableObject {
 
     var timerPercentage: Double {
         guard let timerEndTime = self.timerEndTime else { return 0 }
-        let timerPercentage: Double
-        if Date() >= timerEndTime {
-            self.timerEndTime = nil
-            return 0.0
-        } else {
-            return timerEndTime.timeIntervalSince(Date()) / 60.0
-        }
+        guard Date() < timerEndTime else { return 0 }
+        return timerEndTime.timeIntervalSince(Date()) / 60.0
     }
 
     var timeInSecLeft: Int {

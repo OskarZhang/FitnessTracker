@@ -154,6 +154,9 @@ struct SetLoggingView: View {
                     timerButtonContent
                 }
 				}
+                .accessibilityIdentifier("setLogging.timerButton")
+                .accessibilityValue(viewModel.isTimerRunning ? "\(viewModel.timeInSecLeft)" : "stopped")
+                .accessibilityLabel(viewModel.isTimerRunning ? "Timer \(viewModel.timeInSecLeft) seconds" : "Start timer")
 				.clipShape(Capsule())
 				.glassEffect(.regular.interactive(true))
 				Spacer()
@@ -254,6 +257,7 @@ struct SetLoggingView: View {
                                 .font(.headline.monospaced())
                                 .foregroundStyle(.white)
                                 .frame(width: geo.size.width)
+                                .accessibilityIdentifier("setLogging.timerCountdownLabel")
                             Text("\(viewModel.timeInSecLeft)s")
                                 .multilineTextAlignment(.center)
                                 .font(.headline.monospaced())

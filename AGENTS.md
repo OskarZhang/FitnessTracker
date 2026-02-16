@@ -42,20 +42,31 @@
 - Safe rule: restore only via one-shot token, and clear token on explicit user-driven add entry.
 
 ## UI Test Knowledge
-- Preferred verification path: `FitnessTrackerUITests` on simulator (not deeplink-only).
-- Main tests:
-- `testAddWorkoutFlow`
-- `testRestoresPendingSessionAfterBackgroundKill`
+- Preferred verification path: Appium integration suite on simulator.
+- Main Appium specs:
+- `appium/specs/01-onboarding.e2e.ts`
+- `appium/specs/02-log-exercise.e2e.ts`
+- `appium/specs/03-timer.e2e.ts`
+- `appium/specs/04-healthkit.e2e.ts`
 - Important launch args:
 - `UI_TEST_RESET` resets app data through `ExerciseService(resetData: true)` and clears pending restore session.
+- `INT_TEST_RESET_DATA` resets app data for Appium integration runs.
+- `INT_TEST_FORCE_ONBOARDING` forces onboarding screen for onboarding/HealthKit onboarding tests.
+- `INT_TEST_COMPLETE_ONBOARDING` bypasses onboarding for home/add/timer/settings paths.
 - First-time AI onboarding prompt can block tests; dismiss via `setLogging.skipOnboardingButton` helper logic.
 - Key accessibility IDs:
 - `home.addWorkoutButton`
+- `home.settingsButton`
 - `addWorkout.exerciseInput`
 - `addWorkout.suggestion.<ExerciseName>`
 - `setLogging.addSetButton`
-- `setLogging.completeSetButton.<index>`
+- `setLogging.timerButton`
 - `setLogging.saveButton`
+- `onboarding.enableHealthKitButton`
+- `onboarding.notNowButton`
+- `settings.healthkitStatusLabel`
+- `settings.enableHealthKitButton`
+- `settings.doneButton`
 - `home.emptyStateText`
 
 ## Deeplink Map
@@ -72,11 +83,11 @@
 - Use skill: `fitnesstracker-ios-sim-flow`.
 - Repo-local skill path: `skills/fitnesstracker-ios-sim-flow/SKILL.md` (use this copy for this repository).
 - Default order:
-- run targeted UI tests first
-- run deeplink/screenshot flow only for additional visual validation
-- Simctl cannot tap app UI; use XCUITest for deterministic interactions.
+- during implementation and design-feedback cycles, use `$fitnesstracker-ios-sim-flow` to capture simulator screenshots for visual review
+- do not run Appium integration tests during intermediate design-feedback iterations
+- Simctl cannot tap app UI; use Appium for deterministic post-change UI interactions.
 - Mandatory after any code change:
-- always run `fitnesstracker-ios-sim-flow` to verify implementation
+- run Appium critical-path suite via `scripts/run_appium_critical_paths.sh` only once at the end of implementation
 - compare the resulting UI screenshot(s) against the pre-change UI image(s)
 - report concrete visual diffs (or explicitly state no visual change)
 - run an independent sub-agent review of the produced screenshot(s) after each code change

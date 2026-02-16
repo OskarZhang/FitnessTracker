@@ -105,6 +105,7 @@ struct ExercisesListView: View {
                                 .background(Color(.systemBackground).opacity(0.9), in: Circle())
                         }
                         .accessibilityLabel("Settings")
+                        .accessibilityIdentifier("home.settingsButton")
                         .padding(.trailing, 16)
                         .padding(.top, 8)
                     }
