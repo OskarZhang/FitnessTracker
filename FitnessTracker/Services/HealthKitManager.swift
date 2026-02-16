@@ -98,6 +98,14 @@ final class HealthKitManager: ObservableObject {
         }
     }
 
+    func mostRecentBodyMassInPounds() async -> Double? {
+        do {
+            return try await fetchMostRecentBodyMassInPounds()
+        } catch {
+            return nil
+        }
+    }
+
     private func estimateCalories(totalSets: Int, bodyWeightInLbs: Double?, durationMinutes: Int) -> Double {
         let weightKg = (bodyWeightInLbs ?? 155.0) * 0.45359237
         let hours = Double(durationMinutes) / 60.0
