@@ -16,16 +16,29 @@ struct FitnessTrackerApp: App {
     @State private var didEnterBackgroundInProcess = false
     @State private var hasBecomeActiveOnce = false
     private let isUITestSession: Bool
+    private let forceOnboardingForIntegrationTests: Bool
+    private let completeOnboardingForIntegrationTests: Bool
 
     init() {
         let launchArguments = ProcessInfo.processInfo.arguments
         let environment = ProcessInfo.processInfo.environment
         let shouldResetForUITests = launchArguments.contains("UI_TEST_RESET")
+        let shouldResetForIntegrationTests = launchArguments.contains("INT_TEST_RESET_DATA")
+        self.forceOnboardingForIntegrationTests = launchArguments.contains("INT_TEST_FORCE_ONBOARDING")
+        self.completeOnboardingForIntegrationTests = launchArguments.contains("INT_TEST_COMPLETE_ONBOARDING")
         self.isUITestSession = shouldResetForUITests
             || launchArguments.contains("UITEST")
             || environment["XCTestConfigurationFilePath"] != nil
+
+        if forceOnboardingForIntegrationTests {
+            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+        } else if completeOnboardingForIntegrationTests {
+            UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+        }
         #if DEBUG
-        Container.shared.registerSingleton(ExerciseService.self) { ExerciseService(resetData: shouldResetForUITests) }
+        Container.shared.registerSingleton(ExerciseService.self) {
+            ExerciseService(resetData: shouldResetForUITests || shouldResetForIntegrationTests)
+        }
         #else
         Container.shared.registerSingleton(ExerciseService.self) { ExerciseService() }
         #endif
@@ -35,7 +48,7 @@ struct FitnessTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if !hasCompletedOnboarding && !isUITestSession {
+                if shouldShowOnboarding && !isUITestSession {
                     OnboardingView(accentColor: AppAccentColor.fromStoredValue(appAccentColorID).color) {
                         hasCompletedOnboarding = true
                     }
@@ -62,6 +75,13 @@ struct FitnessTrackerApp: App {
                 hasBecomeActiveOnce = true
             }
         }
+    }
+
+    private var shouldShowOnboarding: Bool {
+        if completeOnboardingForIntegrationTests {
+            return false
+        }
+        return !hasCompletedOnboarding
     }
 }
 
@@ -98,12 +118,14 @@ private struct OnboardingView: View {
                     Text("Enable HealthKit Sync")
                         .font(.system(size: 34, weight: .heavy))
                         .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("onboarding.title")
 
                     Text("Allow FitnessTracker to use your Health app workout data to auto-add exercises.")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
+                        .accessibilityIdentifier("onboarding.message")
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -127,6 +149,7 @@ private struct OnboardingView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
+                        .accessibilityIdentifier("onboarding.healthkitMessage")
                 }
 
                 Button {
@@ -151,6 +174,7 @@ private struct OnboardingView: View {
                 )
                 .clipShape(Capsule(style: .continuous))
                 .padding(.horizontal, 24)
+                .accessibilityIdentifier("onboarding.enableHealthKitButton")
 
                 Button("Not now") {
                     onFinish()
@@ -158,6 +182,7 @@ private struct OnboardingView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 18)
+                .accessibilityIdentifier("onboarding.notNowButton")
 
                 Spacer()
             }
