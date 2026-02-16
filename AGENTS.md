@@ -83,12 +83,11 @@
 - Use skill: `fitnesstracker-ios-sim-flow`.
 - Repo-local skill path: `skills/fitnesstracker-ios-sim-flow/SKILL.md` (use this copy for this repository).
 - Default order:
-- run Appium integration suite first (`scripts/run_appium_critical_paths.sh`)
-- run targeted `FitnessTrackerUITests` only as secondary regression coverage when needed
-- run deeplink/screenshot flow only for additional visual validation
+- during implementation and design-feedback cycles, use `$fitnesstracker-ios-sim-flow` to capture simulator screenshots for visual review
+- do not run Appium integration tests during intermediate design-feedback iterations
 - Simctl cannot tap app UI; use Appium for deterministic post-change UI interactions.
 - Mandatory after any code change:
-- always run Appium critical-path suite via `scripts/run_appium_critical_paths.sh`
+- run Appium critical-path suite via `scripts/run_appium_critical_paths.sh` only once at the end of implementation
 - compare the resulting UI screenshot(s) against the pre-change UI image(s)
 - report concrete visual diffs (or explicitly state no visual change)
 - run an independent sub-agent review of the produced screenshot(s) after each code change
