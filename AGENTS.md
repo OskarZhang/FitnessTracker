@@ -71,6 +71,8 @@
 ## Simulator/Verification Workflow
 - Use skill: `fitnesstracker-ios-sim-flow`.
 - Repo-local skill path: `skills/fitnesstracker-ios-sim-flow/SKILL.md` (use this copy for this repository).
+- Simulator target policy:
+- always get the current available device list first via `xcrun simctl list devices available`
 - Default order:
 - run targeted UI tests first
 - run deeplink/screenshot flow only for additional visual validation
