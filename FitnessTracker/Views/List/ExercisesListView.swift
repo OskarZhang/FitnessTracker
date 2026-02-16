@@ -16,6 +16,7 @@ class SearchContext: ObservableObject {
 
 struct ExercisesListView: View {
     @StateObject private var exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
+    private let workoutLiveActivityService: WorkoutLiveActivityService = Container.shared.resolve(WorkoutLiveActivityService.self)
     
     @Environment(\.colorScheme) var colorScheme
 
@@ -23,6 +24,8 @@ struct ExercisesListView: View {
     @State private var isShowingSettings = false
     @State private var hasAutoRestoredPendingSession = false
     @State private var liveDeepLinkExerciseName: String?
+    @State private var livePromptContext: LiveWorkoutPromptContext?
+    @State private var liveSetLoggingContext: LiveSetLoggingContext?
     @State private var navigationPath: [NavigationTarget] = []
 
     @StateObject var searchContext = SearchContext()
@@ -134,9 +137,40 @@ struct ExercisesListView: View {
             liveDeepLinkExerciseName = nil
         }) {
             AddWorkoutView(isPresented: $isAddingWorkout, initialExerciseName: liveDeepLinkExerciseName)
+                .id(liveDeepLinkExerciseName ?? "manual-add")
         }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
+        }
+        .sheet(item: $liveSetLoggingContext, onDismiss: {
+            liveSetLoggingContext = nil
+        }) { context in
+            SetLoggingView(
+                viewModel: SetLoggingViewModel(mode: .add(exerciseName: context.exerciseName, pendingSession: nil)),
+                onSave: {
+                    liveSetLoggingContext = nil
+                }
+            )
+        }
+        .sheet(item: $livePromptContext) { context in
+            LiveWorkoutPromptSheet(
+                suggestedExerciseName: context.suggestedExerciseName,
+                onEndWorkout: {
+                    livePromptContext = nil
+                    Task {
+                        await workoutLiveActivityService.endSessionAndLogToHealthKit()
+                    }
+                },
+                onSuggestNextExercise: {
+                    let exerciseName = context.suggestedExerciseName
+                    livePromptContext = nil
+                    SetLoggingSessionStore.clearRestoreRequest()
+                    navigationPath.removeAll()
+                    workoutLiveActivityService.startOrUpdateForLogging(exerciseName: exerciseName)
+                    workoutLiveActivityService.recordInteraction()
+                    liveSetLoggingContext = LiveSetLoggingContext(exerciseName: exerciseName)
+                }
+            )
         }
         .onChange(of: exerciseService.exercises) { _, _ in
             fetchGroupedExercises()
@@ -192,6 +226,8 @@ struct ExercisesListView: View {
 
         isAddingWorkout = false
         isShowingSettings = false
+        livePromptContext = nil
+        liveSetLoggingContext = nil
 
         switch target {
         case .home:
@@ -206,19 +242,46 @@ struct ExercisesListView: View {
             navigationPath.removeAll()
             liveDeepLinkExerciseName = nil
             isShowingSettings = true
-        case let .liveWorkout(exerciseName):
+        case let .liveWorkout(exerciseName, presentation):
             SetLoggingSessionStore.clearRestoreRequest()
             navigationPath.removeAll()
-            liveDeepLinkExerciseName = exerciseName
-            isAddingWorkout = true
+            if presentation == .prompt {
+                liveDeepLinkExerciseName = nil
+                let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+                let promptExercise = trimmed.isEmpty ? "Continue your active workout" : trimmed
+                livePromptContext = LiveWorkoutPromptContext(suggestedExerciseName: promptExercise)
+            } else {
+                livePromptContext = nil
+                liveDeepLinkExerciseName = nil
+                let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    workoutLiveActivityService.startOrUpdateForLogging(exerciseName: trimmed)
+                    workoutLiveActivityService.recordInteraction()
+                    liveSetLoggingContext = LiveSetLoggingContext(exerciseName: trimmed)
+                }
+            }
         case let .workoutDetail(id):
             liveDeepLinkExerciseName = nil
+            livePromptContext = nil
+            liveSetLoggingContext = nil
             navigationPath = [.workoutDetail(id)]
         case let .workoutEdit(id):
             liveDeepLinkExerciseName = nil
+            livePromptContext = nil
+            liveSetLoggingContext = nil
             navigationPath = [.workoutEdit(id)]
         }
     }
+}
+
+private struct LiveWorkoutPromptContext: Identifiable {
+    let id = UUID()
+    let suggestedExerciseName: String
+}
+
+private struct LiveSetLoggingContext: Identifiable {
+    let id = UUID()
+    let exerciseName: String
 }
 
 private enum NavigationTarget: Hashable {
@@ -227,9 +290,14 @@ private enum NavigationTarget: Hashable {
 }
 
 private enum DeepLinkTarget {
+    enum LivePresentation: Equatable {
+        case direct
+        case prompt
+    }
+
     case home
     case addWorkout
-    case liveWorkout(String)
+    case liveWorkout(String, LivePresentation)
     case settings
     case workoutDetail(UUID)
     case workoutEdit(UUID)
@@ -253,7 +321,11 @@ private enum DeepLinkTarget {
                   !exercise.isEmpty else {
                 return nil
             }
-            self = .liveWorkout(exercise)
+            let sessionState = components.queryItems?.first(where: { $0.name == "state" })?.value
+            let presentation: LivePresentation = sessionState == WorkoutLiveSessionState.needsPostWorkoutPrompt.rawValue
+                ? .prompt
+                : .direct
+            self = .liveWorkout(exercise, presentation)
         case "settings":
             self = .settings
         case "workout":
@@ -289,6 +361,94 @@ private struct EmptyExercisesStateView: View {
             Spacer()
         }
         .padding(.horizontal, 12)
+    }
+}
+
+private struct LiveWorkoutPromptSheet: View {
+    let suggestedExerciseName: String?
+    let onEndWorkout: () -> Void
+    let onSuggestNextExercise: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Continue your workout?")
+                        .font(.title3.bold())
+
+                    Text("You're between exercises. Choose your next step.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 10) {
+                    Image(systemName: "sparkles")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color.accentColor)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Next likely exercise")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        Text(nextLikelyExerciseText)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.accentColor)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color.accentColor.opacity(0.11), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                Button {
+                    dismiss()
+                    onSuggestNextExercise()
+                } label: {
+                    Label("Suggest Next Exercise", systemImage: "arrow.triangle.2.circlepath.circle.fill")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.accentColor))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("livePrompt.suggestNextButton")
+
+                Button {
+                    dismiss()
+                    onEndWorkout()
+                } label: {
+                    Label("End Workout", systemImage: "stop.circle")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(Color.red)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.red.opacity(0.4), lineWidth: 1.5)
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("livePrompt.endWorkoutButton")
+
+                Text("You can still end later from home.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .padding(20)
+            .presentationDetents([.height(340)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color(.systemBackground))
+        }
+    }
+
+    private var nextLikelyExerciseText: String {
+        let fallback = "Continue your active workout"
+        guard let suggestedExerciseName else { return fallback }
+        let trimmed = suggestedExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return fallback }
+        return trimmed
     }
 }
 

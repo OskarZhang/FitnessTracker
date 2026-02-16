@@ -18,6 +18,9 @@ struct AddWorkoutView: View {
                     }
                 }
         }
+        .onAppear {
+            viewModel.onViewAppear()
+        }
     }
 
   

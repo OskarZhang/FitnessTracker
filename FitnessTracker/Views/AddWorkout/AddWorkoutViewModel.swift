@@ -19,14 +19,26 @@ class AddWorkoutViewModel: ObservableObject {
     @Injected private var exerciseService: ExerciseService
 
     private var isRestoringPendingSession = false
+    private var pendingInitialExerciseToStart: String?
 
     init(initialExerciseName: String? = nil) {
-        if let initialExerciseName, !initialExerciseName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            selectedExercise = initialExerciseName
-            startLogging(exerciseName: initialExerciseName, pendingSession: nil)
-            return
+        if let initialExerciseName {
+            let trimmed = initialExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                selectedExercise = trimmed
+                pendingInitialExerciseToStart = trimmed
+                return
+            }
         }
         restorePendingSessionIfNeeded()
+    }
+
+    func onViewAppear() {
+        if let pendingInitialExerciseToStart {
+            startLogging(exerciseName: pendingInitialExerciseToStart, pendingSession: nil)
+            self.pendingInitialExerciseToStart = nil
+            return
+        }
     }
 
     func getExerciseSuggestions(name: String) -> [String] {

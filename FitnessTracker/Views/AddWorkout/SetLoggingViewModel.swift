@@ -214,7 +214,7 @@ class SetLoggingViewModel: ObservableObject {
             )
             exerciseService.addExercise(exercise)
             SetLoggingSessionStore.clear()
-            workoutLiveActivityService.showNextLikely(afterSavedExercise: selectedExercise)
+            workoutLiveActivityService.showPostWorkoutPrompt(afterSavedExercise: selectedExercise)
         case .edit(let exercise):
             let updatedSets = sets
                 .filter { $0.isCompleted }

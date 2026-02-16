@@ -44,9 +44,11 @@ struct FitnessTrackerApp: App {
         #endif
         Container.shared.registerSingleton(HealthKitManager.self) { HealthKitManager() }
         Container.shared.registerSingleton(WorkoutLiveActivityService.self) {
-            WorkoutLiveActivityService(exerciseService: Container.shared.resolve(ExerciseService.self))
+            WorkoutLiveActivityService(
+                exerciseService: Container.shared.resolve(ExerciseService.self),
+                healthKitManager: Container.shared.resolve(HealthKitManager.self)
+            )
         }
-        BackgroundSyncManager.shared.register()
     }
     var body: some Scene {
         WindowGroup {
@@ -66,21 +68,13 @@ struct FitnessTrackerApp: App {
                 didEnterBackgroundInProcess = true
             }
 
-            if newPhase == .background {
-                BackgroundSyncManager.shared.schedule()
-                let liveActivityService: WorkoutLiveActivityService = Container.shared.resolve(WorkoutLiveActivityService.self)
-                liveActivityService.endIfInactive()
-            } else if newPhase == .active, didEnterBackgroundInProcess {
+            if newPhase == .active, didEnterBackgroundInProcess {
                 // App resumed in the same process; this was not a kill/relaunch restore case.
                 SetLoggingSessionStore.clearRestoreRequest()
                 didEnterBackgroundInProcess = false
-                let liveActivityService: WorkoutLiveActivityService = Container.shared.resolve(WorkoutLiveActivityService.self)
-                liveActivityService.endIfInactive()
             }
 
             if newPhase == .active {
-                let liveActivityService: WorkoutLiveActivityService = Container.shared.resolve(WorkoutLiveActivityService.self)
-                liveActivityService.endIfInactive()
                 hasBecomeActiveOnce = true
             }
         }

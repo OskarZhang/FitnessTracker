@@ -3,15 +3,14 @@ import Foundation
 
 @MainActor
 final class WorkoutLiveActivityService {
-    private let inactivityInterval: TimeInterval = 20 * 60
     private var currentActivity: Activity<WorkoutLiveActivityAttributes>?
-    private var inactivityTask: Task<Void, Never>?
     private let exerciseService: ExerciseService
+    private let healthKitManager: HealthKitManager
 
-    init(exerciseService: ExerciseService) {
+    init(exerciseService: ExerciseService, healthKitManager: HealthKitManager) {
         self.exerciseService = exerciseService
+        self.healthKitManager = healthKitManager
         currentActivity = Activity<WorkoutLiveActivityAttributes>.activities.first
-        scheduleInactivityCheck()
     }
 
     func startOrUpdateForLogging(exerciseName: String) {
@@ -21,14 +20,15 @@ final class WorkoutLiveActivityService {
         let now = Date()
         if let currentActivity {
             let nextState = WorkoutLiveActivityAttributes.ContentState(
+                sessionState: .activeLogging,
                 displayExerciseName: trimmed,
                 timerEndDate: nil,
-                nextLikelyExerciseName: nil,
+                suggestedExerciseName: nil,
                 deepLinkExerciseName: trimmed,
+                sessionStartDate: currentActivity.content.state.sessionStartDate,
                 lastInteractionDate: now
             )
             update(currentActivity: currentActivity, with: nextState)
-            scheduleInactivityCheck()
             return
         }
 
@@ -36,19 +36,20 @@ final class WorkoutLiveActivityService {
 
         let attributes = WorkoutLiveActivityAttributes(workoutSessionID: UUID().uuidString)
         let state = WorkoutLiveActivityAttributes.ContentState(
+            sessionState: .activeLogging,
             displayExerciseName: trimmed,
             timerEndDate: nil,
-            nextLikelyExerciseName: nil,
+            suggestedExerciseName: nil,
             deepLinkExerciseName: trimmed,
+            sessionStartDate: now,
             lastInteractionDate: now
         )
 
         do {
             currentActivity = try Activity.request(
                 attributes: attributes,
-                content: ActivityContent(state: state, staleDate: now.addingTimeInterval(inactivityInterval))
+                content: ActivityContent(state: state, staleDate: nil)
             )
-            scheduleInactivityCheck()
         } catch {
             print("Failed to start workout live activity: \(error)")
         }
@@ -60,23 +61,22 @@ final class WorkoutLiveActivityService {
         nextState.timerEndDate = endDate
         nextState.lastInteractionDate = Date()
         update(currentActivity: currentActivity, with: nextState)
-        scheduleInactivityCheck()
     }
 
-    func showNextLikely(afterSavedExercise exerciseName: String) {
+    func showPostWorkoutPrompt(afterSavedExercise exerciseName: String) {
         guard let currentActivity else { return }
 
         let nextExercise = exerciseService.nextLikelyExercise(after: exerciseName)
         let deepLinkExercise = nextExercise ?? exerciseName
         let now = Date()
         var nextState = currentActivity.content.state
-        nextState.displayExerciseName = deepLinkExercise
-        nextState.nextLikelyExerciseName = nextExercise
+        nextState.sessionState = .needsPostWorkoutPrompt
+        nextState.displayExerciseName = exerciseName
+        nextState.suggestedExerciseName = nextExercise
         nextState.deepLinkExerciseName = deepLinkExercise
         nextState.timerEndDate = nil
         nextState.lastInteractionDate = now
         update(currentActivity: currentActivity, with: nextState)
-        scheduleInactivityCheck()
     }
 
     func recordInteraction() {
@@ -84,23 +84,9 @@ final class WorkoutLiveActivityService {
         var nextState = currentActivity.content.state
         nextState.lastInteractionDate = Date()
         update(currentActivity: currentActivity, with: nextState)
-        scheduleInactivityCheck()
-    }
-
-    func endIfInactive() {
-        guard let currentActivity else { return }
-        let deadline = currentActivity.content.state.lastInteractionDate.addingTimeInterval(inactivityInterval)
-        if Date() >= deadline {
-            endNow()
-        } else {
-            scheduleInactivityCheck()
-        }
     }
 
     func endNow() {
-        inactivityTask?.cancel()
-        inactivityTask = nil
-
         guard let currentActivity else { return }
         let finalState = currentActivity.content.state
         Task {
@@ -112,27 +98,42 @@ final class WorkoutLiveActivityService {
         self.currentActivity = nil
     }
 
+    func endSessionAndLogToHealthKit() async {
+        guard let currentActivity else { return }
+        let finalState = currentActivity.content.state
+
+        let sessionExercises = exerciseService.exercises.filter { exercise in
+            exercise.date >= finalState.sessionStartDate
+        }
+
+        if !sessionExercises.isEmpty,
+           healthKitManager.isAvailable
+        {
+            healthKitManager.refreshAuthorizationStatus()
+            if healthKitManager.workoutAuthorizationStatus == .sharingAuthorized {
+                do {
+                    try await healthKitManager.writeStrengthWorkout(exercises: sessionExercises)
+                } catch {
+                    print("Failed to export workout session to HealthKit: \(error)")
+                }
+            }
+        }
+
+        await currentActivity.end(
+            ActivityContent(state: finalState, staleDate: nil),
+            dismissalPolicy: .immediate
+        )
+        self.currentActivity = nil
+    }
+
     private func update(
         currentActivity: Activity<WorkoutLiveActivityAttributes>,
         with state: WorkoutLiveActivityAttributes.ContentState
     ) {
         Task {
             await currentActivity.update(
-                ActivityContent(state: state, staleDate: state.lastInteractionDate.addingTimeInterval(inactivityInterval))
+                ActivityContent(state: state, staleDate: nil)
             )
-        }
-    }
-
-    private func scheduleInactivityCheck() {
-        inactivityTask?.cancel()
-        guard let currentActivity else { return }
-
-        let deadline = currentActivity.content.state.lastInteractionDate.addingTimeInterval(inactivityInterval)
-        let delay = max(1, deadline.timeIntervalSinceNow)
-
-        inactivityTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            await self?.endIfInactive()
         }
     }
 }
