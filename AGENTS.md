@@ -82,6 +82,8 @@
 ## Simulator/Verification Workflow
 - Use skill: `fitnesstracker-ios-sim-flow`.
 - Repo-local skill path: `skills/fitnesstracker-ios-sim-flow/SKILL.md` (use this copy for this repository).
+- Simulator target policy:
+- always get the current available device list first via `xcrun simctl list devices available`
 - Default order:
 - during implementation and design-feedback cycles, use `$fitnesstracker-ios-sim-flow` to capture simulator screenshots for visual review
 - do not run Appium integration tests during intermediate design-feedback iterations
