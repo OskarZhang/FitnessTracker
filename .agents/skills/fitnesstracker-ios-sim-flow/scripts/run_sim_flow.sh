@@ -3,33 +3,29 @@ set -euo pipefail
 
 PROJECT="FitnessTracker.xcodeproj"
 SCHEME="FitnessTracker"
-DEVICE_NAME="iPhone 15"
+DEVICE_NAME=""
+DEVICE_UDID=""
 CONFIGURATION="Debug"
-BUNDLE_ID="com.oz.fitness.FitnessTracker"
 OUTPUT_DIR="artifacts/simulator-screenshots"
 SCREENSHOT_NAME=""
 DERIVED_DATA_PATH=".build/ios-simulator-derived-data"
-POST_LAUNCH_WAIT="2"
-DEEPLINK_URL=""
+UI_TEST_IDENTIFIER="FitnessTrackerUITests/FitnessTrackerUITests/testCaptureSetLoggingEmptyStateScreenshot"
 
 usage() {
   cat <<USAGE
 Usage:
-  scripts/run_sim_flow.sh --deeplink <url> [options]
-
-Required:
-  --deeplink <url>             Deeplink URL to open in Simulator (e.g. myapp://route)
+  scripts/run_sim_flow.sh [options]
 
 Options:
+  --ui-test <identifier>       XCUITest identifier (default: ${UI_TEST_IDENTIFIER})
   --project <path>             Xcode project path (default: ${PROJECT})
   --scheme <name>              Xcode scheme (default: ${SCHEME})
-  --device <name>              Simulator device name (default: ${DEVICE_NAME})
+  --device <name>              Simulator device name (auto-select if omitted)
+  --udid <id>                  Simulator UDID (overrides --device)
   --configuration <name>       Build configuration (default: ${CONFIGURATION})
-  --bundle-id <id>             App bundle identifier (default: ${BUNDLE_ID})
   --output-dir <dir>           Screenshot output directory (default: ${OUTPUT_DIR})
-  --screenshot-name <name>     Screenshot filename (default: <timestamp>_deeplink.png)
+  --screenshot-name <name>     Screenshot filename (default: <timestamp>_xcuitest.png)
   --derived-data-path <dir>    DerivedData location (default: ${DERIVED_DATA_PATH})
-  --post-launch-wait <secs>    Seconds to wait after launch (default: ${POST_LAUNCH_WAIT})
   --help                       Show this help
 USAGE
 }
@@ -45,9 +41,9 @@ require_cmd() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --deeplink)
-      [[ $# -ge 2 ]] || die "Missing value for --deeplink"
-      DEEPLINK_URL="$2"
+    --ui-test)
+      [[ $# -ge 2 ]] || die "Missing value for --ui-test"
+      UI_TEST_IDENTIFIER="$2"
       shift 2
       ;;
     --project)
@@ -65,14 +61,14 @@ while [[ $# -gt 0 ]]; do
       DEVICE_NAME="$2"
       shift 2
       ;;
+    --udid)
+      [[ $# -ge 2 ]] || die "Missing value for --udid"
+      DEVICE_UDID="$2"
+      shift 2
+      ;;
     --configuration)
       [[ $# -ge 2 ]] || die "Missing value for --configuration"
       CONFIGURATION="$2"
-      shift 2
-      ;;
-    --bundle-id)
-      [[ $# -ge 2 ]] || die "Missing value for --bundle-id"
-      BUNDLE_ID="$2"
       shift 2
       ;;
     --output-dir)
@@ -90,11 +86,6 @@ while [[ $# -gt 0 ]]; do
       DERIVED_DATA_PATH="$2"
       shift 2
       ;;
-    --post-launch-wait)
-      [[ $# -ge 2 ]] || die "Missing value for --post-launch-wait"
-      POST_LAUNCH_WAIT="$2"
-      shift 2
-      ;;
     --help|-h)
       usage
       exit 0
@@ -105,9 +96,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$DEEPLINK_URL" ]] || die "--deeplink is required"
-[[ "$DEEPLINK_URL" =~ ^[A-Za-z][A-Za-z0-9+.-]*: ]] || die "--deeplink must be an absolute URL with a scheme"
-
 require_cmd xcodebuild
 require_cmd xcrun
 require_cmd awk
@@ -115,73 +103,68 @@ require_cmd sed
 require_cmd date
 
 [[ -d "$PROJECT" || -f "$PROJECT" ]] || die "Project not found: $PROJECT"
+[[ -n "$UI_TEST_IDENTIFIER" ]] || die "--ui-test cannot be empty"
 
 mkdir -p "$OUTPUT_DIR"
 mkdir -p "$DERIVED_DATA_PATH"
 
-DEVICE_LINE="$(xcrun simctl list devices available | awk -v name="$DEVICE_NAME" 'index($0, name " (") {print; exit}')"
-[[ -n "$DEVICE_LINE" ]] || die "Simulator device not found: $DEVICE_NAME"
+if [[ -n "$DEVICE_UDID" ]]; then
+  DEVICE_LINE="$(xcrun simctl list devices available | awk -v udid="$DEVICE_UDID" 'index($0, "(" udid ")") {print; exit}')"
+else
+  if [[ -n "$DEVICE_NAME" ]]; then
+    DEVICE_LINE="$(xcrun simctl list devices available | awk -v name="$DEVICE_NAME" 'index($0, name " (") {print; exit}')"
+  else
+    DEVICE_LINE="$(xcrun simctl list devices available | awk '
+      /iPhone/ && /Booted/ { print; exit }
+      END { if (!NR) exit 1 }
+    ')"
+    if [[ -z "$DEVICE_LINE" ]]; then
+      DEVICE_LINE="$(xcrun simctl list devices available | awk '
+        /iPhone/ && /Shutdown/ { print; exit }
+      ')"
+    fi
+  fi
+fi
+[[ -n "${DEVICE_LINE:-}" ]] || die "No matching available iPhone simulator found"
 
-DEVICE_UDID="$(echo "$DEVICE_LINE" | sed -E 's/.*\(([A-Za-z0-9-]+)\).*/\1/')"
-[[ -n "$DEVICE_UDID" ]] || die "Could not parse simulator UDID for device: $DEVICE_NAME"
+DEVICE_UDID="$(echo "$DEVICE_LINE" | awk 'match($0, /[0-9A-Fa-f-]{36}/) { print substr($0, RSTART, RLENGTH); exit }')"
+[[ -n "$DEVICE_UDID" ]] || die "Could not parse simulator UDID"
 
 DEVICE_STATE="$(echo "$DEVICE_LINE" | sed -E 's/.*\([A-Za-z0-9-]+\) \(([^)]+)\).*/\1/')"
 
 if [[ "$DEVICE_STATE" != "Booted" ]]; then
-  echo "[INFO] Booting simulator: $DEVICE_NAME ($DEVICE_UDID)"
+  echo "[INFO] Booting simulator: $DEVICE_UDID"
   xcrun simctl boot "$DEVICE_UDID" >/dev/null 2>&1 || true
 fi
 
 xcrun simctl bootstatus "$DEVICE_UDID" -b
 
-DESTINATION="platform=iOS Simulator,id=$DEVICE_UDID"
+if [[ -z "$SCREENSHOT_NAME" ]]; then
+  SCREENSHOT_NAME="$(date +%Y%m%d-%H%M%S)_xcuitest.png"
+fi
 
-echo "[INFO] Building $SCHEME ($CONFIGURATION)"
+SCREENSHOT_PATH="$OUTPUT_DIR/$SCREENSHOT_NAME"
+if [[ "$SCREENSHOT_PATH" = /* ]]; then
+  ABS_SCREENSHOT_PATH="$SCREENSHOT_PATH"
+else
+  ABS_SCREENSHOT_PATH="$(pwd)/$SCREENSHOT_PATH"
+fi
+HOST_CAPTURE_PATH="/tmp/fitnesstracker-ui-test-screenshot.png"
+rm -f "$HOST_CAPTURE_PATH"
+
+echo "[INFO] Running XCUITest: $UI_TEST_IDENTIFIER"
+UI_TEST_SCREENSHOT_PATH="$HOST_CAPTURE_PATH" \
 xcodebuild \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
   -configuration "$CONFIGURATION" \
-  -destination "$DESTINATION" \
+  -destination "id=$DEVICE_UDID" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
-  build
+  -parallel-testing-enabled NO \
+  -only-testing:"$UI_TEST_IDENTIFIER" \
+  test
 
-BUILD_SETTINGS="$(xcodebuild \
-  -project "$PROJECT" \
-  -scheme "$SCHEME" \
-  -configuration "$CONFIGURATION" \
-  -destination "$DESTINATION" \
-  -derivedDataPath "$DERIVED_DATA_PATH" \
-  -showBuildSettings)"
-
-TARGET_BUILD_DIR="$(echo "$BUILD_SETTINGS" | awk -F ' = ' '/ TARGET_BUILD_DIR = / {print $2; exit}')"
-FULL_PRODUCT_NAME="$(echo "$BUILD_SETTINGS" | awk -F ' = ' '/ FULL_PRODUCT_NAME = / {print $2; exit}')"
-
-[[ -n "$TARGET_BUILD_DIR" ]] || die "Could not resolve TARGET_BUILD_DIR"
-[[ -n "$FULL_PRODUCT_NAME" ]] || die "Could not resolve FULL_PRODUCT_NAME"
-
-APP_PATH="$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME"
-[[ -d "$APP_PATH" ]] || die "Built app not found at: $APP_PATH"
-
-echo "[INFO] Installing app: $APP_PATH"
-xcrun simctl install "$DEVICE_UDID" "$APP_PATH"
-
-xcrun simctl terminate "$DEVICE_UDID" "$BUNDLE_ID" >/dev/null 2>&1 || true
-
-echo "[INFO] Launching app: $BUNDLE_ID"
-xcrun simctl launch "$DEVICE_UDID" "$BUNDLE_ID" >/dev/null
-
-sleep "$POST_LAUNCH_WAIT"
-
-echo "[INFO] Opening URL: $DEEPLINK_URL"
-xcrun simctl openurl "$DEVICE_UDID" "$DEEPLINK_URL"
-
-if [[ -z "$SCREENSHOT_NAME" ]]; then
-  SCREENSHOT_NAME="$(date +%Y%m%d-%H%M%S)_deeplink.png"
-fi
-
-SCREENSHOT_PATH="$OUTPUT_DIR/$SCREENSHOT_NAME"
-
-echo "[INFO] Capturing screenshot: $SCREENSHOT_PATH"
-xcrun simctl io "$DEVICE_UDID" screenshot "$SCREENSHOT_PATH"
-
-printf '[OK] Screenshot saved: %s\n' "$SCREENSHOT_PATH"
+[[ -s "$HOST_CAPTURE_PATH" ]] || die "Screenshot not generated at: $HOST_CAPTURE_PATH"
+cp "$HOST_CAPTURE_PATH" "$ABS_SCREENSHOT_PATH"
+[[ -s "$ABS_SCREENSHOT_PATH" ]] || die "Screenshot not generated at: $ABS_SCREENSHOT_PATH"
+printf '[OK] Screenshot saved: %s\n' "$ABS_SCREENSHOT_PATH"

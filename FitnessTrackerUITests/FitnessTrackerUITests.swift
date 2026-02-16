@@ -1,4 +1,5 @@
 import XCTest
+import Foundation
 
 final class FitnessTrackerUITests: XCTestCase {
     override func setUpWithError() throws {
@@ -62,6 +63,29 @@ final class FitnessTrackerUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["setLogging.addSetButton"].waitForExistence(timeout: 12))
         XCTAssertTrue(app.staticTexts["Bench Press"].waitForExistence(timeout: 8))
+    }
+
+    @MainActor
+    func testCaptureSetLoggingEmptyStateScreenshot() throws {
+        let screenshotPath = ProcessInfo.processInfo.environment["UI_TEST_SCREENSHOT_PATH"]
+            ?? "/tmp/fitnesstracker-ui-test-screenshot.png"
+
+        let app = XCUIApplication()
+        app.launchArguments = ["UI_TEST_RESET", "UI_TEST_SKIP_FIRST_TIME_PROMPT"]
+        app.launch()
+
+        openBenchPressLogging(app)
+
+        let screenshotData = XCUIScreen.main.screenshot().pngRepresentation
+        let screenshotURL = URL(fileURLWithPath: screenshotPath)
+        let screenshotDirectory = screenshotURL.deletingLastPathComponent()
+
+        try FileManager.default.createDirectory(
+            at: screenshotDirectory,
+            withIntermediateDirectories: true
+        )
+        try screenshotData.write(to: screenshotURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: screenshotPath))
     }
 
     @MainActor

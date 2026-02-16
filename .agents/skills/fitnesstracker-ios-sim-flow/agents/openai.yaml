@@ -1,4 +1,4 @@
 interface:
   display_name: "FitnessTracker iOS Sim Flow"
-  short_description: "Build app, open deeplink, and capture simulator screenshots"
-  default_prompt: "Build FitnessTracker, trigger a deeplink in Simulator, and take a screenshot."
+  short_description: "Run XCUITest flows in Simulator and capture screenshots"
+  default_prompt: "Run the FitnessTracker XCUITest screenshot flow in Simulator and return the screenshot path."
