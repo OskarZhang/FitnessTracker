@@ -1,0 +1,20 @@
+{
+  "name": "fitnesstracker-appium-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Appium integration tests for FitnessTracker critical user paths",
+  "scripts": {
+    "test:ios": "wdio run wdio.ios.conf.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@wdio/cli": "^9.17.0",
+    "@wdio/local-runner": "^9.17.0",
+    "@wdio/mocha-framework": "^9.17.0",
+    "@wdio/spec-reporter": "^9.17.0",
+    "appium": "^2.19.0",
+    "appium-xcuitest-driver": "^9.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
