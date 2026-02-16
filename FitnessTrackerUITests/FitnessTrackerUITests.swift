@@ -24,8 +24,6 @@ final class FitnessTrackerUITests: XCTestCase {
         XCTAssertTrue(suggestionButton.waitForExistence(timeout: 5))
         suggestionButton.tap()
 
-        dismissFirstTimePromptIfNeeded(app)
-
         let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
         XCTAssertTrue(addSetControl.waitForExistence(timeout: 8))
         tapWhenInteractable(addSetControl)
@@ -107,15 +105,6 @@ final class FitnessTrackerUITests: XCTestCase {
         let suggestionButton = app.buttons["addWorkout.suggestion.Bench Press"]
         XCTAssertTrue(suggestionButton.waitForExistence(timeout: 5))
         suggestionButton.tap()
-
-        dismissFirstTimePromptIfNeeded(app)
-    }
-
-    private func dismissFirstTimePromptIfNeeded(_ app: XCUIApplication) {
-        let skipOnboardingButton = app.buttons["setLogging.skipOnboardingButton"]
-        if skipOnboardingButton.waitForExistence(timeout: 2) {
-            tapWhenInteractable(skipOnboardingButton)
-        }
 
         let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
         XCTAssertTrue(addSetControl.waitForExistence(timeout: 10))

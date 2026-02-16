@@ -10,7 +10,7 @@ struct SetLoggingView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.scenePhase) private var scenePhase
 
-    @State private var sheetHeight: CGFloat = .zero
+    @State private var showAIGenerationOptions = false
     @ObservedObject var viewModel: SetLoggingViewModel
     let onSave: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
@@ -22,7 +22,6 @@ struct SetLoggingView: View {
 
     var body: some View {
         addSetView
-            .sheet(isPresented: $viewModel.showNewExerciseOnboarding, content: { aiSuggestionModal })
             .onAppear {
                 viewModel.onAppear()
             }
@@ -37,6 +36,34 @@ struct SetLoggingView: View {
                 if viewModel.persistPendingSessionIfNeeded() {
                     SetLoggingSessionStore.requestRestoreOnNextLaunch()
                 }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if viewModel.shouldShowAIToolbarButton {
+                        Button {
+                            confirmationImpact.impactOccurred()
+                            showAIGenerationOptions = true
+                        } label: {
+                            if viewModel.isGeneratingRecommendations {
+                                ProgressView()
+                            } else {
+                                Label("AI", systemImage: "sparkles")
+                            }
+                        }
+                        .accessibilityIdentifier("setLogging.aiToolbarButton")
+                        .accessibilityLabel("Generate with AI")
+                        .disabled(viewModel.isGeneratingRecommendations)
+                    }
+                }
+            }
+            .confirmationDialog("Generate with AI", isPresented: $showAIGenerationOptions, titleVisibility: .visible) {
+                Button("Append Recommended Sets") {
+                    viewModel.generateWeightAndSetSuggestion(insertionMode: .append)
+                }
+                Button("Replace Current Sets", role: .destructive) {
+                    viewModel.generateWeightAndSetSuggestion(insertionMode: .replace)
+                }
+                Button("Cancel", role: .cancel) { }
             }
     }
     
@@ -102,6 +129,10 @@ struct SetLoggingView: View {
 			}
                 .listRowInsets(.init())
             ) {
+                if viewModel.isEmptyStateForAIRecommendation {
+                    aiEmptyStateCard
+                        .listRowSeparator(.hidden)
+                }
                 ForEach(viewModel.sets.indices, id: \.self) { index in
 					HStack {
 						Text("Set \(index + 1)")
@@ -184,55 +215,41 @@ struct SetLoggingView: View {
 	}
 
     @ViewBuilder
-    private var aiSuggestionModal: some View {
-        VStack(alignment: .leading) {
-            Text("First time? ")
-                .multilineTextAlignment(.leading)
-                .font(.title)
-                .fontWeight(.medium)
-                .padding(.top)
-            Text("GTFG AI can recommend you a full set based on your data.")
-                .multilineTextAlignment(.leading)
-                .font(.subheadline)
-                .fixedSize(horizontal: false, vertical: true)
-            
-            Spacer(minLength: 16)
-            Button {
-                viewModel.markOnboardingSeen()
-                viewModel.generateWeightAndSetSuggestion()
-            } label: {
-                Text("Generate full set")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 30)
-            }
-            .tint(Color.accentColor)
-            .buttonStyle(.glassProminent)
-            .accessibilityIdentifier("setLogging.generateOnboardingButton")
-            
-            Button() {
-                viewModel.markOnboardingSeen()
-            } label: {
-                Text("Nah! Let me log my own")
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 30)
-                    .fontWeight(.semibold)
+    private var aiEmptyStateCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkles")
                     .foregroundStyle(Color.accentColor)
+                    .font(.headline)
+                Text("Generate a full recommended set")
+                    .font(.headline)
             }
-            .buttonStyle(.glass)
-            .accessibilityIdentifier("setLogging.skipOnboardingButton")
+            Text("Use our on-device local LLM model with your weight data to generate a recommended full set.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("setLogging.aiEmptyStateText")
+
+            Button {
+                viewModel.generateSuggestedSetForEmptyState()
+            } label: {
+                if viewModel.isGeneratingRecommendations {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text("Generate Recommended Set")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .buttonStyle(.glassProminent)
+            .tint(Color.accentColor)
+            .disabled(viewModel.isGeneratingRecommendations)
+            .accessibilityIdentifier("setLogging.aiEmptyStateGenerateButton")
         }
         .padding()
-        .overlay {
-            GeometryReader { geometry in
-                Color.clear.preference(key: InnerHeightPreferenceKey.self, value: geometry.size.height)
-            }
-        }
-        .onPreferenceChange(InnerHeightPreferenceKey.self) { newHeight in
-            sheetHeight = newHeight
-        }
-        .presentationDetents([.height(sheetHeight)])
-
+        .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityIdentifier("setLogging.aiEmptyStateCard")
     }
 
     @ViewBuilder
@@ -323,13 +340,6 @@ struct SetLoggingView: View {
                 }
         }
         .frame(width: 120)
-    }
-}
-
-struct InnerHeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = .zero
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 

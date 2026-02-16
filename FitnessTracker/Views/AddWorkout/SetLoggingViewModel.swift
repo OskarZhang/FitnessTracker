@@ -62,9 +62,29 @@ struct PendingStrengthSetData: Codable {
 struct PendingSetLoggingSession: Codable {
     let exerciseName: String
     let sets: [PendingStrengthSetData]
-    let hasSeenNewExerciseOnboarding: Bool
-    let showNewExerciseOnboarding: Bool
     let isNewExercise: Bool
+    // Legacy fields retained for backward-compatible decoding of old sessions.
+    let hasSeenNewExerciseOnboarding: Bool?
+    let showNewExerciseOnboarding: Bool?
+
+    init(
+        exerciseName: String,
+        sets: [PendingStrengthSetData],
+        isNewExercise: Bool,
+        hasSeenNewExerciseOnboarding: Bool? = nil,
+        showNewExerciseOnboarding: Bool? = nil
+    ) {
+        self.exerciseName = exerciseName
+        self.sets = sets
+        self.isNewExercise = isNewExercise
+        self.hasSeenNewExerciseOnboarding = hasSeenNewExerciseOnboarding
+        self.showNewExerciseOnboarding = showNewExerciseOnboarding
+    }
+}
+
+enum AISuggestionInsertionMode {
+    case replace
+    case append
 }
 
 enum SetLoggingSessionStore {
@@ -135,28 +155,15 @@ class SetLoggingViewModel: ObservableObject {
         }
     }
 
-    @Published var showNewExerciseOnboarding: Bool = false {
-        didSet {
-            persistPendingSessionIfNeeded()
-        }
-    }
-
-    var hasSeenNewExerciseOnboarding: Bool = false {
-        didSet {
-            persistPendingSessionIfNeeded()
-        }
-    }
-
     private let mode: SetLoggingMode
     private var shouldPersistPendingSession = false
-    private let shouldSkipOnboardingPromptForUITests =
-        ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
     @Published private var timerEndTime: Date?
     private let shouldRelaxCompletionRequirementForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
     @Injected private var exerciseService: ExerciseService
+    @Injected private var healthKitManager: HealthKitManager
 
     init(mode: SetLoggingMode) {
         self.mode = mode
@@ -167,8 +174,6 @@ class SetLoggingViewModel: ObservableObject {
 
             if let pendingSession {
                 sets = pendingSession.sets.map { StrengthSetData(pendingData: $0) }
-                hasSeenNewExerciseOnboarding = pendingSession.hasSeenNewExerciseOnboarding
-                showNewExerciseOnboarding = pendingSession.showNewExerciseOnboarding
                 shouldPersistPendingSession = pendingSession.isNewExercise
             } else {
                 let lastSession = exerciseService.lastExerciseSession(matching: exerciseName)
@@ -176,8 +181,6 @@ class SetLoggingViewModel: ObservableObject {
                     StrengthSetData(weightInLbs: $0.weightInLbs, reps: $0.reps)
                 } ?? []
                 let isNewExercise = lastSession?.orderedStrengthSets.isEmpty ?? true
-                hasSeenNewExerciseOnboarding = false
-                showNewExerciseOnboarding = false
                 shouldPersistPendingSession = isNewExercise
                 persistPendingSessionIfNeeded()
             }
@@ -186,8 +189,6 @@ class SetLoggingViewModel: ObservableObject {
             sets = exercise.orderedStrengthSets.map {
                 StrengthSetData(weightInLbs: $0.weightInLbs, reps: $0.reps, isCompleted: true)
             }
-            hasSeenNewExerciseOnboarding = true
-            showNewExerciseOnboarding = false
             shouldPersistPendingSession = false
         }
     }
@@ -230,32 +231,86 @@ class SetLoggingViewModel: ObservableObject {
         return exerciseService.getExerciseSuggestions(exerciseName: name)
     }
 
-    func generateWeightAndSetSuggestion() {
+    var isInAddMode: Bool {
+        if case .add = mode {
+            return true
+        }
+        return false
+    }
+
+    var isEmptyStateForAIRecommendation: Bool {
+        isInAddMode && sets.isEmpty
+    }
+
+    var shouldShowAIToolbarButton: Bool {
+        isInAddMode && !sets.isEmpty
+    }
+
+    func generateSuggestedSetForEmptyState() {
+        generateWeightAndSetSuggestion(insertionMode: .replace)
+    }
+
+    func generateWeightAndSetSuggestion(insertionMode: AISuggestionInsertionMode) {
+        guard !isGeneratingRecommendations else { return }
         isGeneratingRecommendations = true
-        Task {
-            let recommender = SuggestFullSetForExercise(userWeight: 155, userHeight: "5 foot 7", workoutName: selectedExercise)
+        Task { [weak self] in
+            guard let self else { return }
+            let userWeight = await self.resolveUserWeightInLbs()
+            let recommender = SuggestFullSetForExercise(
+                userWeight: userWeight,
+                userHeight: "5 foot 7",
+                workoutName: self.selectedExercise
+            )
             guard let content = try? await recommender.respond().content else {
                 await MainActor.run {
-                    isGeneratingRecommendations = false
+                    self.isGeneratingRecommendations = false
                 }
                 return
             }
 
             await MainActor.run {
-                sets = []
-                sets.append(
-                    StrengthSetData(weightInLbs: Double(content.warmupWeight), reps: Int(content.warmupReps))
+                self.applyRecommendation(content, insertionMode: insertionMode)
+                self.isGeneratingRecommendations = false
+            }
+        }
+    }
+
+    private func resolveUserWeightInLbs() async -> Int {
+        guard let weight = await healthKitManager.mostRecentBodyMassInPounds() else {
+            return 155
+        }
+        return max(1, Int(weight.rounded()))
+    }
+
+    private func applyRecommendation(
+        _ recommendation: SetRecommendation,
+        insertionMode: AISuggestionInsertionMode
+    ) {
+        var recommendedSets: [StrengthSetData] = [
+            StrengthSetData(
+                weightInLbs: Double(recommendation.warmupWeight),
+                reps: Int(recommendation.warmupReps)
+            )
+        ]
+        for _ in 0..<recommendation.setCount {
+            recommendedSets.append(
+                StrengthSetData(
+                    weightInLbs: Double(recommendation.terminalWeight),
+                    reps: Int(recommendation.terminalReps)
                 )
+            )
+        }
 
-                withAnimation {
-                    currentFocusIndexState = .initial
-                }
+        switch insertionMode {
+        case .replace:
+            sets = recommendedSets
+        case .append:
+            sets.append(contentsOf: recommendedSets)
+        }
 
-                for _ in 0..<content.setCount {
-                    sets.append(StrengthSetData(weightInLbs: Double(content.terminalWeight), reps: Int(content.terminalReps)))
-                }
-
-                isGeneratingRecommendations = false
+        if currentFocusIndexState == nil, !sets.isEmpty {
+            withAnimation {
+                currentFocusIndexState = .initial
             }
         }
     }
@@ -352,21 +407,8 @@ class SetLoggingViewModel: ObservableObject {
         }
     }
 
-    func markOnboardingSeen() {
-        hasSeenNewExerciseOnboarding = true
-        showNewExerciseOnboarding = false
-    }
-
     func onAppear() {
-        if showNewExerciseOnboarding {
-            return
-        }
-        if shouldPersistPendingSession
-            && !hasSeenNewExerciseOnboarding
-            && !shouldSkipOnboardingPromptForUITests
-        {
-            showNewExerciseOnboarding = true
-        } else if sets.count > 0 {
+        if sets.count > 0 {
             currentFocusIndexState = .initial
         }
     }
@@ -415,8 +457,6 @@ class SetLoggingViewModel: ObservableObject {
         let session = PendingSetLoggingSession(
             exerciseName: selectedExercise,
             sets: sets.map { $0.pendingData },
-            hasSeenNewExerciseOnboarding: hasSeenNewExerciseOnboarding,
-            showNewExerciseOnboarding: showNewExerciseOnboarding,
             isNewExercise: shouldPersistPendingSession
         )
         SetLoggingSessionStore.save(session)
@@ -456,7 +496,6 @@ extension SetLoggingViewModel {
             StrengthSetData(weightInLbs: 200, reps: 10),
             StrengthSetData(weightInLbs: 200, reps: 10)
         ]
-        viewModel.hasSeenNewExerciseOnboarding = true
         return viewModel
     }
 }

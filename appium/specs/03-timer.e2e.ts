@@ -8,13 +8,6 @@ import {
 } from '../support/appLifecycle';
 import { a11y, ids } from '../support/selectors';
 
-async function dismissSetLoggingOnboardingIfPresent(): Promise<void> {
-  const skipButton = await $(a11y(ids.setLogging.skipOnboardingButton));
-  if (await skipButton.isExisting().catch(() => false)) {
-    await skipButton.click();
-  }
-}
-
 describe('Set Logging Timer', () => {
   it('starts and counts down while logging', async () => {
     await relaunchApp([
@@ -27,7 +20,7 @@ describe('Set Logging Timer', () => {
     await typeWhenPresent(a11y(ids.addWorkout.exerciseInput), 'Bench Press');
     await clickWhenPresent(a11y(ids.addWorkout.suggestion('Bench Press')));
 
-    await dismissSetLoggingOnboardingIfPresent();
+    await expect(await waitForPresent(a11y(ids.setLogging.addSetButton))).toBeExisting();
     await clickWhenPresent(a11y(ids.setLogging.addSetButton));
     await clickWhenPresent(a11y(ids.setLogging.timerButton));
     await browser.pause(300);

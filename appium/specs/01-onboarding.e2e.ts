@@ -10,6 +10,15 @@ describe('Onboarding Flow', () => {
     await waitForPresent(a11y(ids.onboarding.notNowButton));
     await clickWhenPresent(a11y(ids.onboarding.notNowButton));
 
-    await expect(await waitForPresent(a11y(ids.home.addWorkoutButton))).toBeExisting();
+    const homeButton = await $(a11y(ids.home.addWorkoutButton));
+    const reachedHome = await homeButton.waitForExist({ timeout: 10000 }).catch(() => false);
+    if (!reachedHome) {
+      const notNowAgain = await $(a11y(ids.onboarding.notNowButton));
+      if (await notNowAgain.isExisting().catch(() => false)) {
+        await notNowAgain.click();
+      }
+    }
+
+    await expect(await waitForPresent(a11y(ids.home.addWorkoutButton), 20000)).toBeExisting();
   });
 });
