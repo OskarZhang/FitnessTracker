@@ -32,6 +32,10 @@ export const ids = {
     exportWorkoutButton: 'settings.exportWorkoutButton',
     doneButton: 'settings.doneButton',
   },
+  livePrompt: {
+    suggestNextButton: 'livePrompt.suggestNextButton',
+    endWorkoutButton: 'livePrompt.endWorkoutButton',
+  },
 };
 
 export const a11y = (id: string): string => `~${id}`;

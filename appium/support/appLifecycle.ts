@@ -8,6 +8,14 @@ export async function relaunchApp(args: string[] = []): Promise<void> {
   await browser.execute('mobile: launchApp', launchArgs);
 }
 
+export async function backgroundApp(seconds = 1): Promise<void> {
+  await browser.execute('mobile: backgroundApp', { seconds });
+}
+
+export async function openDeepLink(url: string): Promise<void> {
+  await browser.execute('mobile: deepLink', { url, bundleId: BUNDLE_ID });
+}
+
 export async function waitForPresent(selector: string, timeout = 10000): Promise<WebdriverIO.Element> {
   const el = await $(selector);
   await el.waitForExist({ timeout });

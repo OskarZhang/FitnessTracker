@@ -30,7 +30,7 @@ struct ExercisesListView: View {
     @State private var navigationPath: [NavigationTarget] = []
     @State private var hasBecomeActiveInProcess = false
     @State private var didEnterBackgroundInProcess = false
-    @State private var justResumedFromBackgroundInProcess = false
+    @State private var lastInProcessResumeDate: Date?
 
     @StateObject var searchContext = SearchContext()
     
@@ -196,11 +196,8 @@ struct ExercisesListView: View {
 
             if newPhase == .active {
                 if didEnterBackgroundInProcess {
-                    justResumedFromBackgroundInProcess = true
+                    lastInProcessResumeDate = Date()
                     didEnterBackgroundInProcess = false
-                    DispatchQueue.main.async {
-                        justResumedFromBackgroundInProcess = false
-                    }
                 }
                 hasBecomeActiveInProcess = true
             }
@@ -273,7 +270,7 @@ struct ExercisesListView: View {
             } else {
                 livePromptContext = nil
                 liveDeepLinkExerciseName = nil
-                if justResumedFromBackgroundInProcess {
+                if shouldIgnoreDirectLiveDeepLinkForInProcessResume {
                     // In-process resume from Dynamic Island should not alter navigation.
                     return
                 }
@@ -295,6 +292,12 @@ struct ExercisesListView: View {
             liveSetLoggingContext = nil
             navigationPath = [.workoutEdit(id)]
         }
+    }
+
+    private var shouldIgnoreDirectLiveDeepLinkForInProcessResume: Bool {
+        guard let lastInProcessResumeDate else { return false }
+        // Give the resume deeplink a brief grace window to arrive.
+        return Date().timeIntervalSince(lastInProcessResumeDate) < 8
     }
 }
 
