@@ -1,6 +1,6 @@
 ---
 name: fitnesstracker-ios-sim-flow
-description: Build/test the active FitnessTracker iOS app in Simulator with UI tests as the default verification path, and optionally run deeplink + screenshot capture for visual validation.
+description: Build/test the active FitnessTracker iOS app in Simulator with XCUITest-driven navigation and screenshot capture.
 ---
 
 # FitnessTracker iOS Sim Flow
@@ -8,14 +8,14 @@ description: Build/test the active FitnessTracker iOS app in Simulator with UI t
 ## Overview
 Use this skill to verify UI correctness in this repo. The default path is:
 1. Run `FitnessTrackerUITests` on Simulator.
-2. If visual evidence is needed, run deeplink + screenshot capture.
+2. If visual evidence is needed, run the screenshot flow that drives the UI via XCUITest.
 
-Prefer UI tests over deeplink-only checks whenever validating behavior.
+Use XCUITest as the single UI driver for both behavior validation and screenshot capture.
 
 ## Default Workflow (UI correctness)
 1. Confirm you are in the `FitnessTracker` repo root.
 2. Build + run targeted UI tests first.
-3. Only then run screenshot/deeplink flow for manual visual confirmation if needed.
+3. Run screenshot capture flow if visual confirmation is needed.
 4. Report:
    - test command used
    - pass/fail and failing step
@@ -41,36 +41,62 @@ xcodebuild -project FitnessTracker.xcodeproj \
   test
 ```
 
-## Visual Validation (Optional)
+For navigation-only coverage (no deeplink dependency), run:
+```bash
+xcodebuild -project FitnessTracker.xcodeproj \
+  -scheme FitnessTracker \
+  -destination 'id=<SIMULATOR_UDID>' \
+  -parallel-testing-enabled NO \
+  -only-testing:FitnessTrackerUITests/NavigationCoverageUITests/testNavigateHomeSettingsAddAndSetLoggingScreens \
+  -only-testing:FitnessTrackerUITests/NavigationCoverageUITests/testNavigateWorkoutDetailAndEditSetLoggingScreens \
+  test
+```
+
+For critical user-path coverage (onboarding, log exercise, timer, health settings), run:
+```bash
+xcodebuild -project FitnessTracker.xcodeproj \
+  -scheme FitnessTracker \
+  -destination 'id=<SIMULATOR_UDID>' \
+  -parallel-testing-enabled NO \
+  -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testAddWorkoutFlow \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testOnboardingFlowSkipToHome \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testTimerFlowStartsWhileLogging \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testHealthKitSettingsFlowReachable \
+  test
+```
+
+## XCUITest Screenshot Flow
 If `scripts/run_sim_flow.sh` exists, run:
 ```bash
-scripts/run_sim_flow.sh --deeplink 'fitnesstracker://add'
+.agents/skills/fitnesstracker-ios-sim-flow/scripts/run_sim_flow.sh \
+  --ui-test 'FitnessTrackerUITests/FitnessTrackerUITests/testCaptureSetLoggingEmptyStateScreenshot'
 ```
 
 Optional flags:
+- `--ui-test` (default `FitnessTrackerUITests/FitnessTrackerUITests/testCaptureSetLoggingEmptyStateScreenshot`)
 - `--project` (default `FitnessTracker.xcodeproj`)
 - `--scheme` (default `FitnessTracker`)
-- `--device` (device name, only if available in current runtime set)
+- `--device` (device name)
+- `--udid` (simulator UDID, preferred for stability)
 - `--configuration` (default `Debug`)
-- `--bundle-id` (default `com.oz.fitness.FitnessTracker`)
 - `--output-dir` (default `artifacts/simulator-screenshots`)
-- `--screenshot-name` (default `<timestamp>_deeplink.png`)
+- `--screenshot-name` (default `<timestamp>_xcuitest.png`)
 - `--derived-data-path` (default `.build/ios-simulator-derived-data`)
-- `--post-launch-wait` (default `2` seconds)
 
 ## Manual Fallback (when script is missing)
 Use this exact sequence:
 
 ```bash
 set -euo pipefail
-DEEPLINK='fitnesstracker://add'
-BUNDLE_ID='com.oz.fitness.FitnessTracker'
 DERIVED_DATA_PATH='.build/ios-simulator-derived-data'
 OUT_DIR='artifacts/simulator-screenshots'
 STAMP="$(date +%Y%m%d_%H%M%S)"
-SHOT_PATH="$OUT_DIR/${STAMP}_deeplink.png"
+SHOT_PATH="$OUT_DIR/${STAMP}_xcuitest.png"
+UI_TEST='FitnessTrackerUITests/FitnessTrackerUITests/testCaptureSetLoggingEmptyStateScreenshot'
+HOST_CAPTURE_PATH='/tmp/fitnesstracker-ui-test-screenshot.png'
 
 mkdir -p "$OUT_DIR"
+rm -f "$HOST_CAPTURE_PATH"
 
 # Prefer a booted iPhone simulator; otherwise pick the first available iPhone simulator.
 DEVICE_ID="$(xcrun simctl list devices available | awk '
@@ -82,36 +108,28 @@ if [ -z "$DEVICE_ID" ]; then
   ')"
 fi
 
-xcodebuild -project FitnessTracker.xcodeproj \
+UI_TEST_SCREENSHOT_PATH="$HOST_CAPTURE_PATH" xcodebuild -project FitnessTracker.xcodeproj \
   -scheme FitnessTracker \
   -configuration Debug \
   -destination "id=$DEVICE_ID" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
-  build
-
-APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/FitnessTracker.app"
-
-xcrun simctl boot "$DEVICE_ID" || true
-xcrun simctl bootstatus "$DEVICE_ID" -b
-xcrun simctl install "$DEVICE_ID" "$APP_PATH"
-xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" || true
-sleep 2
-xcrun simctl openurl "$DEVICE_ID" "$DEEPLINK"
-sleep 2
-xcrun simctl io "$DEVICE_ID" screenshot "$SHOT_PATH"
+  -parallel-testing-enabled NO \
+  -only-testing:"$UI_TEST" \
+  test
+cp "$HOST_CAPTURE_PATH" "$SHOT_PATH"
 
 printf 'SCREENSHOT_PATH=%s\n' "$SHOT_PATH"
 ```
 
 ## Notes
-- `simctl` cannot tap app UI. Use `XCUITest` for deterministic UI interaction.
-- This app defines `fitnesstracker` in `FitnessTracker/Info.plist` (`CFBundleURLTypes`).
-- Device-name defaults are brittle across Xcode/runtime versions. Prefer simulator UDID.
+- Screenshot capture is driven by XCUITest method `testCaptureSetLoggingEmptyStateScreenshot`.
+- The skill script writes to `/tmp/fitnesstracker-ui-test-screenshot.png` first, then copies to the requested output path.
+- `simctl` cannot tap app UI, so the script uses XCTest automation to navigate before capture.
+- Device-name selection can be brittle across Xcode/runtime versions. Prefer simulator UDID.
 - Use `-parallel-testing-enabled NO` to reduce flaky clone-device behavior.
 
 ## Troubleshooting
 - Script missing: use manual fallback.
 - Device not found: run `xcrun simctl list devices available` and choose an iPhone UDID.
 - Test runner launch denied: boot one explicit simulator UDID and rerun with `-parallel-testing-enabled NO`.
-- Launch fails: verify bundle ID (`com.oz.fitness.FitnessTracker`).
-- URL opens but navigation does not change: route handler likely does not match deeplink path.
+- Screenshot file missing: verify `/tmp/fitnesstracker-ui-test-screenshot.png` was created and can be copied to the output path.

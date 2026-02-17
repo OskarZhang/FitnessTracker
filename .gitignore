@@ -98,6 +98,3 @@ Playground.playground/contents.swift
 # VSCode / Cursor
 .vscode/
 .cursor/
-
-# JS / Appium
-appium/node_modules/
