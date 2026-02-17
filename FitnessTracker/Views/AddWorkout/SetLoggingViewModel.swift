@@ -90,6 +90,7 @@ enum AISuggestionInsertionMode {
 enum SetLoggingSessionStore {
     private static let pendingSessionKey = "pendingSetLoggingSession"
     private static let restoreOnNextLaunchKey = "pendingSetLoggingSession.restoreOnNextLaunch"
+    private static let restoreRequestingProcessIDKey = "pendingSetLoggingSession.restoreRequestingProcessID"
     // Restore intent is owned by active add-session logging flow.
     // Only SetLoggingView should request restore after persisting a pending add session.
 
@@ -108,6 +109,7 @@ enum SetLoggingSessionStore {
     static func clear() {
         UserDefaults.standard.removeObject(forKey: pendingSessionKey)
         UserDefaults.standard.removeObject(forKey: restoreOnNextLaunchKey)
+        UserDefaults.standard.removeObject(forKey: restoreRequestingProcessIDKey)
     }
 
     static var hasPendingSession: Bool {
@@ -115,16 +117,28 @@ enum SetLoggingSessionStore {
     }
 
     static var shouldRestoreOnNextLaunch: Bool {
-        UserDefaults.standard.bool(forKey: restoreOnNextLaunchKey) && hasPendingSession
+        guard UserDefaults.standard.bool(forKey: restoreOnNextLaunchKey), hasPendingSession else {
+            return false
+        }
+        guard let requestingProcessID = UserDefaults.standard.object(forKey: restoreRequestingProcessIDKey) as? Int32 else {
+            // Backward compatibility for existing tokens that predate process-aware restore.
+            return true
+        }
+        return requestingProcessID != ProcessInfo.processInfo.processIdentifier
     }
 
     static func requestRestoreOnNextLaunch() {
         guard hasPendingSession else { return }
         UserDefaults.standard.set(true, forKey: restoreOnNextLaunchKey)
+        UserDefaults.standard.set(
+            ProcessInfo.processInfo.processIdentifier,
+            forKey: restoreRequestingProcessIDKey
+        )
     }
 
     static func clearRestoreRequest() {
         UserDefaults.standard.removeObject(forKey: restoreOnNextLaunchKey)
+        UserDefaults.standard.removeObject(forKey: restoreRequestingProcessIDKey)
     }
 
     static func consumeRestoreRequest() -> Bool {
