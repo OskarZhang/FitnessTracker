@@ -52,6 +52,19 @@ xcodebuild -project FitnessTracker.xcodeproj \
   test
 ```
 
+For legacy Appium parity coverage (onboarding, log exercise, timer, health settings), run:
+```bash
+xcodebuild -project FitnessTracker.xcodeproj \
+  -scheme FitnessTracker \
+  -destination 'id=<SIMULATOR_UDID>' \
+  -parallel-testing-enabled NO \
+  -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testAddWorkoutFlow \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testOnboardingFlowSkipToHome \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testTimerFlowStartsWhileLogging \
+  -only-testing:FitnessTrackerUITests/CriticalPathUITests/testHealthKitSettingsFlowReachable \
+  test
+```
+
 ## XCUITest Screenshot Flow
 If `scripts/run_sim_flow.sh` exists, run:
 ```bash

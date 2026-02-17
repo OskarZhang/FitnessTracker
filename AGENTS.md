@@ -9,7 +9,7 @@
 
 ## Core Architecture
 - App entry: `FitnessTrackerApp` registers `ExerciseService` and `HealthKitManager` in `Container`.
-- Root UI: onboarding is shown when `hasCompletedOnboarding == false` (except in UI-test sessions), otherwise `ExercisesListView`.
+- Root UI: onboarding is shown when `hasCompletedOnboarding == false`; UI tests can force/bypass onboarding via launch args, otherwise `ExercisesListView` is shown.
 - Accent color: app-wide tint comes from `@AppStorage(AppAccentColor.storageKey)` and is applied to SwiftUI `.tint(...)` + UINavigationBar appearance.
 - Home screen: `ExercisesListView` owns sheet presentation for Add Workout and Settings, grouped workout list rendering, deeplink routing, and empty state.
 
@@ -49,9 +49,19 @@
 - `FitnessTrackerUITests/FitnessTrackerUITests.swift::testCaptureSetLoggingEmptyStateScreenshot`
 - `FitnessTrackerUITests/NavigationCoverageUITests.swift::testNavigateHomeSettingsAddAndSetLoggingScreens`
 - `FitnessTrackerUITests/NavigationCoverageUITests.swift::testNavigateWorkoutDetailAndEditSetLoggingScreens`
+- `FitnessTrackerUITests/CriticalPathUITests.swift::testOnboardingFlowSkipToHome`
+- `FitnessTrackerUITests/CriticalPathUITests.swift::testTimerFlowStartsWhileLogging`
+- `FitnessTrackerUITests/CriticalPathUITests.swift::testHealthKitSettingsFlowReachable`
+- Legacy Appium parity mapping:
+- `appium/specs/01-onboarding.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testOnboardingFlowSkipToHome`
+- `appium/specs/02-log-exercise.e2e.ts` -> `FitnessTrackerUITests/FitnessTrackerUITests.swift::testAddWorkoutFlow`
+- `appium/specs/03-timer.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testTimerFlowStartsWhileLogging`
+- `appium/specs/04-healthkit.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testHealthKitSettingsFlowReachable`
 - Screenshot flow test writes to `/tmp/fitnesstracker-ui-test-screenshot.png` by default; skill script copies it into `artifacts/simulator-screenshots`.
 - Important launch args:
 - `UI_TEST_RESET` resets app data through `ExerciseService(resetData: true)` and clears pending restore session.
+- `UI_TEST_FORCE_ONBOARDING` forces onboarding for explicit onboarding coverage tests.
+- `UI_TEST_COMPLETE_ONBOARDING` bypasses onboarding for home/add/timer/settings paths.
 - `UI_TEST_SEED_ORDERING` seeds deterministic workout data for ordering/deletion assertions.
 - `UI_TEST_SKIP_FIRST_TIME_PROMPT` bypasses first-time prompt blockers during UI tests.
 - First-time AI onboarding prompt can block tests; dismiss via `setLogging.skipOnboardingButton` helper logic.
@@ -87,11 +97,11 @@
 - always get the current available device list first via `xcrun simctl list devices available`
 - Default order:
 - during implementation and design-feedback cycles, use `$fitnesstracker-ios-sim-flow` to capture simulator screenshots for visual review
-- do not use Appium for this workflow; use XCUITest only
+- do not use legacy JS integration tests for this workflow; use XCUITest only
 - Simctl cannot tap app UI; use XCUITest for deterministic post-change UI interactions.
 - Mandatory after any code change:
 - run XCUITest critical path once at the end of implementation:
-- `xcodebuild -project FitnessTracker.xcodeproj -scheme FitnessTracker -destination 'id=<SIMULATOR_UDID>' -parallel-testing-enabled NO -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testAddWorkoutFlow -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testRestoresPendingSessionAfterBackgroundKill test`
+- `xcodebuild -project FitnessTracker.xcodeproj -scheme FitnessTracker -destination 'id=<SIMULATOR_UDID>' -parallel-testing-enabled NO -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testAddWorkoutFlow -only-testing:FitnessTrackerUITests/FitnessTrackerUITests/testRestoresPendingSessionAfterBackgroundKill -only-testing:FitnessTrackerUITests/CriticalPathUITests/testOnboardingFlowSkipToHome -only-testing:FitnessTrackerUITests/CriticalPathUITests/testTimerFlowStartsWhileLogging -only-testing:FitnessTrackerUITests/CriticalPathUITests/testHealthKitSettingsFlowReachable test`
 - run screenshot flow via `.agents/skills/fitnesstracker-ios-sim-flow/scripts/run_sim_flow.sh` for visual verification when needed
 - compare the resulting UI screenshot(s) against the pre-change UI image(s)
 - report concrete visual diffs (or explicitly state no visual change)

@@ -8,8 +8,9 @@
 
 /* Begin PBXBuildFile section */
 			4B10B8A42EA0B6FB00890AC6 /* AddExerciseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */; };
-			4B1C2D6C2F4A1A0100B1C2D3 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */; };
-			4B1C2D6D2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */; };
+				4B1C2D6C2F4A1A0100B1C2D3 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */; };
+				4B1C2D6D2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */; };
+				4B1C2D702F70502000B1C2D3 /* CriticalPathUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C2D6F2F70501F00B1C2D3 /* CriticalPathUITests.swift */; };
 		4B2D17802CB1F9D0001137F7 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2D177F2CB1F9D0001137F7 /* SwiftUIIntrospect */; };
 		4B2D17862CB1F9F2001137F7 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2D17852CB1F9F2001137F7 /* SwiftUIIntrospect */; };
 		4B78EC452D4825EF005BD630 /* AddWorkoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B78EC442D4825EA005BD630 /* AddWorkoutViewModel.swift */; };
@@ -63,9 +64,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExerciseButton.swift; sourceTree = "<group>"; };
-		4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
-		4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncManager.swift; sourceTree = "<group>"; };
+			4B10B8A32EA0B6F700890AC6 /* AddExerciseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExerciseButton.swift; sourceTree = "<group>"; };
+			4B1C2D6B2F4A1A0100B1C2D3 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+			4B1C2D6E2F4A2B4B00B1C2D3 /* BackgroundSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncManager.swift; sourceTree = "<group>"; };
+			4B1C2D6F2F70501F00B1C2D3 /* CriticalPathUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalPathUITests.swift; sourceTree = "<group>"; };
 		4B784A412F05B229008CA92D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4B78EC442D4825EA005BD630 /* AddWorkoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorkoutViewModel.swift; sourceTree = "<group>"; };
 		4B7A1C1E2F4A000100A1B2C3 /* SetLoggingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetLoggingViewModel.swift; sourceTree = "<group>"; };
@@ -248,12 +250,13 @@
 				path = Utils;
 				sourceTree = "<group>";
 			};
-			4BF0000D2F60000500E1A111 /* FitnessTrackerUITests */ = {
-				isa = PBXGroup;
-				children = (
-					4B2F11002F70500000E1A111 /* NavigationCoverageUITests.swift */,
-					4BF0000B2F60000300E1A111 /* FitnessTrackerUITests.swift */,
-				);
+				4BF0000D2F60000500E1A111 /* FitnessTrackerUITests */ = {
+					isa = PBXGroup;
+					children = (
+						4B1C2D6F2F70501F00B1C2D3 /* CriticalPathUITests.swift */,
+						4B2F11002F70500000E1A111 /* NavigationCoverageUITests.swift */,
+						4BF0000B2F60000300E1A111 /* FitnessTrackerUITests.swift */,
+					);
 				path = FitnessTrackerUITests;
 				sourceTree = "<group>";
 			};
@@ -386,13 +389,14 @@
 				);
 				runOnlyForDeploymentPostprocessing = 0;
 			};
-			4BF000042F60000800E1A111 /* Sources */ = {
-				isa = PBXSourcesBuildPhase;
-				buildActionMask = 2147483647;
-				files = (
-					4B2F11012F70500100E1A111 /* NavigationCoverageUITests.swift in Sources */,
-					4BF0000C2F60000400E1A111 /* FitnessTrackerUITests.swift in Sources */,
-				);
+				4BF000042F60000800E1A111 /* Sources */ = {
+					isa = PBXSourcesBuildPhase;
+					buildActionMask = 2147483647;
+					files = (
+						4B1C2D702F70502000B1C2D3 /* CriticalPathUITests.swift in Sources */,
+						4B2F11012F70500100E1A111 /* NavigationCoverageUITests.swift in Sources */,
+						4BF0000C2F60000400E1A111 /* FitnessTrackerUITests.swift in Sources */,
+					);
 				runOnlyForDeploymentPostprocessing = 0;
 			};
 /* End PBXSourcesBuildPhase section */

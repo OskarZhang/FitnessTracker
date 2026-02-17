@@ -16,28 +16,27 @@ struct FitnessTrackerApp: App {
     @State private var didEnterBackgroundInProcess = false
     @State private var hasBecomeActiveOnce = false
     private let isUITestSession: Bool
-    private let forceOnboardingForIntegrationTests: Bool
-    private let completeOnboardingForIntegrationTests: Bool
+    private let forceOnboardingForUITests: Bool
+    private let completeOnboardingForUITests: Bool
 
     init() {
         let launchArguments = ProcessInfo.processInfo.arguments
         let environment = ProcessInfo.processInfo.environment
         let shouldResetForUITests = launchArguments.contains("UI_TEST_RESET")
-        let shouldResetForIntegrationTests = launchArguments.contains("INT_TEST_RESET_DATA")
-        self.forceOnboardingForIntegrationTests = launchArguments.contains("INT_TEST_FORCE_ONBOARDING")
-        self.completeOnboardingForIntegrationTests = launchArguments.contains("INT_TEST_COMPLETE_ONBOARDING")
+        self.forceOnboardingForUITests = launchArguments.contains("UI_TEST_FORCE_ONBOARDING")
+        self.completeOnboardingForUITests = launchArguments.contains("UI_TEST_COMPLETE_ONBOARDING")
         self.isUITestSession = shouldResetForUITests
             || launchArguments.contains("UITEST")
             || environment["XCTestConfigurationFilePath"] != nil
 
-        if forceOnboardingForIntegrationTests {
+        if forceOnboardingForUITests {
             UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-        } else if completeOnboardingForIntegrationTests {
+        } else if completeOnboardingForUITests {
             UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
         }
         #if DEBUG
         Container.shared.registerSingleton(ExerciseService.self) {
-            ExerciseService(resetData: shouldResetForUITests || shouldResetForIntegrationTests)
+            ExerciseService(resetData: shouldResetForUITests)
         }
         #else
         Container.shared.registerSingleton(ExerciseService.self) { ExerciseService() }
@@ -48,7 +47,7 @@ struct FitnessTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if shouldShowOnboarding && !isUITestSession {
+                if shouldShowOnboarding && (!isUITestSession || forceOnboardingForUITests) {
                     OnboardingView(accentColor: AppAccentColor.fromStoredValue(appAccentColorID).color) {
                         hasCompletedOnboarding = true
                     }
@@ -78,7 +77,7 @@ struct FitnessTrackerApp: App {
     }
 
     private var shouldShowOnboarding: Bool {
-        if completeOnboardingForIntegrationTests {
+        if completeOnboardingForUITests {
             return false
         }
         return !hasCompletedOnboarding
