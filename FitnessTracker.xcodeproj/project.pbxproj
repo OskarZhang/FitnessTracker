@@ -35,6 +35,7 @@
 			4BDFCCDA2EA4A16C000861F4 /* WeeklyProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFCCD92EA4A16C000861F4 /* WeeklyProgressView.swift */; };
 			4BEB135D2EA2193600D99818 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB135C2EA2193600D99818 /* SwiftUIIntrospect-Static */; };
 			4BEB13612EA21A4D00D99818 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 4BEB13602EA21A4D00D99818 /* SwiftUIIntrospect */; };
+			4B2F11012F70500100E1A111 /* NavigationCoverageUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2F11002F70500000E1A111 /* NavigationCoverageUITests.swift */; };
 			4BF0000C2F60000400E1A111 /* FitnessTrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF0000B2F60000300E1A111 /* FitnessTrackerUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +90,7 @@
 			4BDFCCD22EA18360000861F4 /* NumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberPad.swift; sourceTree = "<group>"; };
 			4BDFCCD52EA1B324000861F4 /* LocalRecommenders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalRecommenders.swift; sourceTree = "<group>"; };
 			4BDFCCD92EA4A16C000861F4 /* WeeklyProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyProgressView.swift; sourceTree = "<group>"; };
+			4B2F11002F70500000E1A111 /* NavigationCoverageUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCoverageUITests.swift; sourceTree = "<group>"; };
 			4BF000092F60000100E1A111 /* FitnessTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FitnessTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 			4BF0000B2F60000300E1A111 /* FitnessTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessTrackerUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -249,6 +251,7 @@
 			4BF0000D2F60000500E1A111 /* FitnessTrackerUITests */ = {
 				isa = PBXGroup;
 				children = (
+					4B2F11002F70500000E1A111 /* NavigationCoverageUITests.swift */,
 					4BF0000B2F60000300E1A111 /* FitnessTrackerUITests.swift */,
 				);
 				path = FitnessTrackerUITests;
@@ -387,6 +390,7 @@
 				isa = PBXSourcesBuildPhase;
 				buildActionMask = 2147483647;
 				files = (
+					4B2F11012F70500100E1A111 /* NavigationCoverageUITests.swift in Sources */,
 					4BF0000C2F60000400E1A111 /* FitnessTrackerUITests.swift in Sources */,
 				);
 				runOnlyForDeploymentPostprocessing = 0;

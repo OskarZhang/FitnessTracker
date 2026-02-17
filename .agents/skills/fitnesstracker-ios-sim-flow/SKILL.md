@@ -41,6 +41,17 @@ xcodebuild -project FitnessTracker.xcodeproj \
   test
 ```
 
+For navigation-only coverage (no deeplink dependency), run:
+```bash
+xcodebuild -project FitnessTracker.xcodeproj \
+  -scheme FitnessTracker \
+  -destination 'id=<SIMULATOR_UDID>' \
+  -parallel-testing-enabled NO \
+  -only-testing:FitnessTrackerUITests/NavigationCoverageUITests/testNavigateHomeSettingsAddAndSetLoggingScreens \
+  -only-testing:FitnessTrackerUITests/NavigationCoverageUITests/testNavigateWorkoutDetailAndEditSetLoggingScreens \
+  test
+```
+
 ## XCUITest Screenshot Flow
 If `scripts/run_sim_flow.sh` exists, run:
 ```bash

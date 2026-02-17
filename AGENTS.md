@@ -47,6 +47,8 @@
 - `FitnessTrackerUITests/FitnessTrackerUITests.swift::testAddWorkoutFlow`
 - `FitnessTrackerUITests/FitnessTrackerUITests.swift::testRestoresPendingSessionAfterBackgroundKill`
 - `FitnessTrackerUITests/FitnessTrackerUITests.swift::testCaptureSetLoggingEmptyStateScreenshot`
+- `FitnessTrackerUITests/NavigationCoverageUITests.swift::testNavigateHomeSettingsAddAndSetLoggingScreens`
+- `FitnessTrackerUITests/NavigationCoverageUITests.swift::testNavigateWorkoutDetailAndEditSetLoggingScreens`
 - Screenshot flow test writes to `/tmp/fitnesstracker-ui-test-screenshot.png` by default; skill script copies it into `artifacts/simulator-screenshots`.
 - Important launch args:
 - `UI_TEST_RESET` resets app data through `ExerciseService(resetData: true)` and clears pending restore session.
