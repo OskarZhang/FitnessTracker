@@ -52,7 +52,7 @@ xcodebuild -project FitnessTracker.xcodeproj \
   test
 ```
 
-For legacy Appium parity coverage (onboarding, log exercise, timer, health settings), run:
+For critical user-path coverage (onboarding, log exercise, timer, health settings), run:
 ```bash
 xcodebuild -project FitnessTracker.xcodeproj \
   -scheme FitnessTracker \

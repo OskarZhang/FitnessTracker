@@ -52,11 +52,6 @@
 - `FitnessTrackerUITests/CriticalPathUITests.swift::testOnboardingFlowSkipToHome`
 - `FitnessTrackerUITests/CriticalPathUITests.swift::testTimerFlowStartsWhileLogging`
 - `FitnessTrackerUITests/CriticalPathUITests.swift::testHealthKitSettingsFlowReachable`
-- Legacy Appium parity mapping:
-- `appium/specs/01-onboarding.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testOnboardingFlowSkipToHome`
-- `appium/specs/02-log-exercise.e2e.ts` -> `FitnessTrackerUITests/FitnessTrackerUITests.swift::testAddWorkoutFlow`
-- `appium/specs/03-timer.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testTimerFlowStartsWhileLogging`
-- `appium/specs/04-healthkit.e2e.ts` -> `FitnessTrackerUITests/CriticalPathUITests.swift::testHealthKitSettingsFlowReachable`
 - Screenshot flow test writes to `/tmp/fitnesstracker-ui-test-screenshot.png` by default; skill script copies it into `artifacts/simulator-screenshots`.
 - Important launch args:
 - `UI_TEST_RESET` resets app data through `ExerciseService(resetData: true)` and clears pending restore session.
@@ -97,7 +92,7 @@
 - always get the current available device list first via `xcrun simctl list devices available`
 - Default order:
 - during implementation and design-feedback cycles, use `$fitnesstracker-ios-sim-flow` to capture simulator screenshots for visual review
-- do not use legacy JS integration tests for this workflow; use XCUITest only
+- use XCUITest only for this workflow
 - Simctl cannot tap app UI; use XCUITest for deterministic post-change UI interactions.
 - Mandatory after any code change:
 - run XCUITest critical path once at the end of implementation:
