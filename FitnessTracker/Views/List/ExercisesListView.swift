@@ -17,6 +17,7 @@ class SearchContext: ObservableObject {
 struct ExercisesListView: View {
     @StateObject private var exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
     private let workoutLiveActivityService: WorkoutLiveActivityService = Container.shared.resolve(WorkoutLiveActivityService.self)
+    @Environment(\.scenePhase) private var scenePhase
     
     @Environment(\.colorScheme) var colorScheme
 
@@ -27,6 +28,9 @@ struct ExercisesListView: View {
     @State private var livePromptContext: LiveWorkoutPromptContext?
     @State private var liveSetLoggingContext: LiveSetLoggingContext?
     @State private var navigationPath: [NavigationTarget] = []
+    @State private var hasBecomeActiveInProcess = false
+    @State private var didEnterBackgroundInProcess = false
+    @State private var justResumedFromBackgroundInProcess = false
 
     @StateObject var searchContext = SearchContext()
     
@@ -185,6 +189,22 @@ struct ExercisesListView: View {
                 hasAutoRestoredPendingSession = true
             }
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            if hasBecomeActiveInProcess && (newPhase == .inactive || newPhase == .background) {
+                didEnterBackgroundInProcess = true
+            }
+
+            if newPhase == .active {
+                if didEnterBackgroundInProcess {
+                    justResumedFromBackgroundInProcess = true
+                    didEnterBackgroundInProcess = false
+                    DispatchQueue.main.async {
+                        justResumedFromBackgroundInProcess = false
+                    }
+                }
+                hasBecomeActiveInProcess = true
+            }
+        }
         .onOpenURL { url in
             handleDeepLink(url: url)
         }
@@ -253,6 +273,10 @@ struct ExercisesListView: View {
             } else {
                 livePromptContext = nil
                 liveDeepLinkExerciseName = nil
+                if justResumedFromBackgroundInProcess {
+                    // In-process resume from Dynamic Island should not alter navigation.
+                    return
+                }
                 let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !trimmed.isEmpty {
                     workoutLiveActivityService.startOrUpdateForLogging(exerciseName: trimmed)
