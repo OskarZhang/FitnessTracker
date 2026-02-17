@@ -1,0 +1,15 @@
+# FitnessTracker Skill Entry
+
+Canonical skill definition:
+- `.agents/skills/fitnesstracker-ios-sim-flow/SKILL.md`
+
+Current workflow contract:
+- Use XCUITest as the single UI automation driver.
+- Do not use legacy Appium/JS integration tests.
+- Use `.agents/skills/fitnesstracker-ios-sim-flow/scripts/run_sim_flow.sh` for screenshot capture.
+
+Legacy Appium parity coverage now maps to:
+- `FitnessTrackerUITests/FitnessTrackerUITests/testAddWorkoutFlow`
+- `FitnessTrackerUITests/CriticalPathUITests/testOnboardingFlowSkipToHome`
+- `FitnessTrackerUITests/CriticalPathUITests/testTimerFlowStartsWhileLogging`
+- `FitnessTrackerUITests/CriticalPathUITests/testHealthKitSettingsFlowReachable`
