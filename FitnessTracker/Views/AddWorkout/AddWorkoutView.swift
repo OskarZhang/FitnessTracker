@@ -4,9 +4,18 @@ struct AddWorkoutView: View {
     @StateObject var viewModel: AddWorkoutViewModel
     @Binding var isPresented: Bool
 
-    init(isPresented: Binding<Bool>) {
+    init(
+        isPresented: Binding<Bool>,
+        exerciseService: any ExerciseServing = Container.shared.resolve(ExerciseService.self),
+        healthKitManager: any HealthKitManaging = Container.shared.resolve(HealthKitManager.self)
+    ) {
         self._isPresented = isPresented
-        self._viewModel = StateObject(wrappedValue: AddWorkoutViewModel())
+        self._viewModel = StateObject(
+            wrappedValue: AddWorkoutViewModel(
+                exerciseService: exerciseService,
+                healthKitManager: healthKitManager
+            )
+        )
     }
 
     var body: some View {

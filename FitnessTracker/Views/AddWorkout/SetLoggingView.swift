@@ -28,13 +28,13 @@ struct SetLoggingView: View {
             .onDisappear {
                 viewModel.loseFocus()
                 if viewModel.persistPendingSessionIfNeeded() {
-                    SetLoggingSessionStore.requestRestoreOnNextLaunch()
+                    SetLoggingSessionStore.requestRestoreOnNextLaunch(ownerSessionID: AppProcessSession.currentID)
                 }
             }
             .onChange(of: scenePhase) { _, newPhase in
                 guard newPhase == .inactive || newPhase == .background else { return }
                 if viewModel.persistPendingSessionIfNeeded() {
-                    SetLoggingSessionStore.requestRestoreOnNextLaunch()
+                    SetLoggingSessionStore.requestRestoreOnNextLaunch(ownerSessionID: AppProcessSession.currentID)
                 }
             }
             .toolbar {

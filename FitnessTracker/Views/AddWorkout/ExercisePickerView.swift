@@ -71,8 +71,13 @@ struct ExercisePickerView: View {
 }
 
 #Preview {
-  ExercisePickerView(
-	viewModel: AddWorkoutViewModel(),
-	isPresented: .constant(true)
-  )
+    let exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
+    let healthKitManager: HealthKitManager = Container.shared.resolve(HealthKitManager.self)
+    ExercisePickerView(
+        viewModel: AddWorkoutViewModel(
+            exerciseService: exerciseService,
+            healthKitManager: healthKitManager
+        ),
+        isPresented: .constant(true)
+    )
 }

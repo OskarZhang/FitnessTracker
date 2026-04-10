@@ -14,9 +14,19 @@ struct WorkoutDetailView: View {
     @State private var isEditing = false
     @StateObject private var editViewModel: SetLoggingViewModel
 
-    init(exercise: Exercise) {
+    init(
+        exercise: Exercise,
+        exerciseService: any ExerciseServing = Container.shared.resolve(ExerciseService.self),
+        healthKitManager: any HealthKitManaging = Container.shared.resolve(HealthKitManager.self)
+    ) {
         self.exercise = exercise
-        self._editViewModel = StateObject(wrappedValue: SetLoggingViewModel(mode: .edit(exercise: exercise)))
+        self._editViewModel = StateObject(
+            wrappedValue: SetLoggingViewModel(
+                mode: .edit(exercise: exercise),
+                exerciseService: exerciseService,
+                healthKitManager: healthKitManager
+            )
+        )
     }
 
     var body: some View {

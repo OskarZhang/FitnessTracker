@@ -1,6 +1,23 @@
 import Foundation
 import SwiftUI
 
+@MainActor
+protocol ExerciseServing: AnyObject {
+    func addExercise(_ exercise: Exercise)
+    func updateExercise(_ exercise: Exercise, sets: [StrengthSet])
+    func getExerciseSuggestions(exerciseName: String) -> [String]
+    func lastExerciseSession(matching name: String) -> Exercise?
+}
+
+extension ExerciseService: ExerciseServing {}
+
+@MainActor
+protocol HealthKitManaging: AnyObject {
+    func mostRecentBodyMassInPounds() async -> Double?
+}
+
+extension HealthKitManager: HealthKitManaging {}
+
 struct StrengthSetData: Identifiable, Codable {
     let id: UUID
     var weightInLbs: Double
@@ -62,6 +79,7 @@ struct PendingStrengthSetData: Codable {
 struct PendingSetLoggingSession: Codable {
     let exerciseName: String
     let sets: [PendingStrengthSetData]
+    // Legacy metadata retained for backward-compatible decoding.
     let isNewExercise: Bool
     // Legacy fields retained for backward-compatible decoding of old sessions.
     let hasSeenNewExerciseOnboarding: Bool?
@@ -87,11 +105,20 @@ enum AISuggestionInsertionMode {
     case append
 }
 
+enum AppProcessSession {
+    static let currentID = ProcessInfo.processInfo.globallyUniqueString
+}
+
 enum SetLoggingSessionStore {
     private static let pendingSessionKey = "pendingSetLoggingSession"
-    private static let restoreOnNextLaunchKey = "pendingSetLoggingSession.restoreOnNextLaunch"
+    private static let legacyRestoreOnNextLaunchKey = "pendingSetLoggingSession.restoreOnNextLaunch"
+    private static let restoreOwnerSessionIDKey = "pendingSetLoggingSession.restoreOwnerSessionID"
     // Restore intent is owned by active add-session logging flow.
     // Only SetLoggingView should request restore after persisting a pending add session.
+
+    private static var restoreOwnerSessionID: String? {
+        UserDefaults.standard.string(forKey: restoreOwnerSessionIDKey)
+    }
 
     static func load() -> PendingSetLoggingSession? {
         guard let data = UserDefaults.standard.data(forKey: pendingSessionKey) else {
@@ -107,7 +134,7 @@ enum SetLoggingSessionStore {
 
     static func clear() {
         UserDefaults.standard.removeObject(forKey: pendingSessionKey)
-        UserDefaults.standard.removeObject(forKey: restoreOnNextLaunchKey)
+        clearRestoreRequest()
     }
 
     static var hasPendingSession: Bool {
@@ -115,16 +142,27 @@ enum SetLoggingSessionStore {
     }
 
     static var shouldRestoreOnNextLaunch: Bool {
-        UserDefaults.standard.bool(forKey: restoreOnNextLaunchKey) && hasPendingSession
+        hasPendingSession
+            && (
+                restoreOwnerSessionID != nil
+                    || UserDefaults.standard.bool(forKey: legacyRestoreOnNextLaunchKey)
+            )
     }
 
-    static func requestRestoreOnNextLaunch() {
+    static func requestRestoreOnNextLaunch(ownerSessionID: String) {
         guard hasPendingSession else { return }
-        UserDefaults.standard.set(true, forKey: restoreOnNextLaunchKey)
+        UserDefaults.standard.set(ownerSessionID, forKey: restoreOwnerSessionIDKey)
+        UserDefaults.standard.removeObject(forKey: legacyRestoreOnNextLaunchKey)
     }
 
     static func clearRestoreRequest() {
-        UserDefaults.standard.removeObject(forKey: restoreOnNextLaunchKey)
+        UserDefaults.standard.removeObject(forKey: restoreOwnerSessionIDKey)
+        UserDefaults.standard.removeObject(forKey: legacyRestoreOnNextLaunchKey)
+    }
+
+    static func clearRestoreRequestIfOwned(by ownerSessionID: String) {
+        guard restoreOwnerSessionID == ownerSessionID else { return }
+        clearRestoreRequest()
     }
 
     static func consumeRestoreRequest() -> Bool {
@@ -156,17 +194,23 @@ class SetLoggingViewModel: ObservableObject {
     }
 
     private let mode: SetLoggingMode
+    private let exerciseService: any ExerciseServing
+    private let healthKitManager: any HealthKitManaging
     private var shouldPersistPendingSession = false
+    private var isNewExerciseSession = false
 
     @Published private var timerEndTime: Date?
     private let shouldRelaxCompletionRequirementForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
-    @Injected private var exerciseService: ExerciseService
-    @Injected private var healthKitManager: HealthKitManager
-
-    init(mode: SetLoggingMode) {
+    init(
+        mode: SetLoggingMode,
+        exerciseService: any ExerciseServing,
+        healthKitManager: any HealthKitManaging
+    ) {
         self.mode = mode
+        self.exerciseService = exerciseService
+        self.healthKitManager = healthKitManager
 
         switch mode {
         case .add(let exerciseName, let pendingSession):
@@ -174,14 +218,16 @@ class SetLoggingViewModel: ObservableObject {
 
             if let pendingSession {
                 sets = pendingSession.sets.map { StrengthSetData(pendingData: $0) }
-                shouldPersistPendingSession = pendingSession.isNewExercise
+                isNewExerciseSession = pendingSession.isNewExercise
+                shouldPersistPendingSession = true
             } else {
                 let lastSession = exerciseService.lastExerciseSession(matching: exerciseName)
                 sets = lastSession?.orderedStrengthSets.map {
                     StrengthSetData(weightInLbs: $0.weightInLbs, reps: $0.reps)
                 } ?? []
                 let isNewExercise = lastSession?.orderedStrengthSets.isEmpty ?? true
-                shouldPersistPendingSession = isNewExercise
+                isNewExerciseSession = isNewExercise
+                shouldPersistPendingSession = true
                 persistPendingSessionIfNeeded()
             }
         case .edit(let exercise):
@@ -211,6 +257,7 @@ class SetLoggingViewModel: ObservableObject {
                 }
             )
             exerciseService.addExercise(exercise)
+            shouldPersistPendingSession = false
             SetLoggingSessionStore.clear()
         case .edit(let exercise):
             let updatedSets = sets
@@ -457,7 +504,7 @@ class SetLoggingViewModel: ObservableObject {
         let session = PendingSetLoggingSession(
             exerciseName: selectedExercise,
             sets: sets.map { $0.pendingData },
-            isNewExercise: shouldPersistPendingSession
+            isNewExercise: isNewExerciseSession
         )
         SetLoggingSessionStore.save(session)
         return true
@@ -490,7 +537,13 @@ private extension StrengthSetData {
 
 extension SetLoggingViewModel {
     static var mocked: SetLoggingViewModel {
-        let viewModel = SetLoggingViewModel(mode: .add(exerciseName: "Bench Press", pendingSession: nil))
+        let exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
+        let healthKitManager: HealthKitManager = Container.shared.resolve(HealthKitManager.self)
+        let viewModel = SetLoggingViewModel(
+            mode: .add(exerciseName: "Bench Press", pendingSession: nil),
+            exerciseService: exerciseService,
+            healthKitManager: healthKitManager
+        )
         viewModel.sets = [
             StrengthSetData(weightInLbs: 200, reps: 10),
             StrengthSetData(weightInLbs: 200, reps: 10),

@@ -21,7 +21,7 @@ final class FitnessTrackerUITests: XCTestCase {
         exerciseInput.tap()
         exerciseInput.typeText("Bench Press")
 
-        let suggestionButton = app.buttons["addWorkout.suggestion.Bench Press"]
+        let suggestionButton = app.buttons.matching(identifier: "addWorkout.suggestion.Bench Press").firstMatch
         XCTAssertTrue(suggestionButton.waitForExistence(timeout: 5))
         suggestionButton.tap()
 
@@ -63,6 +63,59 @@ final class FitnessTrackerUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["setLogging.addSetButton"].waitForExistence(timeout: 12))
         XCTAssertTrue(app.staticTexts["Bench Press"].waitForExistence(timeout: 8))
+    }
+
+    @MainActor
+    func testRestoresPendingSessionAfterBackgroundKillForExistingExercise() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "UI_TEST_RESET",
+            "UI_TEST_SEED_EXISTING_BENCH_PRESS",
+            "UI_TEST_SKIP_FIRST_TIME_PROMPT",
+        ]
+        app.launch()
+
+        let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
+        openBenchPressLoggingForExistingExercise(app)
+        XCTAssertTrue(app.descendants(matching: .any)["setLogging.row.0"].waitForExistence(timeout: 8))
+        tapWhenInteractable(addSetControl)
+
+        XCUIDevice.shared.press(.home)
+        app.terminate()
+
+        app.launchArguments = ["UI_TEST_SKIP_FIRST_TIME_PROMPT"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["setLogging.addSetButton"].waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["Bench Press"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["setLogging.row.1"].waitForExistence(timeout: 8))
+    }
+
+    @MainActor
+    func testDoesNotRestorePendingSessionAfterSaveAndKill() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["UI_TEST_RESET", "UI_TEST_SKIP_FIRST_TIME_PROMPT"]
+        app.launch()
+
+        openBenchPressLogging(app)
+
+        let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
+        XCTAssertTrue(addSetControl.waitForExistence(timeout: 8))
+        tapWhenInteractable(addSetControl)
+
+        let saveControl = app.descendants(matching: .any)["setLogging.saveButton"]
+        XCTAssertTrue(saveControl.waitForExistence(timeout: 8))
+        tapWhenInteractable(saveControl)
+
+        XCTAssertTrue(app.buttons["home.addWorkoutButton"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Bench Press"].waitForExistence(timeout: 5))
+
+        app.terminate()
+        app.launchArguments = []
+        app.launch()
+
+        XCTAssertTrue(app.buttons["home.addWorkoutButton"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.descendants(matching: .any)["setLogging.addSetButton"].waitForExistence(timeout: 5))
     }
 
     @MainActor
@@ -126,7 +179,26 @@ final class FitnessTrackerUITests: XCTestCase {
         exerciseInput.tap()
         exerciseInput.typeText("Bench Press")
 
-        let suggestionButton = app.buttons["addWorkout.suggestion.Bench Press"]
+        let suggestionButton = app.buttons.matching(identifier: "addWorkout.suggestion.Bench Press").firstMatch
+        XCTAssertTrue(suggestionButton.waitForExistence(timeout: 5))
+        suggestionButton.tap()
+
+        let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
+        XCTAssertTrue(addSetControl.waitForExistence(timeout: 10))
+        XCTAssertTrue(addSetControl.isHittable || waitForHittable(addSetControl, timeout: 6))
+    }
+
+    private func openBenchPressLoggingForExistingExercise(_ app: XCUIApplication) {
+        let addWorkoutButton = app.buttons["home.addWorkoutButton"]
+        XCTAssertTrue(addWorkoutButton.waitForExistence(timeout: 5))
+        addWorkoutButton.tap()
+
+        let exerciseInput = app.textFields["addWorkout.exerciseInput"]
+        XCTAssertTrue(exerciseInput.waitForExistence(timeout: 5))
+        exerciseInput.tap()
+        exerciseInput.typeText("Bench")
+
+        let suggestionButton = app.buttons.matching(identifier: "addWorkout.suggestion.Bench Press").firstMatch
         XCTAssertTrue(suggestionButton.waitForExistence(timeout: 5))
         suggestionButton.tap()
 

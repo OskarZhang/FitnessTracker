@@ -16,6 +16,7 @@ class SearchContext: ObservableObject {
 
 struct ExercisesListView: View {
     @StateObject private var exerciseService: ExerciseService = Container.shared.resolve(ExerciseService.self)
+    @StateObject private var healthKitManager: HealthKitManager = Container.shared.resolve(HealthKitManager.self)
     
     @Environment(\.colorScheme) var colorScheme
 
@@ -121,7 +122,13 @@ struct ExercisesListView: View {
                     }
                 case let .workoutEdit(id):
                     if let exercise = exercise(withID: id) {
-                        SetLoggingView(viewModel: SetLoggingViewModel(mode: .edit(exercise: exercise)))
+                        SetLoggingView(
+                            viewModel: SetLoggingViewModel(
+                                mode: .edit(exercise: exercise),
+                                exerciseService: exerciseService,
+                                healthKitManager: healthKitManager
+                            )
+                        )
                     } else {
                         Text("Workout not found")
                     }
@@ -130,7 +137,11 @@ struct ExercisesListView: View {
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
         .sheet(isPresented: $isAddingWorkout) {
-            AddWorkoutView(isPresented: $isAddingWorkout)
+            AddWorkoutView(
+                isPresented: $isAddingWorkout,
+                exerciseService: exerciseService,
+                healthKitManager: healthKitManager
+            )
         }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()

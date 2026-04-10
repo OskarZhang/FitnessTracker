@@ -226,6 +226,10 @@ private extension ExerciseService {
         if launchArguments.contains("UI_TEST_SEED_ORDERING") {
             seedOrderingUITestData()
         }
+
+        if launchArguments.contains("UI_TEST_SEED_EXISTING_BENCH_PRESS") {
+            seedExistingBenchPressUITestData()
+        }
     }
 
     func resetAllDataForUITests() {
@@ -245,6 +249,18 @@ private extension ExerciseService {
                 StrengthSet(weightInLbs: 35, reps: 10),
                 StrengthSet(weightInLbs: 40, reps: 10),
                 StrengthSet(weightInLbs: 50, reps: 10),
+            ]
+        )
+        modelContext.insert(exercise)
+        try? modelContext.save()
+    }
+
+    func seedExistingBenchPressUITestData() {
+        let exercise = Exercise(
+            name: "Bench Press",
+            type: .strength,
+            strengthSets: [
+                StrengthSet(weightInLbs: 135, reps: 8),
             ]
         )
         modelContext.insert(exercise)

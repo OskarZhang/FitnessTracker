@@ -13,8 +13,6 @@ struct FitnessTrackerApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage(AppAccentColor.storageKey) private var appAccentColorID = AppAccentColor.brat.rawValue
-    @State private var didEnterBackgroundInProcess = false
-    @State private var hasBecomeActiveOnce = false
     private let isUITestSession: Bool
     private let forceOnboardingForUITests: Bool
     private let completeOnboardingForUITests: Bool
@@ -58,20 +56,11 @@ struct FitnessTrackerApp: App {
             .tint(AppAccentColor.fromStoredValue(appAccentColorID).color)
         }
         .onChange(of: scenePhase) { _, newPhase in
-            if hasBecomeActiveOnce && (newPhase == .inactive || newPhase == .background) {
-                didEnterBackgroundInProcess = true
-            }
-
             if newPhase == .background {
                 BackgroundSyncManager.shared.schedule()
-            } else if newPhase == .active, didEnterBackgroundInProcess {
-                // App resumed in the same process; this was not a kill/relaunch restore case.
-                SetLoggingSessionStore.clearRestoreRequest()
-                didEnterBackgroundInProcess = false
-            }
-
-            if newPhase == .active {
-                hasBecomeActiveOnce = true
+            } else if newPhase == .active {
+                // Only the process that requested restore may clear it on resume.
+                SetLoggingSessionStore.clearRestoreRequestIfOwned(by: AppProcessSession.currentID)
             }
         }
     }

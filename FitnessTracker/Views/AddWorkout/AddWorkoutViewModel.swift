@@ -16,11 +16,17 @@ class AddWorkoutViewModel: ObservableObject {
 
     @Published var setLoggingViewModel: SetLoggingViewModel?
 
-    @Injected private var exerciseService: ExerciseService
+    private let exerciseService: any ExerciseServing
+    private let healthKitManager: any HealthKitManaging
 
     private var isRestoringPendingSession = false
 
-    init() {
+    init(
+        exerciseService: any ExerciseServing,
+        healthKitManager: any HealthKitManaging
+    ) {
+        self.exerciseService = exerciseService
+        self.healthKitManager = healthKitManager
         restorePendingSessionIfNeeded()
     }
 
@@ -39,7 +45,9 @@ class AddWorkoutViewModel: ObservableObject {
 
     private func startLogging(exerciseName: String, pendingSession: PendingSetLoggingSession?) {
         setLoggingViewModel = SetLoggingViewModel(
-            mode: .add(exerciseName: exerciseName, pendingSession: pendingSession)
+            mode: .add(exerciseName: exerciseName, pendingSession: pendingSession),
+            exerciseService: exerciseService,
+            healthKitManager: healthKitManager
         )
         showingSetLogger = true
     }
