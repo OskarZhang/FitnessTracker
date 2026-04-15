@@ -27,7 +27,7 @@ struct ExercisesListView: View {
 
     @StateObject var searchContext = SearchContext()
     
-    @State var groupedExercises: [(date: Date, exercises: [Exercise])] = []
+    @State var groupedExercises: [ExerciseDayGroup] = []
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -51,21 +51,25 @@ struct ExercisesListView: View {
                             .listRowBackground(Color.clear)
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
-                            ForEach(groupedExercises, id: \.date) { group in
+                            ForEach(groupedExercises) { group in
                                 Section(header:
                                     Text(group.date.customFormatted)
                                     .foregroundStyle(Color.accentColor)
                                 ) {
-                                    ForEach(group.exercises) { exercise in
-                                        NavigationLink(value: NavigationTarget.workoutDetail(exercise.id)) {
-                                            WorkoutRowView(exercise: exercise)
+                                    ForEach(group.workouts) { workout in
+                                        WorkoutDurationHeaderView(workout: workout)
+
+                                        ForEach(workout.exercises) { exercise in
+                                            NavigationLink(value: NavigationTarget.workoutDetail(exercise.id)) {
+                                                WorkoutRowView(exercise: exercise)
+                                            }
+                                            .accessibilityIdentifier("home.workoutRow.\(exercise.name)")
+                                            .navigationLinkIndicatorVisibility(.hidden)
+                                            .listRowSeparator(.hidden)
                                         }
-                                        .accessibilityIdentifier("home.workoutRow.\(exercise.name)")
-                                        .navigationLinkIndicatorVisibility(.hidden)
-                                        .listRowSeparator(.hidden)
-                                    }
-                                    .onDelete { offsets in
-                                        deleteWorkouts(date: group.date, offsets: offsets)
+                                        .onDelete { offsets in
+                                            deleteWorkouts(workout: workout, offsets: offsets)
+                                        }
                                     }
                                 }
                                 .listRowBackground(Color.clear)
@@ -165,20 +169,17 @@ struct ExercisesListView: View {
     }
     
     private func fetchGroupedExercises() {
-        groupedExercises = exerciseService.groupedWorkouts(query: searchContext.debouncedSearchText.lowercased())
+        groupedExercises = exerciseService.groupedWorkoutSessions(query: searchContext.debouncedSearchText.lowercased())
     }
 
-    private func deleteWorkouts(date: Date, offsets: IndexSet) {
+    private func deleteWorkouts(workout: ExerciseWorkoutGroup, offsets: IndexSet) {
         withAnimation {
-            guard let exercises = groupedExercises.first(where: { $0.date == date })?.exercises else {
-                return
-            }
             var idSet = Set<UUID>()
             for index in offsets {
-                guard index < exercises.count else {
+                guard index < workout.exercises.count else {
                     fatalError("Something in the index is seriously off")
                 }
-                let exercise = exercises[index]
+                let exercise = workout.exercises[index]
                 idSet.insert(exercise.id)
             }
             exerciseService.removeExerciseBulk(idSet: idSet)
@@ -320,6 +321,27 @@ private struct EmptyStateAddHintView: View {
     }
 }
 
+private struct WorkoutDurationHeaderView: View {
+    let workout: ExerciseWorkoutGroup
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "clock")
+                .font(.system(size: 11, weight: .semibold))
+
+            Text("Workout duration · \(workout.duration.formattedWorkoutDuration)")
+                .font(.caption.weight(.semibold))
+        }
+        .foregroundStyle(Color.accentColor)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.accentColor.opacity(0.14), in: Capsule())
+        .accessibilityIdentifier("home.workoutDuration.\(workout.id)")
+        .listRowInsets(EdgeInsets(top: 12, leading: 20, bottom: 2, trailing: 20))
+        .listRowSeparator(.hidden)
+    }
+}
+
 private struct ScribbleArrow: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -355,5 +377,25 @@ private extension Date {
             return formatter.string(from: self)
         }
 
+    }
+}
+
+private extension TimeInterval {
+    var formattedWorkoutDuration: String {
+        let totalMinutes = Int((self / 60).rounded())
+        guard totalMinutes > 0 else { return "<1 min" }
+
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+
+        if hours == 0 {
+            return "\(minutes) min"
+        }
+
+        if minutes == 0 {
+            return "\(hours) hr"
+        }
+
+        return "\(hours) hr \(minutes) min"
     }
 }

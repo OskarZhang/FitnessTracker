@@ -79,6 +79,7 @@ struct PendingStrengthSetData: Codable {
 struct PendingSetLoggingSession: Codable {
     let exerciseName: String
     let sets: [PendingStrengthSetData]
+    let startedAt: Date?
     // Legacy metadata retained for backward-compatible decoding.
     let isNewExercise: Bool
     // Legacy fields retained for backward-compatible decoding of old sessions.
@@ -88,12 +89,14 @@ struct PendingSetLoggingSession: Codable {
     init(
         exerciseName: String,
         sets: [PendingStrengthSetData],
+        startedAt: Date? = nil,
         isNewExercise: Bool,
         hasSeenNewExerciseOnboarding: Bool? = nil,
         showNewExerciseOnboarding: Bool? = nil
     ) {
         self.exerciseName = exerciseName
         self.sets = sets
+        self.startedAt = startedAt
         self.isNewExercise = isNewExercise
         self.hasSeenNewExerciseOnboarding = hasSeenNewExerciseOnboarding
         self.showNewExerciseOnboarding = showNewExerciseOnboarding
@@ -198,6 +201,7 @@ class SetLoggingViewModel: ObservableObject {
     private let healthKitManager: any HealthKitManaging
     private var shouldPersistPendingSession = false
     private var isNewExerciseSession = false
+    private var startedAt: Date?
 
     @Published private var timerEndTime: Date?
     private let shouldRelaxCompletionRequirementForUITests =
@@ -218,9 +222,11 @@ class SetLoggingViewModel: ObservableObject {
 
             if let pendingSession {
                 sets = pendingSession.sets.map { StrengthSetData(pendingData: $0) }
+                startedAt = pendingSession.startedAt ?? Date()
                 isNewExerciseSession = pendingSession.isNewExercise
                 shouldPersistPendingSession = true
             } else {
+                startedAt = Date()
                 let lastSession = exerciseService.lastExerciseSession(matching: exerciseName)
                 sets = lastSession?.orderedStrengthSets.map {
                     StrengthSetData(weightInLbs: $0.weightInLbs, reps: $0.reps)
@@ -242,7 +248,11 @@ class SetLoggingViewModel: ObservableObject {
     func saveWorkout() {
         switch mode {
         case .add:
+            let completedAt = Date()
+            let startedAt = startedAt ?? completedAt.addingTimeInterval(-Exercise.legacyStartedAtFallbackInterval)
             let exercise = Exercise(
+                date: completedAt,
+                startedAt: startedAt,
                 name: selectedExercise,
                 type: .strength,
                 strengthSets: sets
@@ -256,6 +266,7 @@ class SetLoggingViewModel: ObservableObject {
                         )
                 }
             )
+            exercise.startedAt = startedAt
             exerciseService.addExercise(exercise)
             shouldPersistPendingSession = false
             SetLoggingSessionStore.clear()
@@ -504,6 +515,7 @@ class SetLoggingViewModel: ObservableObject {
         let session = PendingSetLoggingSession(
             exerciseName: selectedExercise,
             sets: sets.map { $0.pendingData },
+            startedAt: startedAt,
             isNewExercise: isNewExerciseSession
         )
         SetLoggingSessionStore.save(session)

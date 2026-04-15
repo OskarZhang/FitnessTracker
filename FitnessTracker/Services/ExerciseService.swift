@@ -14,7 +14,7 @@ class ExerciseService: ObservableObject {
     @Published var exercises: [Exercise] = []
 
     private static func makeContainer() throws -> ModelContainer {
-        let schema = Schema(FitnessTrackerSchemaV1.models)
+        let schema = Schema(FitnessTrackerSchemaV2.models)
         return try ModelContainer(
             for: schema,
             migrationPlan: FitnessTrackerMigrationPlan.self,
@@ -80,6 +80,45 @@ class ExerciseService: ObservableObject {
             (date: date, exercises: groupedDict[date]!)
         }
         return res
+    }
+
+    func groupedWorkoutSessions(query: String = "") -> [ExerciseDayGroup] {
+        groupedWorkouts(query: query).map { dayGroup in
+            ExerciseDayGroup(
+                date: dayGroup.date,
+                workouts: Self.makeWorkoutGroups(from: dayGroup.exercises)
+            )
+        }
+    }
+
+    private static func makeWorkoutGroups(from exercises: [Exercise]) -> [ExerciseWorkoutGroup] {
+        let sortedExercises = exercises.sorted { $0.date < $1.date }
+        var groups: [[Exercise]] = []
+
+        for exercise in sortedExercises {
+            guard var currentGroup = groups.popLast(),
+                  let firstExercise = currentGroup.first,
+                  let lastExercise = currentGroup.last
+            else {
+                groups.append([exercise])
+                continue
+            }
+
+            let gapFromPreviousExercise = exercise.date.timeIntervalSince(lastExercise.date)
+            let durationWithExercise = exercise.date.timeIntervalSince(firstExercise.effectiveStartedAt)
+            if gapFromPreviousExercise <= ExerciseWorkoutGroup.maximumGapBetweenExercises
+                && durationWithExercise <= ExerciseWorkoutGroup.maximumWorkoutDuration {
+                currentGroup.append(exercise)
+                groups.append(currentGroup)
+            } else {
+                groups.append(currentGroup)
+                groups.append([exercise])
+            }
+        }
+
+        return groups
+            .map { ExerciseWorkoutGroup(exercises: $0.sorted { $0.date > $1.date }) }
+            .sorted { $0.endDate > $1.endDate }
     }
     
     func removeExerciseBulk(idSet: Set<UUID>) {
@@ -230,6 +269,10 @@ private extension ExerciseService {
         if launchArguments.contains("UI_TEST_SEED_EXISTING_BENCH_PRESS") {
             seedExistingBenchPressUITestData()
         }
+
+        if launchArguments.contains("UI_TEST_SEED_WORKOUT_DURATION_GROUPS") {
+            seedWorkoutDurationGroupsUITestData()
+        }
     }
 
     func resetAllDataForUITests() {
@@ -266,9 +309,78 @@ private extension ExerciseService {
         modelContext.insert(exercise)
         try? modelContext.save()
     }
+
+    func seedWorkoutDurationGroupsUITestData() {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: Date())
+
+        let seededExercises: [(name: String, minutesFromStartOfDay: Int)] = [
+            ("Bench Press", 9 * 60),
+            ("Incline Press", 9 * 60 + 10),
+            ("Cable Fly", 9 * 60 + 25),
+            ("Lat Pulldown", 9 * 60 + 41),
+        ]
+
+        for seed in seededExercises {
+            let date = dayStart.addingTimeInterval(TimeInterval(seed.minutesFromStartOfDay * 60))
+            let startedAt = date.addingTimeInterval(-Exercise.legacyStartedAtFallbackInterval)
+            let exercise = Exercise(
+                date: date,
+                startedAt: startedAt,
+                name: seed.name,
+                type: .strength,
+                strengthSets: [
+                    StrengthSetRecord(weightInLbs: 100, reps: 10),
+                ]
+            )
+            exercise.startedAt = startedAt
+            modelContext.insert(exercise)
+        }
+
+        try? modelContext.save()
+    }
 }
 #else
 private extension ExerciseService {
     func applyUITestResetIfNeeded(resetData: Bool, launchArguments: [String]) {}
 }
 #endif
+
+struct ExerciseDayGroup: Identifiable {
+    let date: Date
+    let workouts: [ExerciseWorkoutGroup]
+
+    var id: Date { date }
+    var exercises: [Exercise] { workouts.flatMap(\.exercises) }
+}
+
+struct ExerciseWorkoutGroup: Identifiable {
+    static let maximumGapBetweenExercises: TimeInterval = 15 * 60
+    static let maximumWorkoutDuration: TimeInterval = 3 * 60 * 60
+
+    let exercises: [Exercise]
+
+    var id: String {
+        exercises.map { $0.id.uuidString }.joined(separator: "-")
+    }
+
+    var startDate: Date {
+        exercises.map(\.effectiveStartedAt).min() ?? .now
+    }
+
+    var endDate: Date {
+        exercises.map(\.date).max() ?? startDate
+    }
+
+    var duration: TimeInterval {
+        max(0, endDate.timeIntervalSince(startDate))
+    }
+}
+
+extension Exercise {
+    static let legacyStartedAtFallbackInterval: TimeInterval = 10 * 60
+
+    var effectiveStartedAt: Date {
+        startedAt ?? date.addingTimeInterval(-Self.legacyStartedAtFallbackInterval)
+    }
+}

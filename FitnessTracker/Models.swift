@@ -156,13 +156,79 @@ enum FitnessTrackerSchemaV1: VersionedSchema {
     }
 }
 
+enum FitnessTrackerSchemaV2: VersionedSchema {
+    static var versionIdentifier: Schema.Version = .init(3, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [Exercise.self, StrengthSet.self]
+    }
+
+    @Model
+    final class Exercise {
+        @Attribute(.unique) var id: UUID = UUID()
+        var type: ExerciseType
+        var name: String
+        var date: Date
+        var startedAt: Date?
+        var notes: String?
+
+        // Legacy relationship retained for migration + fallback backfill.
+        @Relationship(deleteRule: .cascade) var sets: [StrengthSet]?
+
+        var strengthSets: [StrengthSetRecord] = []
+
+        var distanceInMiles: Double?
+        var durationInSeconds: Int?
+        var averageHeartRate: Int?
+
+        init(
+            date: Date = .now,
+            startedAt: Date? = nil,
+            notes: String? = nil,
+            name: String,
+            type: ExerciseType,
+            sets: [StrengthSet]? = nil,
+            strengthSets: [StrengthSetRecord] = [],
+            distanceInMiles: Double? = nil,
+            durationInSeconds: Int? = nil,
+            averageHeartRate: Int? = nil
+        ) {
+            self.date = date
+            self.startedAt = startedAt
+            self.notes = notes
+            self.name = name
+            self.type = type
+            self.sets = sets
+            self.strengthSets = strengthSets
+            self.distanceInMiles = distanceInMiles
+            self.durationInSeconds = durationInSeconds
+            self.averageHeartRate = averageHeartRate
+        }
+    }
+
+    @Model
+    final class StrengthSet {
+        var weightInLbs: Double
+        var reps: Int
+        var restSeconds: Int?
+        var rpe: Int?
+
+        init(weightInLbs: Double, reps: Int, restSeconds: Int? = nil, rpe: Int? = nil) {
+            self.weightInLbs = weightInLbs
+            self.reps = reps
+            self.restSeconds = restSeconds
+            self.rpe = rpe
+        }
+    }
+}
+
 enum FitnessTrackerMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [FitnessTrackerSchemaV0.self, FitnessTrackerSchemaV1.self]
+        [FitnessTrackerSchemaV0.self, FitnessTrackerSchemaV1.self, FitnessTrackerSchemaV2.self]
     }
 
     static var stages: [MigrationStage] {
-        [migrateV0toV1]
+        [migrateV0toV1, migrateV1toV2]
     }
 
     static let migrateV0toV1 = MigrationStage.custom(
@@ -190,9 +256,14 @@ enum FitnessTrackerMigrationPlan: SchemaMigrationPlan {
             try context.save()
         }
     )
+
+    static let migrateV1toV2 = MigrationStage.lightweight(
+        fromVersion: FitnessTrackerSchemaV1.self,
+        toVersion: FitnessTrackerSchemaV2.self
+    )
 }
 
-typealias Exercise = FitnessTrackerSchemaV1.Exercise
+typealias Exercise = FitnessTrackerSchemaV2.Exercise
 typealias StrengthSet = StrengthSetRecord
 
 extension Exercise {

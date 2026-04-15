@@ -119,6 +119,22 @@ final class FitnessTrackerUITests: XCTestCase {
     }
 
     @MainActor
+    func testHomeDisplaysWorkoutDurationGroups() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "UI_TEST_RESET",
+            "UI_TEST_SEED_WORKOUT_DURATION_GROUPS",
+            "UI_TEST_SKIP_FIRST_TIME_PROMPT",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Workout duration · 35 min"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Workout duration · 10 min"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["home.workoutRow.Lat Pulldown"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home.workoutRow.Cable Fly"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testCaptureSetLoggingEmptyStateScreenshot() throws {
         let screenshotPath = ProcessInfo.processInfo.environment["UI_TEST_SCREENSHOT_PATH"]
             ?? "/tmp/fitnesstracker-ui-test-screenshot.png"
@@ -128,6 +144,34 @@ final class FitnessTrackerUITests: XCTestCase {
         app.launch()
 
         openBenchPressLogging(app)
+
+        let screenshotData = XCUIScreen.main.screenshot().pngRepresentation
+        let screenshotURL = URL(fileURLWithPath: screenshotPath)
+        let screenshotDirectory = screenshotURL.deletingLastPathComponent()
+
+        try FileManager.default.createDirectory(
+            at: screenshotDirectory,
+            withIntermediateDirectories: true
+        )
+        try screenshotData.write(to: screenshotURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: screenshotPath))
+    }
+
+    @MainActor
+    func testCaptureHomeWorkoutDurationGroupsScreenshot() throws {
+        let screenshotPath = ProcessInfo.processInfo.environment["UI_TEST_SCREENSHOT_PATH"]
+            ?? "/tmp/fitnesstracker-ui-test-screenshot.png"
+
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "UI_TEST_RESET",
+            "UI_TEST_SEED_WORKOUT_DURATION_GROUPS",
+            "UI_TEST_SKIP_FIRST_TIME_PROMPT",
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Workout duration · 35 min"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Workout duration · 10 min"].waitForExistence(timeout: 8))
 
         let screenshotData = XCUIScreen.main.screenshot().pngRepresentation
         let screenshotURL = URL(fileURLWithPath: screenshotPath)
