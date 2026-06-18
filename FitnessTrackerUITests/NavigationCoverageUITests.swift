@@ -26,6 +26,7 @@ final class NavigationCoverageUITests: XCTestCase {
 
         let addSetControl = app.descendants(matching: .any)["setLogging.addSetButton"]
         XCTAssertTrue(addSetControl.waitForExistence(timeout: 8))
+        XCTAssertFalse(app.descendants(matching: .any)["setLogging.endTimePicker"].exists)
         tapWhenInteractable(addSetControl)
 
         let saveControl = app.descendants(matching: .any)["setLogging.saveButton"]
@@ -52,6 +53,7 @@ final class NavigationCoverageUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["setLogging.addSetButton"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.descendants(matching: .any)["setLogging.saveButton"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["setLogging.endTimePicker"].waitForExistence(timeout: 5))
     }
 
     private func launchApp(_ launchArguments: [String]) -> XCUIApplication {

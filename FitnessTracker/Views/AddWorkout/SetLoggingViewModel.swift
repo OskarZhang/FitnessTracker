@@ -4,7 +4,7 @@ import SwiftUI
 @MainActor
 protocol ExerciseServing: AnyObject {
     func addExercise(_ exercise: Exercise)
-    func updateExercise(_ exercise: Exercise, sets: [StrengthSet])
+    func updateExercise(_ exercise: Exercise, sets: [StrengthSet], endedAt: Date)
     func getExerciseSuggestions(exerciseName: String) -> [String]
     func lastExerciseSession(matching name: String) -> Exercise?
 }
@@ -80,6 +80,7 @@ struct PendingSetLoggingSession: Codable {
     let exerciseName: String
     let sets: [PendingStrengthSetData]
     let startedAt: Date?
+    let stopwatchStartedAt: Date?
     // Legacy metadata retained for backward-compatible decoding.
     let isNewExercise: Bool
     // Legacy fields retained for backward-compatible decoding of old sessions.
@@ -90,6 +91,7 @@ struct PendingSetLoggingSession: Codable {
         exerciseName: String,
         sets: [PendingStrengthSetData],
         startedAt: Date? = nil,
+        stopwatchStartedAt: Date? = nil,
         isNewExercise: Bool,
         hasSeenNewExerciseOnboarding: Bool? = nil,
         showNewExerciseOnboarding: Bool? = nil
@@ -97,6 +99,7 @@ struct PendingSetLoggingSession: Codable {
         self.exerciseName = exerciseName
         self.sets = sets
         self.startedAt = startedAt
+        self.stopwatchStartedAt = stopwatchStartedAt
         self.isNewExercise = isNewExercise
         self.hasSeenNewExerciseOnboarding = hasSeenNewExerciseOnboarding
         self.showNewExerciseOnboarding = showNewExerciseOnboarding
@@ -189,6 +192,7 @@ class SetLoggingViewModel: ObservableObject {
     }
 
     @Published var isGeneratingRecommendations = false
+    @Published var workoutEndedAt: Date = .now
 
     @Published var currentFocusIndexState: FocusIndex? = nil {
         didSet {
@@ -202,8 +206,8 @@ class SetLoggingViewModel: ObservableObject {
     private var shouldPersistPendingSession = false
     private var isNewExerciseSession = false
     private var startedAt: Date?
+    @Published private(set) var stopwatchStartedAt: Date?
 
-    @Published private var timerEndTime: Date?
     private let shouldRelaxCompletionRequirementForUITests =
         ProcessInfo.processInfo.arguments.contains("UI_TEST_SKIP_FIRST_TIME_PROMPT")
 
@@ -219,10 +223,12 @@ class SetLoggingViewModel: ObservableObject {
         switch mode {
         case .add(let exerciseName, let pendingSession):
             selectedExercise = exerciseName
+            workoutEndedAt = Date()
 
             if let pendingSession {
                 sets = pendingSession.sets.map { StrengthSetData(pendingData: $0) }
                 startedAt = pendingSession.startedAt ?? Date()
+                stopwatchStartedAt = pendingSession.stopwatchStartedAt
                 isNewExerciseSession = pendingSession.isNewExercise
                 shouldPersistPendingSession = true
             } else {
@@ -238,6 +244,7 @@ class SetLoggingViewModel: ObservableObject {
             }
         case .edit(let exercise):
             selectedExercise = exercise.name
+            workoutEndedAt = exercise.date
             sets = exercise.orderedStrengthSets.map {
                 StrengthSetData(weightInLbs: $0.weightInLbs, reps: $0.reps, isCompleted: true)
             }
@@ -250,6 +257,7 @@ class SetLoggingViewModel: ObservableObject {
         case .add:
             let completedAt = Date()
             let startedAt = startedAt ?? completedAt.addingTimeInterval(-Exercise.legacyStartedAtFallbackInterval)
+            stopStopwatch()
             let exercise = Exercise(
                 date: completedAt,
                 startedAt: startedAt,
@@ -281,7 +289,7 @@ class SetLoggingViewModel: ObservableObject {
                         rpe: set.rpe
                     )
             }
-            exerciseService.updateExercise(exercise, sets: updatedSets)
+            exerciseService.updateExercise(exercise, sets: updatedSets, endedAt: workoutEndedAt)
         }
     }
 
@@ -291,6 +299,13 @@ class SetLoggingViewModel: ObservableObject {
 
     var isInAddMode: Bool {
         if case .add = mode {
+            return true
+        }
+        return false
+    }
+
+    var shouldShowEndTimeEditor: Bool {
+        if case .edit = mode {
             return true
         }
         return false
@@ -389,6 +404,9 @@ class SetLoggingViewModel: ObservableObject {
         withAnimation {
             sets[setIndex].isCompleted = !isCompleted
         }
+        if !isCompleted {
+            restartStopwatchAfterLoggedSet()
+        }
     }
 
     var focusedFieldType: RecordType? {
@@ -410,17 +428,17 @@ class SetLoggingViewModel: ObservableObject {
         }
     }
 
-    func startTimer() {
-        timerEndTime = Date().advanced(by: 60)
-    }
-
     func onNumberPadReturn() {
         let nextFocus = currentFocusIndexState?.next()
         withAnimation {
             if currentFocusIndexState?.type == .rep,
                let setIndex = currentFocusIndexState?.setIndex
             {
+                let wasCompleted = sets[setIndex].isCompleted
                 sets[setIndex].isCompleted = true
+                if !wasCompleted {
+                    restartStopwatchAfterLoggedSet()
+                }
             }
             currentFocusIndexState = nextFocus
         }
@@ -466,8 +484,15 @@ class SetLoggingViewModel: ObservableObject {
     }
 
     func onAppear() {
-        if sets.count > 0 {
+        if isInAddMode && sets.count > 0 {
             currentFocusIndexState = .initial
+        }
+        if isInAddMode, let stopwatchStartedAt {
+            WorkoutStopwatchLiveActivityController.shared.restartStopwatch(
+                exerciseName: selectedExercise,
+                completedSetCount: completedSetCount,
+                startedAt: stopwatchStartedAt
+            )
         }
     }
 
@@ -492,19 +517,46 @@ class SetLoggingViewModel: ObservableObject {
             })
     }
 
-    var timerPercentage: Double {
-        guard let timerEndTime = self.timerEndTime else { return 0 }
-        guard Date() < timerEndTime else { return 0 }
-        return timerEndTime.timeIntervalSince(Date()) / 60.0
+    var isStopwatchRunning: Bool {
+        stopwatchStartedAt != nil
     }
 
-    var timeInSecLeft: Int {
-        return Int(timerPercentage * 60)
+    var completedSetCount: Int {
+        sets.filter(\.isCompleted).count
     }
 
-    var isTimerRunning: Bool {
-        guard let timerEndTime else { return false }
-        return Date() < timerEndTime
+    func stopwatchElapsedSeconds(at date: Date = Date()) -> Int {
+        guard let stopwatchStartedAt else { return 0 }
+        return max(0, Int(date.timeIntervalSince(stopwatchStartedAt)))
+    }
+
+    func formattedStopwatchElapsed(at date: Date = Date()) -> String {
+        let elapsedSeconds = stopwatchElapsedSeconds(at: date)
+        let hours = elapsedSeconds / 3600
+        let minutes = (elapsedSeconds % 3600) / 60
+        let seconds = elapsedSeconds % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    private func restartStopwatchAfterLoggedSet() {
+        guard isInAddMode else { return }
+        let startedAt = Date()
+        stopwatchStartedAt = startedAt
+        WorkoutStopwatchLiveActivityController.shared.restartStopwatch(
+            exerciseName: selectedExercise,
+            completedSetCount: completedSetCount,
+            startedAt: startedAt
+        )
+        persistPendingSessionIfNeeded()
+    }
+
+    private func stopStopwatch() {
+        stopwatchStartedAt = nil
+        WorkoutStopwatchLiveActivityController.shared.stopStopwatch()
     }
 
     @discardableResult
@@ -516,6 +568,7 @@ class SetLoggingViewModel: ObservableObject {
             exerciseName: selectedExercise,
             sets: sets.map { $0.pendingData },
             startedAt: startedAt,
+            stopwatchStartedAt: stopwatchStartedAt,
             isNewExercise: isNewExerciseSession
         )
         SetLoggingSessionStore.save(session)

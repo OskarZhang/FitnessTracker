@@ -129,6 +129,9 @@ struct SetLoggingView: View {
 			}
                 .listRowInsets(.init())
             ) {
+                if viewModel.shouldShowEndTimeEditor {
+                    endTimeEditor
+                }
                 if viewModel.isEmptyStateForAIRecommendation {
                     aiEmptyStateCard
                         .listRowSeparator(.hidden)
@@ -149,6 +152,9 @@ struct SetLoggingView: View {
 								.foregroundColor(viewModel.sets[index].isCompleted ? .accentColor : .secondary)
 						}
 						.padding(.leading, 8)
+                        .buttonStyle(.borderless)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(viewModel.sets[index].isCompleted ? "Set \(index + 1) complete" : "Complete set \(index + 1)")
                         .accessibilityIdentifier("setLogging.completeSetButton.\(index)")
 					}
                     .accessibilityIdentifier("setLogging.row.\(index)")
@@ -172,24 +178,22 @@ struct SetLoggingView: View {
         .listStyle(.plain)
     }
 
+    @ViewBuilder
+    private var endTimeEditor: some View {
+        DatePicker(
+            "End time",
+            selection: $viewModel.workoutEndedAt,
+            displayedComponents: [.date, .hourAndMinute]
+        )
+        .accessibilityIdentifier("setLogging.endTimePicker")
+        .listRowSeparator(.hidden)
+    }
+
 	@ViewBuilder
 	private var bottomActionRow: some View {
 
 		HStack() {
-            Button(action: viewModel.startTimer) {
-                if viewModel.isTimerRunning {
-                    TimelineView(.periodic(from: .now, by: 0.2)) { _ in
-                        timerButtonContent
-                    }
-                } else {
-                    timerButtonContent
-                }
-				}
-                .accessibilityIdentifier("setLogging.timerButton")
-                .accessibilityValue(viewModel.isTimerRunning ? "\(viewModel.timeInSecLeft)" : "stopped")
-                .accessibilityLabel(viewModel.isTimerRunning ? "Timer \(viewModel.timeInSecLeft) seconds" : "Start timer")
-				.clipShape(Capsule())
-				.glassEffect(.regular.interactive(true))
+            stopwatchStatus
 				Spacer()
 
 				Button(action: {
@@ -213,6 +217,39 @@ struct SetLoggingView: View {
 		.frame(height: Self.bottomActionRowHeight)
 
 	}
+
+    @ViewBuilder
+    private var stopwatchStatus: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "stopwatch.fill")
+                .font(.headline)
+                .foregroundStyle(Color.accentColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Rest stopwatch")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if viewModel.isStopwatchRunning {
+                    TimelineView(.periodic(from: .now, by: 1.0)) { context in
+                        Text(viewModel.formattedStopwatchElapsed(at: context.date))
+                            .font(.headline.monospacedDigit())
+                            .contentTransition(.numericText())
+                    }
+                } else {
+                    Text(viewModel.formattedStopwatchElapsed())
+                        .font(.headline.monospacedDigit())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(maxHeight: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier("setLogging.stopwatchStatus")
+        .accessibilityLabel("Rest stopwatch")
+        .accessibilityValue(viewModel.isStopwatchRunning ? viewModel.formattedStopwatchElapsed() : "stopped")
+        .glassEffect(.regular)
+    }
 
     @ViewBuilder
     private var aiEmptyStateCard: some View {
@@ -250,41 +287,6 @@ struct SetLoggingView: View {
         .padding()
         .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
         .accessibilityIdentifier("setLogging.aiEmptyStateCard")
-    }
-
-    @ViewBuilder
-    private var timerButtonContent: some View {
-        Label("Start timer", systemImage: "timer")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .foregroundStyle(colorScheme == .light ? .black : .white)
-            .opacity(viewModel.timerPercentage > 0.0 ? 0.0 : 1.0)
-            .background {
-                GeometryReader { geo in
-                    if viewModel.timerPercentage > 0.0 {
-                        ZStack(alignment: .leading) {
-                            HStack(spacing: 0) {
-                                Rectangle()
-                                    .fill(Color.accentColor)
-                                    .frame(width: geo.size.width * viewModel.timerPercentage)
-                                Spacer()
-                            }
-                            // Invert text color across timer progress fill.
-                            Text("\(viewModel.timeInSecLeft)s")
-                                .multilineTextAlignment(.center)
-                                .font(.headline.monospaced())
-                                .foregroundStyle(.white)
-                                .frame(width: geo.size.width)
-                                .accessibilityIdentifier("setLogging.timerCountdownLabel")
-                            Text("\(viewModel.timeInSecLeft)s")
-                                .multilineTextAlignment(.center)
-                                .font(.headline.monospaced())
-                                .foregroundStyle(Color.black)
-                                .frame(width: geo.size.width)
-                                .mask(Rectangle().offset(x: geo.size.width * viewModel.timerPercentage, y: 0))
-                        }
-                    }
-                }
-            }
     }
 
     private func recordColor(at index: Int) -> Color {

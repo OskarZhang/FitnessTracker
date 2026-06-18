@@ -34,13 +34,18 @@ final class CriticalPathUITests: XCTestCase {
         XCTAssertTrue(addSetControl.waitForExistence(timeout: 8))
         tapWhenInteractable(addSetControl)
 
-        let timerButton = app.buttons["setLogging.timerButton"]
-        XCTAssertTrue(timerButton.waitForExistence(timeout: 8))
-        timerButton.tap()
+        let completeSetControl = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@ AND label == %@", "setLogging.row.0", "Complete set 1"))
+            .firstMatch
+        XCTAssertTrue(completeSetControl.waitForExistence(timeout: 8))
+        tapWhenInteractable(completeSetControl)
+
+        let stopwatchStatus = app.descendants(matching: .any)["setLogging.stopwatchStatus"]
+        XCTAssertTrue(stopwatchStatus.waitForExistence(timeout: 8))
 
         let runningPredicate = NSPredicate(format: "value != %@", "stopped")
-        let timerRunningExpectation = XCTNSPredicateExpectation(predicate: runningPredicate, object: timerButton)
-        XCTAssertEqual(XCTWaiter().wait(for: [timerRunningExpectation], timeout: 8), .completed)
+        let stopwatchRunningExpectation = XCTNSPredicateExpectation(predicate: runningPredicate, object: stopwatchStatus)
+        XCTAssertEqual(XCTWaiter().wait(for: [stopwatchRunningExpectation], timeout: 8), .completed)
     }
 
     @MainActor

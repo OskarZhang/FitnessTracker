@@ -70,8 +70,7 @@ class ExerciseService: ObservableObject {
         let groupedDict = Dictionary(grouping: exercises.filter({ exercise in
             query.isEmpty || exercise.name.lowercased().contains(query)
         })) { exercise in
-            // Normalize the date to remove time components
-            Calendar.current.startOfDay(for: exercise.date)
+            Calendar.current.startOfDay(for: exercise.workoutDayReferenceDate)
         }
         // Sort the dates in descending order
         let sortedDates = groupedDict.keys.sorted(by: >)
@@ -97,17 +96,14 @@ class ExerciseService: ObservableObject {
 
         for exercise in sortedExercises {
             guard var currentGroup = groups.popLast(),
-                  let firstExercise = currentGroup.first,
-                  let lastExercise = currentGroup.last
+                  let firstExercise = currentGroup.first
             else {
                 groups.append([exercise])
                 continue
             }
 
-            let gapFromPreviousExercise = exercise.date.timeIntervalSince(lastExercise.date)
             let durationWithExercise = exercise.date.timeIntervalSince(firstExercise.effectiveStartedAt)
-            if gapFromPreviousExercise <= ExerciseWorkoutGroup.maximumGapBetweenExercises
-                && durationWithExercise <= ExerciseWorkoutGroup.maximumWorkoutDuration {
+            if durationWithExercise <= ExerciseWorkoutGroup.maximumWorkoutDuration {
                 currentGroup.append(exercise)
                 groups.append(currentGroup)
             } else {
@@ -216,8 +212,9 @@ class ExerciseService: ObservableObject {
         try? modelContext.save()
     }
 
-    func updateExercise(_ exercise: Exercise, sets: [StrengthSet]) {
+    func updateExercise(_ exercise: Exercise, sets: [StrengthSet], endedAt: Date) {
         exercise.strengthSets = sets
+        exercise.date = endedAt
         try? modelContext.save()
         exercises = fetchWorkouts()
     }
@@ -319,6 +316,7 @@ private extension ExerciseService {
             ("Incline Press", 9 * 60 + 10),
             ("Cable Fly", 9 * 60 + 25),
             ("Lat Pulldown", 9 * 60 + 41),
+            ("Evening Row", 13 * 60),
         ]
 
         for seed in seededExercises {
@@ -355,7 +353,6 @@ struct ExerciseDayGroup: Identifiable {
 }
 
 struct ExerciseWorkoutGroup: Identifiable {
-    static let maximumGapBetweenExercises: TimeInterval = 15 * 60
     static let maximumWorkoutDuration: TimeInterval = 3 * 60 * 60
 
     let exercises: [Exercise]
@@ -379,6 +376,10 @@ struct ExerciseWorkoutGroup: Identifiable {
 
 extension Exercise {
     static let legacyStartedAtFallbackInterval: TimeInterval = 10 * 60
+
+    var workoutDayReferenceDate: Date {
+        startedAt ?? date
+    }
 
     var effectiveStartedAt: Date {
         startedAt ?? date.addingTimeInterval(-Self.legacyStartedAtFallbackInterval)

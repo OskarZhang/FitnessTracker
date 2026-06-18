@@ -35,6 +35,8 @@
 	<string>Push your workout logs to your Health app</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Push your workout logs to your Health app</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
